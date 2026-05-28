@@ -991,8 +991,9 @@ async function showDealDetail(dealId) {
   for (const cached of Object.values(personDealsCache)) { const f = cached.find(x => x.id === dealId); if (f) { d = f; break; } }
   if (!d && window.__LOAD_DEAL__) d = await window.__LOAD_DEAL__(dealId);
   if (!d) { alert('案件が見つかりません'); return; }
+  const sfUrl = 'https://logiquest.lightning.force.com/lightning/r/Oppotunities__c/' + encodeURIComponent(d.id) + '/view';
   let html = '<h3>'+escHtml(d.name)+'</h3>';
-  html += '<div class="sub-title">担当: '+escHtml(d.ownerName)+' '+teamTag(d.teamId)+'</div>';
+  html += '<div class="sub-title">担当: '+escHtml(d.ownerName)+' '+teamTag(d.teamId)+' / <a href="'+sfUrl+'" target="_blank" rel="noopener noreferrer" style="color:var(--c-primary);text-decoration:underline;font-weight:600">☁ Salesforceで開く ↗</a></div>';
   html += '<table class="kvtable">';
   html += '<tr><td>マニュアル番号</td><td>'+escHtml(d.manualNo)+'</td></tr>';
   html += '<tr><td>稼働開始日</td><td>'+(d.operationStartDate?String(d.operationStartDate).slice(0,10):'-')+'</td></tr>';
@@ -1002,6 +1003,9 @@ async function showDealDetail(dealId) {
   html += '<tr><td>時間当たり単価</td><td>'+(d.hourlyRate!=null?fmtYen(d.hourlyRate):'-')+'</td></tr>';
   html += '<tr><td><strong>獲得ポイント</strong></td><td><strong style="color:#2E5C8A;font-size:16px">'+fmtPt(d.point)+'pt</strong></td></tr>';
   html += '</table>';
+  html += '<div style="margin-top:16px;text-align:center">';
+  html += '<a class="btn primary" href="'+sfUrl+'" target="_blank" rel="noopener noreferrer" style="text-decoration:none;padding:8px 20px;font-size:13px">☁ Salesforceで開く ↗</a>';
+  html += '</div>';
   document.getElementById('deal-detail-body').innerHTML = html;
   document.getElementById('modal-deal-detail').classList.add('active');
 }
