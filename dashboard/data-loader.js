@@ -117,7 +117,30 @@ async function fetchAll(db, name) {
   return snap.docs.map(d => ({ _id: d.id, ...d.data() }));
 }
 
-async function loadData() {
+// セッション内キャッシュ（Firestoreの読取回数を抑えるため）
+const CACHE_KEY = 'summit_data_cache_v1';
+const CACHE_TTL_MS = 5 * 60 * 1000; // 5分
+
+function loadCache() {
+  try {
+    const s = sessionStorage.getItem(CACHE_KEY);
+    if (!s) return null;
+    const o = JSON.parse(s);
+    if (!o.savedAt || (Date.now() - o.savedAt) > CACHE_TTL_MS) return null;
+    return o.data;
+  } catch { return null; }
+}
+function saveCache(data) {
+  try {
+    sessionStorage.setItem(CACHE_KEY, JSON.stringify({ savedAt: Date.now(), data }));
+  } catch (e) { console.warn('cache save failed:', e); }
+}
+function clearCache() {
+  try { sessionStorage.removeItem(CACHE_KEY); } catch {}
+}
+window.__CLEAR_DATA_CACHE__ = clearCache;
+
+async function loadData(opts = {}) {
   const overlay = document.createElement('div');
   overlay.id = 'data-loading';
   overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(247,249,252,0.9);z-index:5000;display:flex;align-items:center;justify-content:center;font-family:"Yu Gothic","Hiragino Sans",sans-serif;';
@@ -127,9 +150,19 @@ async function loadData() {
 
   const db = getFirestore(getApp());
 
+  // セッションキャッシュをチェック（5分以内なら全コレクション取得をスキップ）
+  let cached = null;
+  if (!opts.forceRefresh) {
+    cached = loadCache();
+    if (cached) {
+      setMsg('キャッシュから復元中...');
+      console.info('[data-loader] sessionStorage キャッシュを使用（Firestore読取スキップ）');
+    }
+  }
+
   setMsg('チーム・メンバー取得中...');
-  const teamsRaw = await fetchAll(db, 'teams');
-  const membersRaw = await fetchAll(db, 'members');
+  const teamsRaw = cached ? cached.teamsRaw : await fetchAll(db, 'teams');
+  const membersRaw = cached ? cached.membersRaw : await fetchAll(db, 'members');
 
   // 非アクティブを完全除外（active未定義はtrueとみなす）
   const activeTeams = teamsRaw.filter(t => t.active !== false);
@@ -142,7 +175,7 @@ async function loadData() {
   const finalActiveNames = new Set(activeMembers.filter(m => activeTeamIds.has(m.team)).map(m => m.name));
 
   setMsg('案件データ取得中...');
-  const dealsRawAll = await fetchAll(db, 'deals');
+  const dealsRawAll = cached ? cached.dealsRawAll : await fetchAll(db, 'deals');
   // 非アクティブメンバー/チームの案件を完全除外
   const dealsRaw = dealsRawAll.filter(d => {
     if (d.teamId && !activeTeamIds.has(d.teamId)) return false;
@@ -155,7 +188,7 @@ async function loadData() {
   if (excluded > 0) console.info('[data-loader] 非アクティブ除外: ' + excluded + '件の案件をスキップ');
 
   setMsg('実績データ取得中...');
-  const monthlyRawAll = await fetchAll(db, 'monthly_revenue');
+  const monthlyRawAll = cached ? cached.monthlyRawAll : await fetchAll(db, 'monthly_revenue');
   const monthlyRaw = monthlyRawAll.filter(r => {
     if (r.teamId && !activeTeamIds.has(r.teamId)) return false;
     if (r.ownerName && !finalActiveNames.has(r.ownerName)) return false;
@@ -163,15 +196,32 @@ async function loadData() {
   });
 
   setMsg('設定取得中...');
-  const settingsKpi = await getDoc(doc(db, 'settings', 'kpi'));
-  const meta = await getDoc(doc(db, 'meta', 'sync_status'));
+  const settingsKpiData = cached ? cached.settingsKpiData
+    : (await getDoc(doc(db, 'settings', 'kpi'))).data() || {};
+  const metaData = cached ? cached.metaData
+    : (() => {
+        const s = (async () => {
+          const d = await getDoc(doc(db, 'meta', 'sync_status'));
+          return d.exists() ? { lastSfSync: d.data().lastSfSync ? d.data().lastSfSync.toDate().toISOString() : null } : null;
+        })();
+        return s;
+      })();
+  const metaDataResolved = cached ? cached.metaData : await metaData;
 
   setMsg('ユーザーロール取得中...');
   const auth = getAuth();
-  let userRole = 'member';
-  if (auth.currentUser && auth.currentUser.email) {
+  let userRole = cached && cached.userRole ? cached.userRole : 'member';
+  if (!cached && auth.currentUser && auth.currentUser.email) {
     const myDoc = await getDoc(doc(db, 'members', auth.currentUser.email));
     if (myDoc.exists() && myDoc.data().role === 'admin') userRole = 'admin';
+  }
+
+  // キャッシュ書き出し（重いコレクションを保存。次回は読まずに済む）
+  if (!cached) {
+    saveCache({
+      teamsRaw, membersRaw, dealsRawAll, monthlyRawAll,
+      settingsKpiData, metaData: metaDataResolved, userRole,
+    });
   }
 
   setMsg('集計中...');
@@ -196,8 +246,8 @@ async function loadData() {
   }));
 
   const summary = {
-    computedAt: meta.exists() && meta.data().lastSfSync ? meta.data().lastSfSync.toDate().toISOString() : null,
-    settings: settingsKpi.exists() ? settingsKpi.data() : {},
+    computedAt: metaDataResolved && metaDataResolved.lastSfSync ? metaDataResolved.lastSfSync : null,
+    settings: settingsKpiData,
     aggregate: aggregate(deals),
     aggregateByPeriod: aggregateByMonth(deals),
     aggregateByFiscalYear: aggregateByFY(deals),
@@ -234,7 +284,20 @@ window.addEventListener('summit-auth-ready', () => {
   });
 });
 
-// 設定画面からの再ロードAPI
+// 設定画面からの再ロードAPI（重い・全件取得）
 window.__DATA_RELOADER__ = async () => {
   await loadData();
+};
+
+// 軽量版: teams + members だけ再取得（数十件のみ、読取コストが低い）
+window.__RELOAD_TEAMS_MEMBERS__ = async () => {
+  const db = getFirestore(getApp());
+  const teamsRaw = await fetchAll(db, 'teams');
+  const membersRaw = await fetchAll(db, 'members');
+  const activeTeams = teamsRaw.filter(t => t.active !== false);
+  const activeMembers = membersRaw.filter(m => m.active !== false);
+  window.__TEAMS__ = activeTeams.sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
+  window.__MEMBERS__ = activeMembers;
+  window.__TEAMS_ALL__ = teamsRaw;
+  window.__MEMBERS_ALL__ = membersRaw;
 };

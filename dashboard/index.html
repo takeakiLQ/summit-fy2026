@@ -179,6 +179,8 @@ function initAfterDataReady() {
     const navSettings = document.getElementById('nav-settings');
     if (navSettings) navSettings.style.display = '';
   }
+  // 強制再読込ボタンを meta 行に注入（1回だけ）
+  injectRefreshButton();
   if (!isInitialized) {
     isInitialized = true;
     renderFyPills(); renderMonthPills(); updateFilterInfo(); renderOverview();
@@ -438,7 +440,10 @@ function attachSettingsHandlers(sec) {
         else if (action === 'toggle-member') await onToggleMember(btn.dataset.memberEmail);
         else if (action === 'add-member') await onAddMember(sec);
         btn.textContent = '✓ 完了';
-        await reloadAllData();
+        // ⚠ 全件再ロードはしない（Firestore読取爆発の原因）。
+        // teams/members だけ軽量に再取得し、画面を再描画する
+        await reloadTeamsAndMembersOnly();
+        renderSettingsAdmin();
         setTimeout(() => { btn.textContent = prevText; btn.disabled = false; }, 600);
       } catch (e) {
         alert('エラー: ' + (e.message || e));
@@ -447,6 +452,13 @@ function attachSettingsHandlers(sec) {
       }
     });
   });
+}
+
+async function reloadTeamsAndMembersOnly() {
+  // 軽量再取得: teams + members だけ（数件〜数十件）
+  if (window.__RELOAD_TEAMS_MEMBERS__) {
+    await window.__RELOAD_TEAMS_MEMBERS__();
+  }
 }
 
 async function onSaveTeam(id, sec) {
@@ -1033,6 +1045,22 @@ function attachClickHandlers(sec) {
   sec.querySelectorAll('[data-member]').forEach(el => el.addEventListener('click', () => showIndividualDetail(el.dataset.member)));
 }
 document.querySelectorAll('nav button').forEach(btn => btn.addEventListener('click', () => { currentView = btn.dataset.view; currentMember = null; currentTeam = null; setActiveTab(currentView); setActiveSection(currentView); renderCurrentView(); }));
+
+function injectRefreshButton() {
+  const header = document.querySelector('header');
+  if (!header || document.getElementById('btn-force-refresh')) return;
+  const btn = document.createElement('button');
+  btn.id = 'btn-force-refresh';
+  btn.title = '5分以内のキャッシュを破棄してFirestoreから最新データを再取得';
+  btn.style.cssText = 'position:absolute;top:14px;right:140px;background:rgba(255,255,255,0.2);color:white;border:1px solid rgba(255,255,255,0.4);padding:4px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-weight:600';
+  btn.textContent = '🔄 最新化';
+  btn.addEventListener('click', async () => {
+    if (window.__CLEAR_DATA_CACHE__) window.__CLEAR_DATA_CACHE__();
+    if (window.__DATA_RELOADER__) await window.__DATA_RELOADER__();
+  });
+  header.style.position = 'relative';
+  header.appendChild(btn);
+}
 
 function buildMetaLine() {
   const parts = [];
