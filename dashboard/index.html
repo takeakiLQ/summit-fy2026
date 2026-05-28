@@ -180,6 +180,7 @@ if (window.__SUMMARY__) {
 }
 
 let currentFY = 'all', currentMonth = 'all', currentView = 'overview';
+let currentMember = null, currentTeam = null;
 
 function fyMonths(fy) {
   if (!fy.startsWith('FY')) return [];
@@ -290,6 +291,12 @@ function updateFilterInfo() {
 }
 
 function renderCurrentView() {
+  // 詳細セクションが表示中ならそちらを優先して再描画（ドリルダウン後の期間切替対応）
+  const active = document.querySelector('.section.active');
+  if (active) {
+    if (active.id === 'individual-detail' && currentMember) { showIndividualDetail(currentMember); return; }
+    if (active.id === 'team-detail' && currentTeam) { showTeamDetail(currentTeam); return; }
+  }
   ({overview:renderOverview, teams:renderTeams, individuals:renderIndividuals, monthly:renderMonthly, financials:renderFinancials, 'import-csv':renderImportCsv}[currentView] || (()=>{}))();
 }
 
@@ -638,6 +645,7 @@ function renderFinancials() {
 }
 
 function showTeamDetail(teamId) {
+  currentTeam = teamId; currentMember = null;
   setActiveSection('team-detail');
   const a = getAggregate(); const fin = getFinancialsForPeriod();
   const info = TEAM_INFO[teamId] || {name:teamId,color:'#ccc'};
@@ -659,6 +667,7 @@ function showTeamDetail(teamId) {
 }
 
 function showIndividualDetail(ownerName) {
+  currentMember = ownerName; currentTeam = null;
   setActiveSection('individual-detail');
   const a = getAggregate(); const fin = getFinancialsForPeriod();
   const m = a.members.find(x => x.ownerName === ownerName);
@@ -681,7 +690,7 @@ function showIndividualDetail(ownerName) {
   if (personDeals.length === 0) {
     html += '<div class="empty">この期間の案件はありません</div>';
   } else {
-    html += '<table class="ranking"><thead><tr><th>稼働開始</th><th>案件名</th><th>M/S</th><th class="num">時単価</th><th class="num">pt</th><th>区分</th><th>操作</th></tr></thead><tbody>';
+    html += '<table class="ranking"><thead><tr><th>稼働開始</th><th>案件名</th><th>M/S</th><th class="num">時単価</th><th class="num">pt</th><th>区分</th><th class="num">月間予定売上</th><th>操作</th></tr></thead><tbody>';
     for (const d of personDeals) {
       const msLabel = d.msKbn === 'main' ? 'メイン' : d.msKbn === 'sub' ? 'サブ' : '?';
       html += '<tr>';
@@ -691,6 +700,7 @@ function showIndividualDetail(ownerName) {
       html += '<td class="num">'+(d.hourlyRate != null ? fmtYen(d.hourlyRate) : '-')+'</td>';
       html += '<td class="num"><strong>'+fmtPt(d.point)+'pt</strong></td>';
       html += '<td>'+escHtml(d.classification || '-')+'</td>';
+      html += '<td class="num">'+(d.monthlyRevenue != null ? fmtYen(d.monthlyRevenue) : '-')+'</td>';
       html += '<td><div class="btn-group">';
       html += '<button class="btn primary" onclick="showDealDetail(\''+d.id+'\')">詳細</button>';
       html += '<button class="btn success" onclick="showDealFinancial(\''+d.id+'\')">実績</button>';
@@ -823,14 +833,14 @@ function closeModal() {
 document.querySelectorAll('.modal').forEach(m => m.addEventListener('click', e => { if (e.target === m) closeModal(); }));
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
-function goBack(view) { currentView = view; setActiveTab(view); setActiveSection(view); renderCurrentView(); }
+function goBack(view) { currentView = view; currentMember = null; currentTeam = null; setActiveTab(view); setActiveSection(view); renderCurrentView(); }
 function setActiveSection(id) { document.querySelectorAll('.section').forEach(s => s.classList.remove('active')); const el = document.getElementById(id); if (el) el.classList.add('active'); }
 function setActiveTab(view) { document.querySelectorAll('nav button').forEach(b => b.classList.toggle('active', b.dataset.view === view)); }
 function attachClickHandlers(sec) {
   sec.querySelectorAll('[data-team-id]').forEach(el => el.addEventListener('click', () => showTeamDetail(el.dataset.teamId)));
   sec.querySelectorAll('[data-member]').forEach(el => el.addEventListener('click', () => showIndividualDetail(el.dataset.member)));
 }
-document.querySelectorAll('nav button').forEach(btn => btn.addEventListener('click', () => { currentView = btn.dataset.view; setActiveTab(currentView); setActiveSection(currentView); renderCurrentView(); }));
+document.querySelectorAll('nav button').forEach(btn => btn.addEventListener('click', () => { currentView = btn.dataset.view; currentMember = null; currentTeam = null; setActiveTab(currentView); setActiveSection(currentView); renderCurrentView(); }));
 
 function buildMetaLine() {
   const parts = [];
@@ -841,7 +851,7 @@ function buildMetaLine() {
     if (maxIso) parts.push('SF案件 最終更新: ' + new Date(maxIso).toLocaleString('ja-JP'));
   }
   if (FINANCIALS && FINANCIALS.matchedRows && FINANCIALS.matchedRows.length > 0) {
-    const yms = FINANCIALS.matchedRows.map(r => r.yearMonth).filter(Boolean).sort();
+    const yms = Array.from(new Set(FINANCIALS.matchedRows.map(r => r.yearMonth).filter(Boolean))).sort();
     if (yms.length > 0) parts.push('実績データ: ' + yms[0] + ' 〜 ' + yms[yms.length - 1] + '（' + FINANCIALS.matchedRows.length + '行）');
   }
   return parts.join('  /  ');

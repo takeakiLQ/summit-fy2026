@@ -122,13 +122,54 @@ async function syncDeals(): Promise<void> {
     return x;
   });
 
+  // 🛡 安全ガード: SF取得結果が0件なら処理中断（認証エラー等で全件消すのを防ぐ）
+  if (dealItems.length === 0) {
+    console.warn('  ⚠ SFから取得した案件が0件です。書込・削除処理をスキップします（SF認証エラーやフィルタ全外れの可能性）');
+    return;
+  }
+
+  // UPSERT書込
   await batchSet('deals', dealItems);
-  console.log('  完了: ' + dealItems.length + '件の案件を書込');
+  console.log('  完了: ' + dealItems.length + '件の案件をUPSERT書込');
+
+  // 🗑 差分削除: 今回のSF取得結果に含まれないFirestoreの案件を削除
+  // （SF側で削除/失注/区分変更/スポット化/担当者外し等で対象外になった案件をクリーンアップ）
+  const sfIdSet = new Set(dealItems.map((x: { id: string }) => x.id));
+  const existingSnap = await db.collection('deals').get();
+  const orphanIds: string[] = [];
+  existingSnap.forEach(doc => { if (!sfIdSet.has(doc.id)) orphanIds.push(doc.id); });
+
+  let orphansDeleted = 0;
+  if (orphanIds.length === 0) {
+    console.log('  孤立案件なし（SFと完全一致）');
+  } else {
+    // 🛡 安全ガード: 削除対象が異常に多い場合は警告ログを出す（実行は継続）
+    const totalBefore = existingSnap.size;
+    const ratio = totalBefore > 0 ? orphanIds.length / totalBefore : 0;
+    if (orphanIds.length > 10 && ratio > 0.2) {
+      console.warn('  ⚠ 削除対象が多めです: ' + orphanIds.length + '件 / 既存' + totalBefore + '件 (' + (ratio * 100).toFixed(1) + '%)');
+      console.warn('    SF側で大量変更があったか、フィルタ条件が変わった可能性があります');
+    }
+    // バッチ削除（500件ずつ）
+    for (let i = 0; i < orphanIds.length; i += 500) {
+      const batch = db.batch();
+      const slice = orphanIds.slice(i, i + 500);
+      for (const id of slice) batch.delete(db.collection('deals').doc(id));
+      await batch.commit();
+    }
+    orphansDeleted = orphanIds.length;
+    console.log('  完了: ' + orphansDeleted + '件の孤立案件を削除');
+    // サンプルとして先頭5件のIDをログ出力（追跡用）
+    if (orphansDeleted > 0) {
+      console.log('  削除ID例: ' + orphanIds.slice(0, 5).join(', ') + (orphansDeleted > 5 ? ' ...' : ''));
+    }
+  }
 
   // meta/sync_status
   await db.collection('meta').doc('sync_status').set({
     lastSfSync: FieldValue.serverTimestamp(),
     lastSfSyncDeals: dealItems.length,
+    lastSfSyncOrphansDeleted: orphansDeleted,
     lastSfSyncBy: 'firestore-sync',
   }, { merge: true });
 }
