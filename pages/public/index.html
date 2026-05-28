@@ -18,6 +18,7 @@
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'Yu Gothic','Hiragino Sans','Meiryo',sans-serif; background: var(--c-bg); color: var(--c-text); line-height: 1.6; }
+.topbar-wrapper { position: sticky; top: 0; z-index: 50; background: var(--c-bg); box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
 header { background: linear-gradient(135deg,var(--c-primary),var(--c-accent)); color: white; padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
 header .header-left { flex: 1 1 auto; min-width: 0; }
 header .header-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end; }
@@ -71,6 +72,9 @@ table.ranking tr:last-child td { border-bottom: none; }
 table.ranking tr.clickable { cursor: pointer; }
 table.ranking tr.clickable:hover { background: var(--c-bg); }
 table.ranking td.num { text-align: right; font-variant-numeric: tabular-nums; }
+table.ranking th.sortable { cursor: pointer; user-select: none; }
+table.ranking th.sortable:hover { background: var(--c-border); }
+table.ranking th .sort-ind { color: var(--c-primary); margin-left: 4px; font-weight: 700; }
 .rank-badge { display: inline-block; width: 26px; height: 26px; line-height: 26px; text-align: center; border-radius: 50%; font-weight: 700; font-size: 11px; background: var(--c-bg); color: var(--c-text-sub); }
 .rank-badge.gold { background: #FFD700; color: #4D3800; }
 .rank-badge.silver { background: #C0C0C0; color: #333; }
@@ -106,6 +110,7 @@ table.ranking td.num { text-align: right; font-variant-numeric: tabular-nums; }
 </style>
 </head>
 <body>
+<div class="topbar-wrapper">
 <header>
   <div class="header-left">
     <h1>🏔 サミット営業成績ダッシュボード</h1>
@@ -133,6 +138,7 @@ table.ranking td.num { text-align: right; font-variant-numeric: tabular-nums; }
     <div class="filter-info" id="filter-info"></div>
   </div>
 </div>
+</div><!-- /.topbar-wrapper -->
 <main>
   <section id="overview" class="section active"></section>
   <section id="teams" class="section"></section>
@@ -172,6 +178,7 @@ function rebuildTeamInfo() {
 
 let currentFY = 'all', currentMonth = 'all', currentView = 'overview';
 let currentMember = null, currentTeam = null;
+let currentTeamRankBy = 'point';  // 'point' | 'gp' (粗利)
 let SUMMARY = null, DEALS = null, FINANCIALS = null;
 let isInitialized = false;
 
@@ -354,6 +361,14 @@ function renderSettingsAdmin() {
     html += '</div>';
   }
   html += '<p style="font-size:12px;color:var(--c-text-sub);margin-bottom:16px">編集は複数行をまとめて変更し、上の「💾 まとめて保存」で一括反映されます。「非表示」「追加」は即時実行です。</p>';
+
+  // 同期管理セクション
+  html += '<div style="background:white;border:1px solid var(--c-border);border-radius:12px;padding:20px;margin-bottom:20px">';
+  html += '<h3 style="font-size:14px;font-weight:700;color:var(--c-primary);margin-bottom:12px">🔄 同期管理</h3>';
+  html += '<p style="font-size:12px;color:var(--c-text-sub);margin-bottom:12px">Salesforce → Cloudflare D1 の同期は通常毎時0分に自動実行されますが、設定変更後など即時反映したい場合は下のボタンで手動実行できます（GitHub Actions を起動し、2〜3分で完了）。</p>';
+  html += '<button class="btn primary" data-action="sync-now">🔄 SF同期を今すぐ実行</button>';
+  html += '<span id="sync-now-status" style="margin-left:12px;font-size:12px;color:var(--c-text-sub)"></span>';
+  html += '</div>';
   html += '<div style="background:white;border:1px solid var(--c-border);border-radius:12px;padding:20px;margin-bottom:20px">';
   html += '<h3 style="font-size:14px;font-weight:700;color:var(--c-primary);margin-bottom:12px">🏔 チーム管理</h3>';
   html += '<table class="ranking"><thead><tr><th>ID</th><th>名前</th><th>色</th><th class="num">順</th><th>状態</th><th>操作</th></tr></thead><tbody>';
@@ -463,6 +478,7 @@ function attachSettingsHandlers(sec) {
         else if (action === 'add-team') await onAddTeam(sec);
         else if (action === 'toggle-member') await onToggleMember(btn.dataset.memberEmail);
         else if (action === 'add-member') await onAddMember(sec);
+        else if (action === 'sync-now') { await onSyncNow(); return; } // 再描画不要、ステータス表示で完結
         if (action !== 'discard-all') {
           await reloadTeamsAndMembersOnly();
         }
@@ -502,6 +518,24 @@ function onDiscardAll() {
   if (!confirm('未保存の変更を全て破棄しますか？')) return;
   pendingChanges.teams = {};
   pendingChanges.members = {};
+}
+
+async function onSyncNow() {
+  const status = document.getElementById('sync-now-status');
+  if (status) status.textContent = '🚀 GitHub Actions を起動中...';
+  try {
+    const result = await window.__API_SEND__('POST', '/api/admin/sync-now');
+    if (status) {
+      status.innerHTML = '✅ ' + (result.message || '起動しました') +
+        (result.runsUrl ? ' <a href="'+result.runsUrl+'" target="_blank" style="color:var(--c-primary);text-decoration:underline">実行状況を確認</a>' : '');
+      status.style.color = '#059669';
+    }
+  } catch (e) {
+    if (status) {
+      status.textContent = '❌ 失敗: ' + (e.message || e);
+      status.style.color = '#DC2626';
+    }
+  }
 }
 
 async function reloadTeamsAndMembersOnly() {
@@ -654,20 +688,52 @@ function renderOverview() {
   html += '<div class="kpi-box"><div class="label">案件数</div><div class="value">'+a.totalDeals+'<small>件</small></div></div>';
   html += '<div class="kpi-box"><div class="label">合計売上</div><div class="value" style="font-size:18px">'+fmtYen(fin.revenue)+'</div></div>';
   html += '<div class="kpi-box"><div class="label">合計粗利</div><div class="value" style="font-size:18px">'+fmtYen(fin.grossProfit)+'</div></div>';
-  html += '</div><h2>🏆 チームランキング</h2><div class="team-grid">';
-  for (const t of a.rankings.team) {
-    const info = TEAM_INFO[t.teamId] || {name:t.teamId};
-    const team = a.teams.find(x => x.teamId === t.teamId);
-    const ft = fin.byTeam[t.teamId] || {revenue:0,grossProfit:0};
-    html += '<div class="team-card" data-team="'+t.teamId+'" data-team-id="'+t.teamId+'"><div class="accent"></div>';
-    html += '<div class="rank">'+(t.rank===1?'🥇':t.rank===2?'🥈':t.rank===3?'🥉':'')+' 第'+t.rank+'位 / '+t.teamId+'</div>';
-    html += '<div class="name">'+info.name+'</div>';
-    html += '<div class="pt">'+fmtPt(t.point)+'<small>pt</small></div>';
-    if (team) html += '<div class="stats"><span>案件 '+team.totalDeals+'件</span><span>M '+team.mainCount+'/S '+team.subCount+'</span></div>';
-    html += '<div class="money">'+fmtYen(ft.revenue)+' <small>売上</small></div>';
-    html += '<div class="money">'+fmtYen(ft.grossProfit)+' <small>粗利</small></div></div>';
+  html += '</div>';
+  // チームランキング: ピル切替
+  html += '<div style="display:flex;align-items:center;gap:10px;margin:18px 0 10px;flex-wrap:wrap">';
+  html += '<h2 style="margin:0;padding:0;border:none">🏆 チームランキング</h2>';
+  html += '<div style="display:flex;gap:6px;margin-left:auto">';
+  html += '<button class="pill'+(currentTeamRankBy==='point'?' active':'')+'" data-rank-by="point">💎 獲得ポイント</button>';
+  html += '<button class="pill'+(currentTeamRankBy==='gp'?' active':'')+'" data-rank-by="gp">💰 累積粗利</button>';
+  html += '</div></div>';
+
+  // ランキング作成
+  let ranked;
+  if (currentTeamRankBy === 'gp') {
+    ranked = a.teams.map(t => {
+      const ft = fin.byTeam[t.teamId] || {revenue:0, grossProfit:0};
+      return { teamId: t.teamId, team: t, ft, sortKey: ft.grossProfit };
+    }).sort((x,y) => y.sortKey - x.sortKey);
+  } else {
+    ranked = a.rankings.team.map(r => ({
+      teamId: r.teamId,
+      team: a.teams.find(x => x.teamId === r.teamId),
+      ft: fin.byTeam[r.teamId] || {revenue:0, grossProfit:0},
+      sortKey: r.point,
+    }));
   }
-  html += '</div><div class="chart-card"><div class="title">チーム別ポイント</div><div class="chart-wrap"><canvas id="ch-teams"></canvas></div></div>';
+  ranked.forEach((r, i) => r.rank = i + 1);
+
+  html += '<div class="team-grid">';
+  for (const r of ranked) {
+    const info = TEAM_INFO[r.teamId] || {name:r.teamId};
+    const team = r.team;
+    html += '<div class="team-card" data-team="'+r.teamId+'" data-team-id="'+r.teamId+'"><div class="accent"></div>';
+    html += '<div class="rank">'+(r.rank===1?'🥇':r.rank===2?'🥈':r.rank===3?'🥉':'')+' 第'+r.rank+'位 / '+r.teamId+'</div>';
+    html += '<div class="name">'+info.name+'</div>';
+    if (currentTeamRankBy === 'gp') {
+      html += '<div class="pt">'+fmtYen(r.ft.grossProfit)+'</div>';
+      html += '<div class="stats"><span>'+fmtPt(team?.totalPoint||0)+'pt</span><span>売上 '+fmtYen(r.ft.revenue)+'</span></div>';
+      if (team) html += '<div class="stats"><span>案件 '+team.totalDeals+'件</span><span>M '+team.mainCount+'/S '+team.subCount+'</span></div>';
+    } else {
+      html += '<div class="pt">'+fmtPt(team?.totalPoint||r.sortKey||0)+'<small>pt</small></div>';
+      if (team) html += '<div class="stats"><span>案件 '+team.totalDeals+'件</span><span>M '+team.mainCount+'/S '+team.subCount+'</span></div>';
+      html += '<div class="money">'+fmtYen(r.ft.revenue)+' <small>売上</small></div>';
+      html += '<div class="money">'+fmtYen(r.ft.grossProfit)+' <small>粗利</small></div>';
+    }
+    html += '</div>';
+  }
+  html += '</div><div class="chart-card"><div class="title">チーム別 '+(currentTeamRankBy==='gp'?'累積粗利':'獲得ポイント')+'</div><div class="chart-wrap"><canvas id="ch-teams"></canvas></div></div>';
   html += '<h2>🌟 個人ランキング TOP 10</h2><table class="ranking"><thead><tr><th>順位</th><th>メンバー</th><th>チーム</th><th class="num">pt</th><th class="num">案件</th><th class="num">月間予定売上</th><th class="num">売上実績累計</th><th class="num">粗利実績累計</th></tr></thead><tbody>';
   for (const r of a.rankings.individual.slice(0,10)) {
     const mf = getMemberFinancialsCumulative(r.ownerName);
@@ -677,8 +743,24 @@ function renderOverview() {
   sec.innerHTML = html;
   requestAnimationFrame(() => requestAnimationFrame(() => {
     const ctx = document.getElementById('ch-teams'); if (!ctx) return;
-    new Chart(ctx, { type:'bar', data:{labels:a.rankings.team.map(t=>TEAM_INFO[t.teamId]?.name||t.teamId), datasets:[{data:a.rankings.team.map(t=>t.point), backgroundColor:a.rankings.team.map(t=>TEAM_INFO[t.teamId]?.color||'#ccc'), borderRadius:8}]}, options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}}});
+    const labels = ranked.map(r => TEAM_INFO[r.teamId]?.name || r.teamId);
+    const values = currentTeamRankBy === 'gp'
+      ? ranked.map(r => r.ft.grossProfit)
+      : ranked.map(r => r.team?.totalPoint || r.sortKey || 0);
+    const colors = ranked.map(r => TEAM_INFO[r.teamId]?.color || '#ccc');
+    new Chart(ctx, {
+      type:'bar',
+      data:{ labels, datasets:[{ data: values, backgroundColor: colors, borderRadius: 8 }]},
+      options:{ responsive:true, maintainAspectRatio:false,
+        plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label: c => currentTeamRankBy==='gp' ? fmtYen(c.parsed.y) : fmtPt(c.parsed.y)+'pt' } } },
+        scales:{ y:{ beginAtZero:true, ticks:{ callback: v => currentTeamRankBy==='gp' ? '¥'+(v/10000).toFixed(0)+'万' : v } } }
+      }
+    });
   }));
+  // ピル切替ハンドラ
+  sec.querySelectorAll('[data-rank-by]').forEach(btn => {
+    btn.onclick = () => { currentTeamRankBy = btn.dataset.rankBy; renderOverview(); };
+  });
   attachClickHandlers(sec);
 }
 
@@ -783,6 +865,76 @@ async function loadPersonDealsCached(ownerName, ownerEmail) {
   return deals;
 }
 
+// 担当案件リストのソート状態（デフォルト: 稼働開始 昇順）
+let personDealsSort = { col: 'operationStartDate', dir: 'asc' };
+
+function sortPersonDeals(deals, sort) {
+  const col = sort.col;
+  const dir = sort.dir === 'desc' ? -1 : 1;
+  const getter = {
+    operationStartDate: d => d.operationStartDate || '',
+    name: d => d.name || '',
+    msKbn: d => d.msKbn === 'main' ? 1 : d.msKbn === 'sub' ? 2 : 9,
+    hourlyRate: d => d.hourlyRate ?? -1,
+    point: d => d.point ?? 0,
+    classification: d => d.classification || '',
+    monthlyRevenue: d => d.monthlyRevenue ?? -1,
+  }[col] || (d => '');
+  return [...deals].sort((a, b) => {
+    const va = getter(a), vb = getter(b);
+    if (typeof va === 'number' && typeof vb === 'number') return (va - vb) * dir;
+    return String(va).localeCompare(String(vb)) * dir;
+  });
+}
+
+function renderPersonDealsTable(personDeals) {
+  const area = document.getElementById('person-deals-area');
+  if (!area) return;
+  const sorted = sortPersonDeals(personDeals, personDealsSort);
+  let html = '<h2>担当案件リスト（'+personDeals.length+'件）</h2>';
+  if (sorted.length === 0) {
+    html += '<div class="empty">この期間の案件はありません</div>';
+    area.innerHTML = html;
+    return;
+  }
+  // ソートインジケータ
+  const ind = (c) => personDealsSort.col === c ? '<span class="sort-ind">'+(personDealsSort.dir==='asc'?'▲':'▼')+'</span>' : '';
+  html += '<table class="ranking"><thead><tr>';
+  html += '<th class="sortable" data-sort-col="operationStartDate">稼働開始'+ind('operationStartDate')+'</th>';
+  html += '<th class="sortable" data-sort-col="name">案件名'+ind('name')+'</th>';
+  html += '<th class="sortable" data-sort-col="msKbn">M/S'+ind('msKbn')+'</th>';
+  html += '<th class="sortable num" data-sort-col="hourlyRate">時単価'+ind('hourlyRate')+'</th>';
+  html += '<th class="sortable num" data-sort-col="point">pt'+ind('point')+'</th>';
+  html += '<th class="sortable" data-sort-col="classification">区分'+ind('classification')+'</th>';
+  html += '<th class="sortable num" data-sort-col="monthlyRevenue">月間予定売上'+ind('monthlyRevenue')+'</th>';
+  html += '<th>操作</th></tr></thead><tbody>';
+  for (const d of sorted) {
+    const msLabel = d.msKbn === 'main' ? 'メイン' : d.msKbn === 'sub' ? 'サブ' : '?';
+    html += '<tr>';
+    html += '<td>'+(d.operationStartDate?String(d.operationStartDate).slice(0,10):'-')+'</td>';
+    html += '<td>'+escHtml(d.name)+'</td><td>'+msLabel+'</td>';
+    html += '<td class="num">'+(d.hourlyRate!=null?fmtYen(d.hourlyRate):'-')+'</td>';
+    html += '<td class="num"><strong>'+fmtPt(d.point)+'pt</strong></td>';
+    html += '<td>'+escHtml(d.classification || '-')+'</td>';
+    html += '<td class="num">'+(d.monthlyRevenue!=null?fmtYen(d.monthlyRevenue):'-')+'</td>';
+    html += '<td><div class="btn-group">';
+    html += '<button class="btn primary" onclick="showDealDetail(\''+d.id+'\')">詳細</button>';
+    html += '<button class="btn success" onclick="showDealFinancial(\''+d.id+'\')">実績</button>';
+    html += '</div></td></tr>';
+  }
+  html += '</tbody></table>';
+  area.innerHTML = html;
+  // ヘッダクリックでソート切替
+  area.querySelectorAll('th.sortable').forEach(th => {
+    th.addEventListener('click', () => {
+      const col = th.dataset.sortCol;
+      if (personDealsSort.col === col) personDealsSort.dir = personDealsSort.dir === 'asc' ? 'desc' : 'asc';
+      else { personDealsSort.col = col; personDealsSort.dir = 'asc'; }
+      renderPersonDealsTable(personDeals);
+    });
+  });
+}
+
 function filterPersonDeals(allDeals) {
   return allDeals.filter(d => {
     if (currentMonth !== 'all') return d.yearMonth === currentMonth;
@@ -811,29 +963,9 @@ async function showIndividualDetail(ownerName) {
   try {
     const allDeals = await loadPersonDealsCached(m.ownerName, m.ownerEmail);
     const personDeals = filterPersonDeals(allDeals);
-    let dealsHtml = '<h2>担当案件リスト（'+personDeals.length+'件）</h2>';
-    if (personDeals.length === 0) {
-      dealsHtml += '<div class="empty">この期間の案件はありません</div>';
-    } else {
-      dealsHtml += '<table class="ranking"><thead><tr><th>稼働開始</th><th>案件名</th><th>M/S</th><th class="num">時単価</th><th class="num">pt</th><th>区分</th><th class="num">月間予定売上</th><th>操作</th></tr></thead><tbody>';
-      for (const d of personDeals) {
-        const msLabel = d.msKbn === 'main' ? 'メイン' : d.msKbn === 'sub' ? 'サブ' : '?';
-        dealsHtml += '<tr>';
-        dealsHtml += '<td>'+(d.operationStartDate?String(d.operationStartDate).slice(0,10):'-')+'</td>';
-        dealsHtml += '<td>'+escHtml(d.name)+'</td><td>'+msLabel+'</td>';
-        dealsHtml += '<td class="num">'+(d.hourlyRate!=null?fmtYen(d.hourlyRate):'-')+'</td>';
-        dealsHtml += '<td class="num"><strong>'+fmtPt(d.point)+'pt</strong></td>';
-        dealsHtml += '<td>'+escHtml(d.classification || '-')+'</td>';
-        dealsHtml += '<td class="num">'+(d.monthlyRevenue!=null?fmtYen(d.monthlyRevenue):'-')+'</td>';
-        dealsHtml += '<td><div class="btn-group">';
-        dealsHtml += '<button class="btn primary" onclick="showDealDetail(\''+d.id+'\')">詳細</button>';
-        dealsHtml += '<button class="btn success" onclick="showDealFinancial(\''+d.id+'\')">実績</button>';
-        dealsHtml += '</div></td></tr>';
-      }
-      dealsHtml += '</tbody></table>';
-    }
-    const area = document.getElementById('person-deals-area');
-    if (area) area.innerHTML = dealsHtml;
+    // 個人切替時はデフォルトソートに戻す
+    personDealsSort = { col: 'operationStartDate', dir: 'asc' };
+    renderPersonDealsTable(personDeals);
   } catch (e) {
     const area = document.getElementById('person-deals-area');
     if (area) area.innerHTML = '<div class="empty">読込失敗: '+(e.message||e)+'</div>';
