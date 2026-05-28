@@ -11,11 +11,14 @@ export async function recomputeSummary(env: Env) {
   const activeTeamIds = new Set<string>();
   for (const t of teamsRes.results || []) if (t.active === 1) activeTeamIds.add(t.id);
 
-  const membersRes = await env.DB.prepare('SELECT email, name, team, active FROM members').all<{ email: string; name: string; team: string; active: number }>();
+  const membersRes = await env.DB.prepare('SELECT email, name, team, role, active FROM members').all<{ email: string; name: string; team: string; role: string; active: number }>();
   const activeMemberEmails = new Set<string>();
   const activeMemberNames = new Set<string>();
   for (const m of membersRes.results || []) {
     if (m.active !== 1) continue;
+    // 所属チームがactiveでないなら除外（本部など非研修チームのメンバーを除外）。
+    // admin ロールでも T1〜T4 所属なら集計対象に含める（メンバー兼admin想定）。
+    if (!activeTeamIds.has(m.team)) continue;
     if (m.email) activeMemberEmails.add(m.email);
     if (m.name) activeMemberNames.add(m.name);
   }

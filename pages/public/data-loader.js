@@ -103,7 +103,9 @@ async function loadData(opts = {}) {
   window.__TEAMS_ALL__ = data.teamsAll || [];
   window.__MEMBERS_ALL__ = data.membersAll || [];
   window.__TEAMS__ = (data.teamsAll || []).filter(t => t.active).sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
-  window.__MEMBERS__ = (data.membersAll || []).filter(m => m.active);
+  // 集計対象（個人ランキング等）は active=true かつ 所属チームも active のメンバー（adminロールでも含める）
+  const activeTeamIds = new Set((data.teamsAll || []).filter(t => t.active).map(t => t.id));
+  window.__MEMBERS__ = (data.membersAll || []).filter(m => m.active && activeTeamIds.has(m.team));
   window.__USER_ROLE__ = (data.user && data.user.role) || 'member';
   window.__USER_EMAIL__ = (data.user && data.user.email) || null;
   window.__USER_NAME__ = (data.user && data.user.name) || null;
