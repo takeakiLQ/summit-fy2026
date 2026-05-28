@@ -597,12 +597,13 @@ async function onAddMember(sec) {
 }
 
 let csvParsedRows = null;
+let csvParsedMeta = null;  // { files: [{name, kind, months, rowCount, totalRev, totalGp}], totalRows, totalRev, totalGp, allMonths }
 function renderImportCsv() {
   const sec = document.getElementById('import-csv');
   let html = '<h2>📥 実績データ取込</h2>';
   html += '<div style="background:white;border:1px solid var(--c-border);border-radius:12px;padding:20px;margin-bottom:16px">';
-  html += '<p style="font-size:13px;color:var(--c-text-sub);margin-bottom:12px">月別売上・粗利CSVをアップロード。同じ月のデータは置換されます。</p>';
-  html += '<input type="file" id="csv-file" accept=".csv" style="margin-bottom:12px" /><br>';
+  html += '<p style="font-size:13px;color:var(--c-text-sub);margin-bottom:12px">月別売上・粗利CSVをアップロード（<strong>複数選択可</strong>）。同じ月のデータは置換されます。<br>ファイル名で種別を自動判定: <code>ByQ_*.csv</code> → ByQ、 <code>Q配_*.csv</code> → Qhai。</p>';
+  html += '<input type="file" id="csv-file" accept=".csv" multiple style="margin-bottom:12px" /><br>';
   html += '<button id="btn-preview" class="btn primary">プレビュー</button>';
   html += '<button id="btn-import" class="btn success" style="margin-left:6px" disabled>取込実行</button>';
   html += '<div id="csv-preview" style="margin-top:16px"></div>';
@@ -621,65 +622,111 @@ function detectCsvKind(filename) {
   return null;
 }
 
-function previewCsv() {
-  const file = document.getElementById('csv-file').files[0];
-  if (!file) { alert('ファイルを選択'); return; }
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    const text = String(e.target.result).replace(/^﻿/, '');
-    const lines = text.split(/\r?\n/).filter(l => l.trim() !== '');
-    if (lines.length < 2) { document.getElementById('csv-preview').innerHTML = '<div class="empty">行数不足</div>'; return; }
-    const header = parseCsvLine(lines[0]);
-    const idx = {
-      ym: header.findIndex(h => h.includes('配送年月')),
-      mn: header.findIndex(h => h.includes('マニュアル番号')),
-      rev: header.findIndex(h => h.includes('売上合計')),
-      cp: header.findIndex(h => h.includes('CP用原価合計')),
-      wd: header.findIndex(h => h.includes('稼働日数')),
-    };
-    if (idx.ym < 0 || idx.mn < 0 || idx.rev < 0 || idx.cp < 0) { document.getElementById('csv-preview').innerHTML = '<div class="empty">必須カラムが見つかりません</div>'; return; }
-    const months = new Set();
-    let totalRev = 0, totalGp = 0, rowCount = 0;
-    csvParsedRows = [];
-    for (let i = 1; i < lines.length; i++) {
-      const c = parseCsvLine(lines[i]);
-      const ym = String(c[idx.ym] || '').replace(/['"]/g,'').trim();
-      const mn = String(c[idx.mn] || '').replace(/['"]/g,'').trim();
-      const rev = Number(c[idx.rev]) || 0;
-      const cp = Number(c[idx.cp]) || 0;
-      const wd = Number(c[idx.wd]) || 0;
-      if (!ym || !mn) continue;
-      const ymNorm = /^\d{6}$/.test(ym) ? ym.slice(0,4)+'-'+ym.slice(4,6) : ym;
-      months.add(ymNorm); totalRev += rev; totalGp += rev - cp; rowCount++;
-      csvParsedRows.push({ yearMonth: ymNorm, manualNo: mn, revenue: rev, grossProfit: rev - cp, workdays: wd });
-    }
-    const sortedMonths = Array.from(months).sort();
-    const kind = detectCsvKind(file.name);
-    let html = '<h3 style="margin-bottom:8px">プレビュー</h3>';
-    html += '<table class="ranking"><tbody>';
-    html += '<tr><td>ファイル名</td><td><strong>'+file.name+'</strong>'+(kind?' <span style="margin-left:8px;padding:2px 10px;border-radius:8px;font-size:11px;font-weight:700;background:'+(kind==='ByQ'?'#fee2e2;color:#991b1b':'#e0e7ff;color:#3730a3')+'">'+kind+'</span>':' <span style="color:#DC2626">⚠ 種別を判別できません（ByQ_*.csv または Q配_*.csv 推奨）</span>')+'</td></tr>';
-    html += '<tr><td>有効行数</td><td>'+rowCount+'</td></tr>';
-    html += '<tr><td>対象月</td><td><strong>'+sortedMonths.join(', ')+'</strong></td></tr>';
-    html += '<tr><td>合計売上</td><td>'+fmtYen(totalRev)+'</td></tr>';
-    html += '<tr><td>合計粗利</td><td>'+fmtYen(totalGp)+'</td></tr>';
-    html += '</tbody></table>';
-    document.getElementById('csv-preview').innerHTML = html;
-    document.getElementById('btn-import').disabled = false;
+function parseOneCsv(text) {
+  text = String(text).replace(/^﻿/, '');
+  const lines = text.split(/\r?\n/).filter(l => l.trim() !== '');
+  if (lines.length < 2) return { error: '行数不足' };
+  const header = parseCsvLine(lines[0]);
+  const idx = {
+    ym: header.findIndex(h => h.includes('配送年月')),
+    mn: header.findIndex(h => h.includes('マニュアル番号')),
+    rev: header.findIndex(h => h.includes('売上合計')),
+    cp: header.findIndex(h => h.includes('CP用原価合計')),
+    wd: header.findIndex(h => h.includes('稼働日数')),
   };
-  reader.readAsText(file, 'UTF-8');
+  if (idx.ym < 0 || idx.mn < 0 || idx.rev < 0 || idx.cp < 0) return { error: '必須カラムが見つかりません' };
+  const months = new Set();
+  let totalRev = 0, totalGp = 0;
+  const rows = [];
+  for (let i = 1; i < lines.length; i++) {
+    const c = parseCsvLine(lines[i]);
+    const ym = String(c[idx.ym] || '').replace(/['"]/g,'').trim();
+    const mn = String(c[idx.mn] || '').replace(/['"]/g,'').trim();
+    const rev = Number(c[idx.rev]) || 0;
+    const cp = Number(c[idx.cp]) || 0;
+    const wd = Number(c[idx.wd]) || 0;
+    if (!ym || !mn) continue;
+    const ymNorm = /^\d{6}$/.test(ym) ? ym.slice(0,4)+'-'+ym.slice(4,6) : ym;
+    months.add(ymNorm); totalRev += rev; totalGp += rev - cp;
+    rows.push({ yearMonth: ymNorm, manualNo: mn, revenue: rev, grossProfit: rev - cp, workdays: wd });
+  }
+  return { rows, months: Array.from(months).sort(), totalRev, totalGp };
+}
+
+async function previewCsv() {
+  const files = Array.from(document.getElementById('csv-file').files);
+  if (files.length === 0) { alert('ファイルを選択（複数選択可）'); return; }
+  const previewEl = document.getElementById('csv-preview');
+  previewEl.innerHTML = '<div style="padding:12px;background:var(--c-bg);border-radius:8px;font-size:13px">📂 '+files.length+'件のファイルをパース中...</div>';
+
+  // ファイル並列読込
+  const fileResults = await Promise.all(files.map(async file => {
+    const text = await file.text();
+    const parsed = parseOneCsv(text);
+    return { file, parsed, kind: detectCsvKind(file.name) };
+  }));
+
+  // 統合
+  csvParsedRows = [];
+  csvParsedMeta = { files: [], totalRows: 0, totalRev: 0, totalGp: 0, allMonths: new Set() };
+  let errorCount = 0;
+  for (const r of fileResults) {
+    if (r.parsed.error) {
+      csvParsedMeta.files.push({ name: r.file.name, error: r.parsed.error, kind: r.kind });
+      errorCount++;
+      continue;
+    }
+    for (const row of r.parsed.rows) csvParsedRows.push(row);
+    for (const m of r.parsed.months) csvParsedMeta.allMonths.add(m);
+    csvParsedMeta.totalRows += r.parsed.rows.length;
+    csvParsedMeta.totalRev += r.parsed.totalRev;
+    csvParsedMeta.totalGp += r.parsed.totalGp;
+    csvParsedMeta.files.push({
+      name: r.file.name, kind: r.kind,
+      rowCount: r.parsed.rows.length, months: r.parsed.months,
+      totalRev: r.parsed.totalRev, totalGp: r.parsed.totalGp,
+    });
+  }
+
+  // プレビュー描画
+  const sortedMonths = Array.from(csvParsedMeta.allMonths).sort();
+  let html = '<h3 style="margin-bottom:8px">プレビュー（'+files.length+'件のファイル）</h3>';
+  html += '<table class="ranking"><thead><tr><th>ファイル名</th><th>種別</th><th class="num">行数</th><th>対象月</th><th class="num">売上</th><th class="num">粗利</th></tr></thead><tbody>';
+  for (const f of csvParsedMeta.files) {
+    if (f.error) {
+      html += '<tr style="background:#fee2e2"><td><strong>'+escHtml(f.name)+'</strong></td><td colspan="5" style="color:#991b1b">❌ '+f.error+'</td></tr>';
+      continue;
+    }
+    const kindBadge = f.kind === 'ByQ' ? '<span style="background:#fee2e2;color:#991b1b;padding:1px 8px;border-radius:8px;font-size:10px;font-weight:700">ByQ</span>'
+      : f.kind === 'Qhai' ? '<span style="background:#e0e7ff;color:#3730a3;padding:1px 8px;border-radius:8px;font-size:10px;font-weight:700">Qhai</span>'
+      : '<span style="color:#DC2626;font-size:11px">⚠ 不明</span>';
+    html += '<tr><td><code style="font-size:11px">'+escHtml(f.name)+'</code></td>';
+    html += '<td>'+kindBadge+'</td>';
+    html += '<td class="num">'+f.rowCount+'</td>';
+    html += '<td><code style="font-size:11px">'+f.months.join(', ')+'</code></td>';
+    html += '<td class="num">'+fmtYen(f.totalRev)+'</td>';
+    html += '<td class="num">'+fmtYen(f.totalGp)+'</td></tr>';
+  }
+  html += '<tr style="background:var(--c-bg);font-weight:700"><td>合計</td><td>-</td><td class="num">'+csvParsedMeta.totalRows+'</td><td><code style="font-size:11px">'+sortedMonths.join(', ')+'</code></td><td class="num">'+fmtYen(csvParsedMeta.totalRev)+'</td><td class="num">'+fmtYen(csvParsedMeta.totalGp)+'</td></tr>';
+  html += '</tbody></table>';
+  if (errorCount > 0) html += '<p style="color:#DC2626;font-size:12px;margin-top:8px">⚠ '+errorCount+'件のファイルでエラーがあります。エラーファイルはスキップして取込されます。</p>';
+  previewEl.innerHTML = html;
+  document.getElementById('btn-import').disabled = (csvParsedRows.length === 0);
 }
 
 async function importCsvToD1() {
   if (!csvParsedRows || csvParsedRows.length === 0) { alert('先にプレビュー'); return; }
-  const fileName = document.getElementById('csv-file').files[0]?.name || '(unknown)';
+  const files = Array.from(document.getElementById('csv-file').files);
+  const fileNames = files.map(f => f.name);
+  const fileNameLabel = files.length === 1 ? fileNames[0] : fileNames[0] + ' ほか' + (files.length-1) + '件';
   const progress = document.getElementById('csv-import-progress');
-  if (!confirm('対象月のデータを削除して、CSVの内容で置換します。よろしいですか？')) return;
+  const months = Array.from(new Set(csvParsedRows.map(r => r.yearMonth))).sort();
+  if (!confirm('以下の月のデータを削除して、'+files.length+'件のCSVの内容で置換します。\n対象月: '+months.join(', ')+'\nよろしいですか？')) return;
   document.getElementById('btn-import').disabled = true;
   document.getElementById('btn-preview').disabled = true;
   try {
-    progress.innerHTML = '<div style="padding:12px;background:var(--c-bg);border-radius:8px;font-size:13px">⏳ 送信中...</div>';
-    const months = Array.from(new Set(csvParsedRows.map(r => r.yearMonth))).sort();
-    const result = await window.__API_SEND__('POST', '/api/import-csv', { rows: csvParsedRows, months, fileName });
+    progress.innerHTML = '<div style="padding:12px;background:var(--c-bg);border-radius:8px;font-size:13px">⏳ '+files.length+'件のCSV（合計 '+csvParsedRows.length+'行）を送信中...</div>';
+    const result = await window.__API_SEND__('POST', '/api/import-csv', { rows: csvParsedRows, months, fileName: fileNameLabel });
     progress.innerHTML = '<div style="padding:14px;background:#d1fae5;border:1px solid #059669;border-radius:8px;font-size:13px;color:#064e3b">✅ <strong>取込完了！</strong><br>対象月: '+months.join(', ')+'<br>削除: '+(result.deleted||0)+' / 書込: '+(result.upserted||0)+'（突合 '+(result.matched||0)+' / 未突合 '+(result.unmatched||0)+'）<br><button class="btn primary" style="margin-top:10px" onclick="(function(){if(window.__CLEAR_DATA_CACHE__)window.__CLEAR_DATA_CACHE__();location.reload();})()">再読込</button></div>';
     document.getElementById('btn-preview').disabled = false;
   } catch (err) {
