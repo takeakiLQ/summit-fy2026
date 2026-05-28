@@ -1,0 +1,8 @@
+node_modules/
+dist/
+*.log
+
+# 重要: サービスアカウント鍵はコミット禁止
+service-account.json
+*.serviceaccount.json
+firebase-adminsdk-*.json

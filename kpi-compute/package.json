@@ -1,0 +1,20 @@
+{
+  "name": "kpi-compute",
+  "version": "0.1.0",
+  "description": "サミット営業成績ダッシュボード - sf-extractの出力にKPI計算と集計を適用するモジュール",
+  "type": "module",
+  "private": true,
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "compute": "tsx src/index.ts",
+    "build": "tsc --noEmit",
+    "lint": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.3"
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "$comment": "KPI計算の可変パラメータ。管理者が値を変更しても計算ロジックのコード変更は不要。",
+  "msPoints": {
+    "main": 1.0,
+    "sub": 0.5
+  },
+  "hourlyCoefThresholds": [
+    { "min": 4000, "coef": 2.0, "label": "4000円以上" },
+    { "min": 3000, "coef": 1.5, "label": "3000円以上4000円未満" },
+    { "min": 0,    "coef": 1.0, "label": "3000円未満" }
+  ],
+  "issueRules": {
+    "$comment": "要修正案件として検出するルール。集計上のポイントは0として扱われる。",
+    "missingDailyHours": true,
+    "missingMonthlyWorkdays": true,
+    "missingMonthlyRevenue": true,
+    "zeroDivisor": true,
+    "extremeHourlyRateAbove": 100000,
+    "extremeHourlyRateBelow": 100
+  },
+  "$notes": {
+    "thresholds": "min は含む（4000円ちょうど→×2.0, 3000円ちょうど→×1.5）。順序は降順で評価される。",
+    "msPoints": "Item__c='メイン'→main、'サブ'→sub。スポットはsf-extract側で除外済み。",
+    "extremeHourlyRateAbove": "時間当たり単価がこの値を超える案件は異常値として要修正案件に分類（任意、デフォルト10万円超）",
+    "extremeHourlyRateBelow": "時間当たり単価がこの値未満の案件は異常値として要修正案件に分類（任意、デフォルト100円未満）"
+  }
+}

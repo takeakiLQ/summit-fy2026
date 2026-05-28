@@ -1,0 +1,20 @@
+{
+  "name": "csv-import",
+  "version": "0.1.0",
+  "description": "サミット営業成績ダッシュボード - 月別売上・粗利CSV取込モジュール（マニュアル番号でSF案件と突合）",
+  "type": "module",
+  "private": true,
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "import": "tsx src/index.ts",
+    "build": "tsc --noEmit",
+    "lint": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.3"
+  }
+}

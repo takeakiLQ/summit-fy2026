@@ -1,0 +1,40 @@
+
+> sf-extract@0.1.0 extract
+> tsx src/index.ts --out output/deals-v2.json
+
+[sf-extract] Salesforce 繧｢繧ｯ繧ｻ繧ｹ繝医・繧ｯ繝ｳ繧貞叙蠕嶺ｸｭ...
+[sf-extract] 隱崎ｨｼ謌仙粥. instance=https://logiquest.my.salesforce.com
+[sf-extract] 譯井ｻｶ蜿門ｾ鈴幕蟋・ object=Oppotunities__c
+[sf-extract] 遞ｼ蜒埼幕蟋区律繝輔ぅ繝ｫ繧ｿ: >= 2026-04-01
+[sf-extract] 蜿門ｾ怜ｮ御ｺ・
+             SF霑泌唆莉ｶ謨ｰ: 62
+             蟇ｾ雎｡莉ｶ謨ｰ  : 62
+             髯､螟紋ｻｶ謨ｰ  : 0
+
+[sf-extract] 繝｡繝ｳ繝舌・蛻･蜿門ｾ礼憾豕・
+  T1:
+    莉贋ｺ・豬ｩ莠・          0莉ｶ 笞 0莉ｶ
+    譁ｰ螻・蟇ｿ蟷ｸ           5莉ｶ [name]
+    譚ｾ譚・蜆ｪ讓ｹ           4莉ｶ [name]
+    豐也伐 蜊壻ｹ・          4莉ｶ [name]
+    蛹・諞ｲ豐ｻ            6莉ｶ [name]
+  T2:
+    隹ｷ蟾・鄒ｩ蝟・          2莉ｶ [name]
+    蟯ｩ蟆ｾ 諷ｶ            0莉ｶ 笞 0莉ｶ
+    鄒ｽ逕・濶ｯ莠・          2莉ｶ [name]
+    螻ｱ逕ｰ 陬募､ｪ           1莉ｶ [name]
+    譟ｿ豐ｼ 鮴榊ｾ・          9莉ｶ [name]
+  T3:
+    譛ｬ螟・蛛･陬・          0莉ｶ 笞 0莉ｶ
+    螻ｱ逕ｰ 逵溷､ｧ           5莉ｶ [name]
+    逕ｰ譚・諞ｲ            4莉ｶ [name]
+    螂･譚・荳蠢・          1莉ｶ [name]
+    蟆冗ｬ蜴・螟ｧ鄙ｼ          6莉ｶ [name]
+  T4:
+    讓ｪ蟆ｾ 譏惹ｻ・          0莉ｶ 笞 0莉ｶ
+    閼・伐 諡馴ｦｬ           5莉ｶ [name]
+    ｮｷ驥・豕ｰ逾・         3莉ｶ [email]
+    貂・ｰｴ 蝠謎ｻ・          3莉ｶ [name]
+    隕区悽 逶ｴ蠑･           2莉ｶ [name]
+
+[sf-extract] JSON蜃ｺ蜉・ D:\Claude\繝医ャ繝怜霧讌ｭ遐比ｿｮ・医し繝溘ャ繝茨ｼ噂sf-extract\output\deals-v2.json

@@ -1,0 +1,87 @@
+name: Salesforce → Firestore 自動同期
+
+on:
+  schedule:
+    # 毎時0分に実行（UTC基準）。日本時間で見れば毎時0分。
+    - cron: '0 * * * *'
+  workflow_dispatch:  # GitHub UI から手動実行できるように
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: リポジトリ取得
+        uses: actions/checkout@v4
+
+      - name: Node.js セットアップ
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: sf-extract — Salesforce認証情報を .env に書き出し
+        working-directory: sf-extract
+        env:
+          SF_AUTH_TYPE: ${{ secrets.SF_AUTH_TYPE }}
+          SF_LOGIN_URL: ${{ secrets.SF_LOGIN_URL }}
+          SF_CLIENT_ID: ${{ secrets.SF_CLIENT_ID }}
+          SF_CLIENT_SECRET: ${{ secrets.SF_CLIENT_SECRET }}
+          SF_USERNAME: ${{ secrets.SF_USERNAME }}
+          SF_PASSWORD: ${{ secrets.SF_PASSWORD }}
+          SF_SECURITY_TOKEN: ${{ secrets.SF_SECURITY_TOKEN }}
+        run: |
+          cat <<EOF > .env
+          SF_AUTH_TYPE=$SF_AUTH_TYPE
+          SF_LOGIN_URL=$SF_LOGIN_URL
+          SF_CLIENT_ID=$SF_CLIENT_ID
+          SF_CLIENT_SECRET=$SF_CLIENT_SECRET
+          SF_USERNAME=$SF_USERNAME
+          SF_PASSWORD=$SF_PASSWORD
+          SF_SECURITY_TOKEN=$SF_SECURITY_TOKEN
+          SF_API_VERSION=v60.0
+          OUTPUT_DIR=./output
+          EOF
+
+      - name: sf-extract — 依存インストール
+        working-directory: sf-extract
+        run: npm install --no-audit --no-fund
+
+      - name: sf-extract — Salesforce案件抽出
+        working-directory: sf-extract
+        run: npm run extract -- --out output/deals-latest.json
+
+      - name: kpi-compute — 依存インストール
+        working-directory: kpi-compute
+        run: npm install --no-audit --no-fund
+
+      - name: kpi-compute — KPI計算
+        working-directory: kpi-compute
+        run: npm run compute -- --in ../sf-extract/output/deals-latest.json --out-base latest
+
+      - name: firestore-sync — サービスアカウント鍵を書き出し
+        working-directory: firestore-sync
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          printf '%s' "$FIREBASE_SERVICE_ACCOUNT" > service-account.json
+
+      - name: firestore-sync — 依存インストール
+        working-directory: firestore-sync
+        run: npm install --no-audit --no-fund
+
+      - name: firestore-sync — Firestoreに書込（実績はスキップ、案件のみ）
+        working-directory: firestore-sync
+        run: npm run sync -- --skip-financials
+
+      - name: 後片付け（鍵・.envを念のため削除）
+        if: always()
+        run: |
+          rm -f sf-extract/.env || true
+          rm -f firestore-sync/service-account.json || true
+
+      - name: 同期完了通知
+        if: success()
+        run: echo "✅ Salesforce → Firestore 同期 完了 ($(date -u '+%Y-%m-%d %H:%M:%S') UTC)"

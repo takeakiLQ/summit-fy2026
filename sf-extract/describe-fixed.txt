@@ -1,0 +1,6182 @@
+
+> sf-extract@0.1.0 extract
+> tsx src/index.ts --describe
+
+[sf-extract] Salesforce アクセスト�Eクンを取得中...
+[sf-extract] 認証成功. instance=https://logiquest.my.salesforce.com
+[sf-extract] Oppotunities__c のスキーマを取得中...
+{
+  "object": "Oppotunities__c",
+  "totalFields": 608,
+  "fields": [
+    {
+      "name": "Id",
+      "label": "カスタムオブジェクチEID",
+      "type": "id",
+      "custom": false,
+      "length": 18,
+      "picklistValues": []
+    },
+    {
+      "name": "IsDeleted",
+      "label": "削除",
+      "type": "boolean",
+      "custom": false,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Name",
+      "label": "案件吁E,
+      "type": "string",
+      "custom": false,
+      "length": 80,
+      "picklistValues": []
+    },
+    {
+      "name": "RecordTypeId",
+      "label": "レコードタイチEID",
+      "type": "reference",
+      "custom": false,
+      "length": 18,
+      "picklistValues": []
+    },
+    {
+      "name": "CreatedDate",
+      "label": "作�E日",
+      "type": "datetime",
+      "custom": false,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "CreatedById",
+      "label": "作�E老EID",
+      "type": "reference",
+      "custom": false,
+      "length": 18,
+      "picklistValues": []
+    },
+    {
+      "name": "LastModifiedDate",
+      "label": "最終更新日",
+      "type": "datetime",
+      "custom": false,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "LastModifiedById",
+      "label": "最終更新老EID",
+      "type": "reference",
+      "custom": false,
+      "length": 18,
+      "picklistValues": []
+    },
+    {
+      "name": "SystemModstamp",
+      "label": "System Modstamp",
+      "type": "datetime",
+      "custom": false,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "LastActivityDate",
+      "label": "最終活動日",
+      "type": "date",
+      "custom": false,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "LastViewedDate",
+      "label": "最終閲覧日",
+      "type": "datetime",
+      "custom": false,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "LastReferencedDate",
+      "label": "最終参照日",
+      "type": "datetime",
+      "custom": false,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "TravelTime__c",
+      "label": "稼働�Eまでの移動時閁E,
+      "type": "string",
+      "custom": true,
+      "length": 255,
+      "picklistValues": []
+    },
+    {
+      "name": "LicenseType__c",
+      "label": "免許種顁E,
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "普送E,
+        "AT限宁E,
+        "そ�E仁E
+      ]
+    },
+    {
+      "name": "LicenseTypeOther__c",
+      "label": "免許種類_そ�E仁E,
+      "type": "string",
+      "custom": true,
+      "length": 255,
+      "picklistValues": []
+    },
+    {
+      "name": "CarModelShape__c",
+      "label": "持込車種形状",
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "ワンボックス",
+        "トラチE��タイチE,
+        "クール",
+        "積載量に制限有車両",
+        "そ�E仁E
+      ]
+    },
+    {
+      "name": "CarModelShapeOther__c",
+      "label": "持込車種形状_そ�E仁E,
+      "type": "string",
+      "custom": true,
+      "length": 255,
+      "picklistValues": []
+    },
+    {
+      "name": "NAVI__c",
+      "label": "NAVI裁E��",
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "裁E��済み",
+        "裁E��予宁E,
+        "裁E��なぁE
+      ]
+    },
+    {
+      "name": "ShippingExperience__c",
+      "label": "運送経騁E,
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "あり",
+        "なぁE
+      ]
+    },
+    {
+      "name": "ShippingExperienceDetails__c",
+      "label": "運送経験_詳細",
+      "type": "string",
+      "custom": true,
+      "length": 255,
+      "picklistValues": []
+    },
+    {
+      "name": "OperatingTime__c",
+      "label": "稼働時閁E,
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "制限なぁE,
+        "制限あめE
+      ]
+    },
+    {
+      "name": "OperatingTimeDetails__c",
+      "label": "稼働時間_詳細",
+      "type": "string",
+      "custom": true,
+      "length": 255,
+      "picklistValues": []
+    },
+    {
+      "name": "EarlyMorningOperation__c",
+      "label": "早朝稼僁E,
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "できる",
+        "できなぁE,
+        "そ�E仁E
+      ]
+    },
+    {
+      "name": "EarlyMorningOperationOther__c",
+      "label": "早朝稼働_そ�E仁E,
+      "type": "string",
+      "custom": true,
+      "length": 255,
+      "picklistValues": []
+    },
+    {
+      "name": "NightOperation__c",
+      "label": "夜間稼僁E,
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "できる",
+        "できなぁE,
+        "そ�E仁E
+      ]
+    },
+    {
+      "name": "NightOperationOther__c",
+      "label": "夜間稼働_そ�E仁E,
+      "type": "string",
+      "custom": true,
+      "length": 255,
+      "picklistValues": []
+    },
+    {
+      "name": "Holidays__c",
+      "label": "日・祝日",
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "できる",
+        "できなぁE,
+        "そ�E仁E
+      ]
+    },
+    {
+      "name": "HolidaysOther__c",
+      "label": "日・祝日_そ�E仁E,
+      "type": "string",
+      "custom": true,
+      "length": 255,
+      "picklistValues": []
+    },
+    {
+      "name": "HolidaySpecification__c",
+      "label": "休日持E��E,
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "なぁE,
+        "あり"
+      ]
+    },
+    {
+      "name": "HolidaySpecificationOther__c",
+      "label": "休日持E��_そ�E仁E,
+      "type": "string",
+      "custom": true,
+      "length": 255,
+      "picklistValues": []
+    },
+    {
+      "name": "Priceperhour__c",
+      "label": "参老E��定価の時間単価�E�定価÷8時間�E�E,
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Xcesscharge__c",
+      "label": "趁E��料�߁E�E�E�）！E9刁E��下�Eり捨て　20刁E��上繰り上げ�E�E,
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Overdistanceover__c",
+      "label": "距離趁E��80km趁E���E�EKMあたり）！E01512と同じ",
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Example9hours__c",
+      "label": "例！E時間�E�E00�E�ｍ�E場合！E,
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Example10hours__c",
+      "label": "例！E0時間�E�E00�E�ｍ�E場合！E,
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "SatSunsub9hoursrestraint__c",
+      "label": "土日サブ！E時間拘束�E�E時間、E0�E�ｍ！E,
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Upto5hoursuptime__c",
+      "label": "稼働時間５時間以冁E��価",
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Premium__c",
+      "label": "割墁E,
+      "type": "percent",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "DriverSituation__c",
+      "label": "案件スチE�Eタス",
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "失注",
+        "案件",
+        "見積り",
+        "申込審査",
+        "売上稟議申諁E,
+        "契紁E空枠",
+        "配車済み",
+        "稼働終亁E
+      ]
+    },
+    {
+      "name": "Time__c",
+      "label": "時間",
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "ExcessCharge__c",
+      "label": "趁E��料�߁E�Ekm�E�E,
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Basicdistance__c",
+      "label": "基準距離",
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Shortterm__c",
+      "label": "長期／短期区刁E,
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "長朁E,
+        "短朁E,
+        "ワクチン案件"
+      ]
+    },
+    {
+      "name": "Days2__c",
+      "label": "日数",
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "週4日未満"
+      ]
+    },
+    {
+      "name": "Time2__c",
+      "label": "時間",
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "早朝（ａE時！E,
+        "深夜！E2時～！E,
+        "ショーチE
+      ]
+    },
+    {
+      "name": "Partner__c",
+      "label": "パ�Eトナー",
+      "type": "reference",
+      "custom": true,
+      "length": 18,
+      "picklistValues": []
+    },
+    {
+      "name": "Delivery__c",
+      "label": "お届け方況E,
+      "type": "multipicklist",
+      "custom": true,
+      "length": 4099,
+      "picklistValues": [
+        "納品�E�有人�E�E,
+        "納品�E�無人�E�E,
+        "置酁E,
+        "鍵納品",
+        "施設冁E��品",
+        "設置絁E��立て",
+        "端末操佁E,
+        "雁E��及�E代引き",
+        "啁E��回収",
+        "容器回収",
+        "受領書回収",
+        "征E��！E刁E��上！E
+      ]
+    },
+    {
+      "name": "Numberlowerlimit__c",
+      "label": "件数�E�下限�E�E,
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "0件�E�E件",
+        "6件�E�E0件",
+        "11件�E�E0件",
+        "21件�E�E0件",
+        "31件�E�E0件",
+        "41件�E�E0件",
+        "51件�E�E0件",
+        "61件�E�E0件",
+        "71件�E�E0件",
+        "81件�E�E0件",
+        "91件�E�E00件",
+        "101件�E�E
+      ]
+    },
+    {
+      "name": "Numberupperlimit__c",
+      "label": "配達件数",
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "0件�E�E件",
+        "6件�E�E0件",
+        "11件�E�E0件",
+        "21件�E�E0件",
+        "31件�E�E0件",
+        "41件�E�E0件",
+        "51件�E�E0件",
+        "61件�E�E0件",
+        "71件�E�E0件",
+        "81件�E�E0件",
+        "91件�E�E00件",
+        "101件�E�E
+      ]
+    },
+    {
+      "name": "Client__c",
+      "label": "顧客",
+      "type": "reference",
+      "custom": true,
+      "length": 18,
+      "picklistValues": []
+    },
+    {
+      "name": "Perproductweightupperlimit__c",
+      "label": "啁E��重量",
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "�E�E0�E�ａE,
+        "�E�E0�E�ａE,
+        "�E�E0�E�ａE,
+        "�E�E0�E�ａE,
+        "�E�E0�E�ａE,
+        "51�E�ａE��E
+      ]
+    },
+    {
+      "name": "Item__c",
+      "label": "メイン�E�サブ区刁E,
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "メイン",
+        "サチE,
+        "スポッチE
+      ]
+    },
+    {
+      "name": "OpputunityClassification__c",
+      "label": "案件区刁E,
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "新要E,
+        "増軁E,
+        "新墁E,
+        "復活",
+        "条件変更",
+        "委託条件変更",
+        "入替",
+        "単価アチE�E",
+        "管琁E��当老E�E予測趁E��変更"
+      ]
+    },
+    {
+      "name": "Billing_Criteria__c",
+      "label": "請求基溁E,
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "日極",
+        "月極"
+      ]
+    },
+    {
+      "name": "Other__c",
+      "label": "そ�E仁E,
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "服裁E��宁E,
+        "準備品E,
+        "年齢制陁E,
+        "性別持E��E,
+        "ユニフォーム貸出",
+        "�E��E��E�貸出",
+        "ETC車載器",
+        "スーチE��用"
+      ]
+    },
+    {
+      "name": "ICEbattery__c",
+      "label": "ICE　バッチE��ー",
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "冷凍庫",
+        "-15",
+        "�E�E
+      ]
+    },
+    {
+      "name": "Unitprice1__c",
+      "label": "単価",
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Unitprice2__c",
+      "label": "単価",
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Unitprice3__c",
+      "label": "単価",
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Unitprice4__c",
+      "label": "単価",
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Unitprice5__c",
+      "label": "単価",
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Unitprice6__c",
+      "label": "単価",
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Unitprice7__c",
+      "label": "単価",
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Unitprice8__c",
+      "label": "単価",
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Unitprice9__c",
+      "label": "単価",
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Unitprice10__c",
+      "label": "単価",
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Unitprice11__c",
+      "label": "単価",
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Excessamount__c",
+      "label": "趁E��金顁E,
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Fixedprice9hoursrestraint__c",
+      "label": "請求単価",
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "OpportunityMakingDay__c",
+      "label": "案件発生日",
+      "type": "date",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Account__c",
+      "label": "取引�E",
+      "type": "reference",
+      "custom": true,
+      "length": 18,
+      "picklistValues": []
+    },
+    {
+      "name": "Deliveryform__c",
+      "label": "配送形慁E,
+      "type": "multipicklist",
+      "custom": true,
+      "length": 4099,
+      "picklistValues": [
+        "ルート�E送E,
+        "得意先�E送E,
+        "雁E��",
+        "宁E�E",
+        "引越し",
+        "宵積み"
+      ]
+    },
+    {
+      "name": "Incidentalwork__c",
+      "label": "付帯業勁E,
+      "type": "multipicklist",
+      "custom": true,
+      "length": 4099,
+      "picklistValues": [
+        "定数納品管琁E,
+        "設置絁E��E,
+        "端末作業",
+        "啁E��回収",
+        "受領書回収",
+        "雁E��",
+        "ピッキング",
+        "仕�EぁE,
+        "検品",
+        "発送E,
+        "入庫作業",
+        "梱匁E��業",
+        "チE�Eタ入劁E,
+        "製品整琁E,
+        "フォークリフト",
+        "調査",
+        "征E��（見張�E�E
+      ]
+    },
+    {
+      "name": "ETCAttached__c",
+      "label": "ETC機器",
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "なぁE,
+        "あり"
+      ]
+    },
+    {
+      "name": "ContractPrice__c",
+      "label": "契紁E��価",
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "BillingCategory__c",
+      "label": "請求区刁E,
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "日極",
+        "月極",
+        "時間",
+        "個建",
+        "そ�E仁E
+      ]
+    },
+    {
+      "name": "SF_ID__c",
+      "label": "案件ID",
+      "type": "string",
+      "custom": true,
+      "length": 1300,
+      "picklistValues": []
+    },
+    {
+      "name": "ReimbursementMethod__c",
+      "label": "立替金渁E��方況E,
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "都度渁E��E,
+        "請求時渁E��E,
+        "なぁE
+      ]
+    },
+    {
+      "name": "WorkingDay__c",
+      "label": "稼働曜日",
+      "type": "multipicklist",
+      "custom": true,
+      "length": 4099,
+      "picklistValues": [
+        "月曜日",
+        "火曜日",
+        "水曜日",
+        "木曜日",
+        "金曜日",
+        "土曜日",
+        "日曜日",
+        "祝日"
+      ]
+    },
+    {
+      "name": "WorkingHour__c",
+      "label": "稼働時閁E,
+      "type": "time",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "BusinessHoursStart__c",
+      "label": "業務時間開姁E,
+      "type": "time",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "BusinessEndTime__c",
+      "label": "業務終亁E��閁E,
+      "type": "time",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "MonthlyWorkingDays__c",
+      "label": "月間稼働日数",
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Mileage__c",
+      "label": "走行距離",
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "OperationStartDate__c",
+      "label": "稼働開始日",
+      "type": "date",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "OperationEndDate__c",
+      "label": "稼働終亁E��",
+      "type": "date",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "PostalCode__c",
+      "label": "郵便番号",
+      "type": "string",
+      "custom": true,
+      "length": 1300,
+      "picklistValues": []
+    },
+    {
+      "name": "Prefectures__c",
+      "label": "都道府県",
+      "type": "string",
+      "custom": true,
+      "length": 1300,
+      "picklistValues": []
+    },
+    {
+      "name": "City__c",
+      "label": "市区町杁E,
+      "type": "string",
+      "custom": true,
+      "length": 1300,
+      "picklistValues": []
+    },
+    {
+      "name": "TownNameAddress__c",
+      "label": "町名�E番地",
+      "type": "string",
+      "custom": true,
+      "length": 1300,
+      "picklistValues": []
+    },
+    {
+      "name": "Overtime_19_20__c",
+      "label": "時間趁E���E�１ｈ）！E9刁E��下�Eり捨て　20刁E��上繰り上げ�E�E,
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "YenDay1__c",
+      "label": "1月（�E/日�E�_予測時間趁E��料��",
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "OverDistanceBillingUnit__c",
+      "label": "距離趁E��請求単位（ｋｍ！E,
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "OverDistanceChargeAmount__c",
+      "label": "距離趁E��請求��額（単位毎！E,
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "DressDesignation__c",
+      "label": "服裁E��宁E,
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "なぁE,
+        "荷主制朁E,
+        "スーチE,
+        "そ�E仁E
+      ]
+    },
+    {
+      "name": "PreparedGoods__c",
+      "label": "準備品E,
+      "type": "string",
+      "custom": true,
+      "length": 255,
+      "picklistValues": []
+    },
+    {
+      "name": "AgeLimit__c",
+      "label": "年齢制陁E,
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "30代以丁E,
+        "40代以丁E,
+        "50代以丁E,
+        "なぁE
+      ]
+    },
+    {
+      "name": "SexDesignation__c",
+      "label": "性別持E��E,
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "なぁE,
+        "女性",
+        "男性"
+      ]
+    },
+    {
+      "name": "PostalCodeFree__c",
+      "label": "郵便番号�E�稼働地�E�E,
+      "type": "string",
+      "custom": true,
+      "length": 255,
+      "picklistValues": []
+    },
+    {
+      "name": "PrefecturesFree__c",
+      "label": "都道府県�E�稼働地�E�E,
+      "type": "string",
+      "custom": true,
+      "length": 255,
+      "picklistValues": []
+    },
+    {
+      "name": "CityFree__c",
+      "label": "市区町村（稼働地�E�E,
+      "type": "string",
+      "custom": true,
+      "length": 255,
+      "picklistValues": []
+    },
+    {
+      "name": "StreetBunch__c",
+      "label": "町名�E番地�E�稼働地�E�E,
+      "type": "string",
+      "custom": true,
+      "length": 255,
+      "picklistValues": []
+    },
+    {
+      "name": "PaymentMonth__c",
+      "label": "支払月",
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "翌月",
+        "翌、E��",
+        "当月"
+      ]
+    },
+    {
+      "name": "PaymentDate__c",
+      "label": "支払日",
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "1日",
+        "5日",
+        "10日",
+        "15日",
+        "20日",
+        "25日",
+        "末日"
+      ]
+    },
+    {
+      "name": "Handlingproduct__c",
+      "label": "取扱ぁE��品E,
+      "type": "string",
+      "custom": true,
+      "length": 255,
+      "picklistValues": []
+    },
+    {
+      "name": "Vehicle__c",
+      "label": "車両",
+      "type": "multipicklist",
+      "custom": true,
+      "length": 4099,
+      "picklistValues": [
+        "4�E�ゲート付き",
+        "冷蔵",
+        "冷凁E,
+        "軽",
+        "軽バン",
+        "軽幁E,
+        "軽幁E.1持E��E,
+        "軽幁E.3持E��E,
+        "軽幁E.5持E��E,
+        "軽改造幌指宁E,
+        "�E�ａE,
+        "�E�ａE,
+        "�E�ｔ平",
+        "�E�ｔ平",
+        "�E�ｔゲート軁E,
+        "�E�ｔゲート軁E,
+        "そ�E他大垁E
+      ]
+    },
+    {
+      "name": "PaymentSite__c",
+      "label": "支払いサイチE,
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "15",
+        "16",
+        "17",
+        "18",
+        "19",
+        "20",
+        "21",
+        "22",
+        "23",
+        "24",
+        "25",
+        "26",
+        "27",
+        "28",
+        "29",
+        "30",
+        "31",
+        "32",
+        "33",
+        "34",
+        "35",
+        "36",
+        "37",
+        "38",
+        "39",
+        "40",
+        "41",
+        "42",
+        "43",
+        "44",
+        "45",
+        "46",
+        "47",
+        "48",
+        "49",
+        "50",
+        "51",
+        "52",
+        "53",
+        "54",
+        "55",
+        "56",
+        "57",
+        "58",
+        "59",
+        "60",
+        "61",
+        "62",
+        "63",
+        "64",
+        "65",
+        "66",
+        "67",
+        "68",
+        "69",
+        "70",
+        "71",
+        "72",
+        "73",
+        "74",
+        "75",
+        "76",
+        "77",
+        "78",
+        "79",
+        "80",
+        "81",
+        "82",
+        "83",
+        "84",
+        "85",
+        "86",
+        "87",
+        "88",
+        "89",
+        "90",
+        "91",
+        "92",
+        "93",
+        "94",
+        "95",
+        "96",
+        "97",
+        "98",
+        "99",
+        "100",
+        "101",
+        "102",
+        "103",
+        "104",
+        "105",
+        "106",
+        "107",
+        "108",
+        "109",
+        "110",
+        "111",
+        "112",
+        "113",
+        "114",
+        "115",
+        "116",
+        "117",
+        "118",
+        "119",
+        "120",
+        "121",
+        "122",
+        "123",
+        "124",
+        "125",
+        "126",
+        "127",
+        "128",
+        "129",
+        "130",
+        "131",
+        "132",
+        "133",
+        "134",
+        "135",
+        "136",
+        "137",
+        "138",
+        "139",
+        "140",
+        "141",
+        "142",
+        "143",
+        "144",
+        "145",
+        "146",
+        "147",
+        "148",
+        "149",
+        "150",
+        "151",
+        "152",
+        "153",
+        "154",
+        "155",
+        "156",
+        "157",
+        "158",
+        "159",
+        "160",
+        "161",
+        "162",
+        "163",
+        "164",
+        "165",
+        "166",
+        "167",
+        "168",
+        "169",
+        "170",
+        "171",
+        "172",
+        "173",
+        "174",
+        "175",
+        "176",
+        "177",
+        "178",
+        "179",
+        "180"
+      ]
+    },
+    {
+      "name": "DeliveryArea__c",
+      "label": "配送エリア",
+      "type": "string",
+      "custom": true,
+      "length": 255,
+      "picklistValues": []
+    },
+    {
+      "name": "CollectionService__c",
+      "label": "雁E��業勁E,
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "なぁE,
+        "あり"
+      ]
+    },
+    {
+      "name": "BillingDeadline__c",
+      "label": "請求締日",
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "5日",
+        "10日",
+        "15日",
+        "20日",
+        "25日",
+        "末日",
+        "そ�E仁E
+      ]
+    },
+    {
+      "name": "HourlyPriceOver__c",
+      "label": "時間単価�E�趁E���E�E,
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "BillingUnitOver__c",
+      "label": "請求単位（趁E���E�E,
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "5刁E,
+        "10刁E,
+        "15刁E,
+        "20刁E,
+        "25刁E,
+        "30刁E,
+        "60刁E,
+        "そ�E仁E
+      ]
+    },
+    {
+      "name": "FeedingConditionOver__c",
+      "label": "繰上条件�E�趁E���E�E,
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "1刁E,
+        "5刁E,
+        "8刁E,
+        "10刁E,
+        "15刁E,
+        "20刁E,
+        "25刁E,
+        "30刁E,
+        "そ�E仁E
+      ]
+    },
+    {
+      "name": "Expectation_of_Multiple_Case__c",
+      "label": "褁E��枠期征E,
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "あり"
+      ]
+    },
+    {
+      "name": "OtherExcessChargeEntryColumn__c",
+      "label": "そ�E他趁E��料��惁E��",
+      "type": "textarea",
+      "custom": true,
+      "length": 255,
+      "picklistValues": []
+    },
+    {
+      "name": "DistanceExcessJudgment__c",
+      "label": "趁E��単位（距離�E�E,
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "1㎁E,
+        "5㎁E,
+        "10㎁E,
+        "そ�E仁E
+      ]
+    },
+    {
+      "name": "ConsignmentPrice__c",
+      "label": "委託単価",
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Waku_Point_Sub1_seisuu__c",
+      "label": "枠ポイント（サブ＝１）終亁E,
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "OverDistancePrice__c",
+      "label": "趁E��距離単価",
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "OtherExcessInformation__c",
+      "label": "そ�E他趁E��惁E��②",
+      "type": "textarea",
+      "custom": true,
+      "length": 255,
+      "picklistValues": []
+    },
+    {
+      "name": "OperationStartTime__c",
+      "label": "稼働開始時閁E,
+      "type": "time",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "OperationEndTime__c",
+      "label": "稼働終亁E��閁E,
+      "type": "time",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "YenDay2__c",
+      "label": "2月（�E/日�E�_予測時間趁E��料��",
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "YenDay3__c",
+      "label": "3月（�E/日�E�_予測時間趁E��料��",
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "YenDay4__c",
+      "label": "4月（�E/日�E�_予測時間趁E��料��",
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "MaximumCargWeight__c",
+      "label": "最大貨物重量(1個あたり�E�E,
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "DeliveryPriceperDelivery__c",
+      "label": "一配送当たり�E配送価顁E500丁E��で�E�E,
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "NumberDeliveryDayAve__c",
+      "label": "配送件数/日(平坁E��E,
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "DeliveryDistanceDayAve__c",
+      "label": "配送距離/日(平坁E��E,
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "TemperatureZone__c",
+      "label": "温度帯",
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "常温",
+        "冷蔵",
+        "冷凁E,
+        "そ�E仁E,
+        "なぁE
+      ]
+    },
+    {
+      "name": "CollectionAmountDay__c",
+      "label": "雁E��金顁E日",
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "ShippingHours__c",
+      "label": "運送業務時閁E,
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "WorkHours__c",
+      "label": "作業業務時閁E,
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "ShippingBusinessMemo__c",
+      "label": "運送業務�E容",
+      "type": "textarea",
+      "custom": true,
+      "length": 2000,
+      "picklistValues": []
+    },
+    {
+      "name": "YenDay5__c",
+      "label": "5月（�E/日�E�_予測時間趁E��料��",
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "DeliveryMethod__c",
+      "label": "納品方況E,
+      "type": "multipicklist",
+      "custom": true,
+      "length": 4099,
+      "picklistValues": [
+        "置酁E,
+        "鍵納品",
+        "施設冁E��品",
+        "宵積み"
+      ]
+    },
+    {
+      "name": "BusinessDivision__c",
+      "label": "業務区刁E,
+      "type": "multipicklist",
+      "custom": true,
+      "length": 4099,
+      "picklistValues": [
+        "ルート�E送E,
+        "得意先�E送E,
+        "雁E��",
+        "宁E�E",
+        "引趁E,
+        "宵穁E,
+        "作業のみ",
+        "そ�E仁E
+      ]
+    },
+    {
+      "name": "AvailableModel__c",
+      "label": "使用可能車種",
+      "type": "multipicklist",
+      "custom": true,
+      "length": 4099,
+      "picklistValues": [
+        "軽",
+        "1トン",
+        "2トン",
+        "4トン�E�E,
+        "バイク",
+        "自転軁E,
+        "ハンドキャリー",
+        "作業員のみ"
+      ]
+    },
+    {
+      "name": "VehicleTypeClassification__c",
+      "label": "車種区刁E,
+      "type": "multipicklist",
+      "custom": true,
+      "length": 4099,
+      "picklistValues": [
+        "幌軁E,
+        "バン",
+        "冷蔵軁E,
+        "冷凍軁E,
+        "平ボデイ",
+        "ユニック",
+        "箱軁E,
+        "アイスバッチE���E�E,
+        "バイク",
+        "自転軁E
+      ]
+    },
+    {
+      "name": "Withdrawal__c",
+      "label": "立替有無",
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "なぁE,
+        "あり"
+      ]
+    },
+    {
+      "name": "ReceiptBusiness__c",
+      "label": "入庫業勁E,
+      "type": "textarea",
+      "custom": true,
+      "length": 255,
+      "picklistValues": []
+    },
+    {
+      "name": "OutgoingBusiness__c",
+      "label": "出庫業勁E,
+      "type": "textarea",
+      "custom": true,
+      "length": 255,
+      "picklistValues": []
+    },
+    {
+      "name": "InventoryManagementWork__c",
+      "label": "在庫管琁E��勁E,
+      "type": "textarea",
+      "custom": true,
+      "length": 255,
+      "picklistValues": []
+    },
+    {
+      "name": "OtherDuties__c",
+      "label": "そ�E他業勁E,
+      "type": "textarea",
+      "custom": true,
+      "length": 255,
+      "picklistValues": []
+    },
+    {
+      "name": "OtherComment__c",
+      "label": "そ�E他記�E欁E,
+      "type": "textarea",
+      "custom": true,
+      "length": 255,
+      "picklistValues": []
+    },
+    {
+      "name": "PersoninCharge__c",
+      "label": "契紁E��当老E,
+      "type": "reference",
+      "custom": true,
+      "length": 18,
+      "picklistValues": []
+    },
+    {
+      "name": "FreightContent__c",
+      "label": "貨物冁E��",
+      "type": "textarea",
+      "custom": true,
+      "length": 255,
+      "picklistValues": []
+    },
+    {
+      "name": "Phase__c",
+      "label": "フェーズ�E�不要E��E,
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "失注",
+        "案件",
+        "見積り",
+        "申込審査",
+        "契紁E空枠",
+        "配車済み",
+        "稼働終亁E
+      ]
+    },
+    {
+      "name": "YenDay6__c",
+      "label": "6月（�E/日�E�_予測時間趁E��料��",
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "YenDay7__c",
+      "label": "7月（�E/日�E�_予測時間趁E��料��",
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "YenDay8__c",
+      "label": "8月（�E/日�E�_予測時間趁E��料��",
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "YenDay9__c",
+      "label": "9月（�E/日�E�_予測時間趁E��料��",
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "YenDay10__c",
+      "label": "10月（�E/日�E�_予測時間趁E��料��",
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "YenDay11__c",
+      "label": "11月（�E/日�E�_予測時間趁E��料��",
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "YenDay12__c",
+      "label": "12月（�E/日�E�_予測時間趁E��料��",
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Distance1__c",
+      "label": "1月（�E/日�E�E,
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Distance2__c",
+      "label": "2月（�E/日�E�E,
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Distance3__c",
+      "label": "3月（�E/日�E�E,
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Distance4__c",
+      "label": "4月（�E/日�E�E,
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Distance5__c",
+      "label": "5月（�E/日�E�E,
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Distance6__c",
+      "label": "6月（�E/日�E�E,
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Distance7__c",
+      "label": "7月（�E/日�E�E,
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Distance8__c",
+      "label": "8月（�E/日�E�E,
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Distance9__c",
+      "label": "9月（�E/日�E�E,
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Distance10__c",
+      "label": "10月（�E/日�E�E,
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Distance11__c",
+      "label": "11月（�E/日�E�E,
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Distance12__c",
+      "label": "12月（�E/日�E�E,
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "OtherExcessInformations__c",
+      "label": "そ�E他趁E��惁E��",
+      "type": "textarea",
+      "custom": true,
+      "length": 32768,
+      "picklistValues": []
+    },
+    {
+      "name": "BillingCategorys__c",
+      "label": "委託区刁E,
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "日極",
+        "月極",
+        "時間",
+        "個建",
+        "そ�E仁E
+      ]
+    },
+    {
+      "name": "CommissionFeeRate__c",
+      "label": "委託料玁E,
+      "type": "percent",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Overtime1__c",
+      "label": "1月（�E/日�E�_予測趁E��時間単価/朁E,
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "OveTime2__c",
+      "label": "2月（�E/日�E�_予測趁E��時間単価/朁E,
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "OveTime3__c",
+      "label": "3月（�E/日�E�_予測趁E��時間単価/朁E,
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "OveTime4__c",
+      "label": "4月（�E/日�E�_予測趁E��時間単価/朁E,
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "OveTime5__c",
+      "label": "5月（�E/日�E�_予測趁E��時間単価/朁E,
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "OveTime6__c",
+      "label": "6月（�E/日�E�_予測趁E��時間単価/朁E,
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "OveTime7__c",
+      "label": "7月（�E/日�E�_予測趁E��時間単価/朁E,
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "OveTime8__c",
+      "label": "8月（�E/日�E�_予測趁E��時間単価/朁E,
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "OveTime9__c",
+      "label": "9月（�E/日�E�_予測趁E��時間単価/朁E,
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "OveTime10__c",
+      "label": "10月（�E/日�E�_予測趁E��時間単価/朁E,
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "OveTime11__c",
+      "label": "11月（�E/日�E�_予測趁E��時間単価/朁E,
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "OveTime12__c",
+      "label": "12月（�E/日�E�_予測趁E��時間単価/朁E,
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "OverDistance1__c",
+      "label": "1月（�E/日�E�_予測趁E��距離単価",
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "OverDistance2__c",
+      "label": "2月（�E/日�E�_予測趁E��距離単価",
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "OverDistance3__c",
+      "label": "3月（�E/日�E�_予測趁E��距離単価",
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "OverDistance4__c",
+      "label": "4月（�E/日�E�_予測趁E��距離単価",
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "OverDistance5__c",
+      "label": "5月（�E/日�E�_予測趁E��距離単価",
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "OverDistance6__c",
+      "label": "6月（�E/日�E�_予測趁E��距離単価",
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "OverDistance7__c",
+      "label": "7月（�E/日�E�_予測趁E��距離単価",
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "OverDistance8__c",
+      "label": "8月（�E/日�E�_予測趁E��距離単価",
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "OverDistance9__c",
+      "label": "9月（�E/日�E�_予測趁E��距離単価",
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "OverDistance10__c",
+      "label": "10月（�E/日�E�_予測趁E��距離単価",
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "OverDistance11__c",
+      "label": "11月（�E/日�E�_予測趁E��距離単価",
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "OverDistance12__c",
+      "label": "12月（�E/日�E�_予測趁E��距離単価",
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Contract_History__c",
+      "label": "契紁E��由",
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "社員の負荷軽渁E,
+        "配送費など経費のコスDOWN",
+        "業務効率UP",
+        "業務�E拡大",
+        "絁E���E活性匁E,
+        "人員不足の解涁E
+      ]
+    },
+    {
+      "name": "Other_contract_history__c",
+      "label": "契紁E��でのエピソーチE,
+      "type": "textarea",
+      "custom": true,
+      "length": 255,
+      "picklistValues": []
+    },
+    {
+      "name": "PlannedWorkingDays__c",
+      "label": "予定稼働日数�E�案件�E�E,
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "MainBusinessContents__c",
+      "label": "主たる事業冁E��",
+      "type": "string",
+      "custom": true,
+      "length": 255,
+      "picklistValues": []
+    },
+    {
+      "name": "Accuracy__c",
+      "label": "確度�E�契紁E��E,
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "A:競合なし�E回答征E��",
+        "B:競合あり�E回答征E��",
+        "C:検討中",
+        "D:取引見込みあり",
+        "E:取引見込みなぁE
+      ]
+    },
+    {
+      "name": "Phone__c",
+      "label": "電話",
+      "type": "string",
+      "custom": true,
+      "length": 255,
+      "picklistValues": []
+    },
+    {
+      "name": "FAX__c",
+      "label": "FAX",
+      "type": "string",
+      "custom": true,
+      "length": 255,
+      "picklistValues": []
+    },
+    {
+      "name": "RepresentativesName__c",
+      "label": "代表老E��",
+      "type": "string",
+      "custom": true,
+      "length": 255,
+      "picklistValues": []
+    },
+    {
+      "name": "RepresentativesBirthday__c",
+      "label": "代表老E��生年月日",
+      "type": "string",
+      "custom": true,
+      "length": 255,
+      "picklistValues": []
+    },
+    {
+      "name": "Payment40DaysSite__c",
+      "label": "支払い40日サイチE,
+      "type": "date",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "SalesOver2MillionMonth__c",
+      "label": "売丁E00丁E月以丁E,
+      "type": "date",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "PostalCodeHeadOffice__c",
+      "label": "郵便番号",
+      "type": "string",
+      "custom": true,
+      "length": 255,
+      "picklistValues": []
+    },
+    {
+      "name": "PrefecturesHeadOffice__c",
+      "label": "都道府県",
+      "type": "string",
+      "custom": true,
+      "length": 255,
+      "picklistValues": []
+    },
+    {
+      "name": "CityHeadOffice__c",
+      "label": "市区町杁E,
+      "type": "string",
+      "custom": true,
+      "length": 255,
+      "picklistValues": []
+    },
+    {
+      "name": "StreetBunchHeadOffice__c",
+      "label": "町名�E番地",
+      "type": "string",
+      "custom": true,
+      "length": 255,
+      "picklistValues": []
+    },
+    {
+      "name": "PlannedStartDate__c",
+      "label": "稼働開始予定日",
+      "type": "date",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "PlannedEndDate__c",
+      "label": "稼働終亁E��定日",
+      "type": "date",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Anticompanycheckdate__c",
+      "label": "反社チェチE��日晁E,
+      "type": "datetime",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "MoreThan__c",
+      "label": "雁E��10丁E日以丁E,
+      "type": "date",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "SalesUnder5MillionYear__c",
+      "label": "売丁E00丁E年未満",
+      "type": "date",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Sales5MillionYearMore__c",
+      "label": "売丁E00丁E年以丁E,
+      "type": "date",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "SalesOver10MillionYear__c",
+      "label": "売丁E,000丁E年以丁E,
+      "type": "date",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Administrator__c",
+      "label": "管琁E��当老E,
+      "type": "reference",
+      "custom": true,
+      "length": 18,
+      "picklistValues": []
+    },
+    {
+      "name": "Group__c",
+      "label": "グルーチE,
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "北海遁E,
+        "東匁E,
+        "北関東・新潁E,
+        "埼玁E,
+        "十E��",
+        "東京",
+        "神奈巁E,
+        "北陸・長釁E,
+        "東海",
+        "京滋奁E,
+        "大阪・和歌山",
+        "関西営業",
+        "兵庫",
+        "中国",
+        "四国",
+        "九巁E,
+        "宁E�E事業推進部",
+        "営業開発部",
+        "エクスプレス営業部",
+        "都市型サポ�EチE,
+        "関西オペレーション",
+        "都市型開発",
+        "コントロール部",
+        "関西コントロールGr",
+        "東海コントロールGr",
+        "チE��カGr",
+        "カスタマ�Eサービス�E�E��ライシング",
+        "カスタマ�Eサービス",
+        "セールス�E�E��際宁E�E",
+        "国際営業支援部",
+        "開発プロジェクト推進",
+        "通関事業Gr",
+        "開発Gr",
+        "管琁E��",
+        "チE��タル戦略部",
+        "IS・カスタマ�Eサービス部",
+        "教育Gr",
+        "総務部",
+        "業務部",
+        "経理部",
+        "東日本Gr",
+        "西日本Gr",
+        "庁E��営業Gr"
+      ]
+    },
+    {
+      "name": "Department__c",
+      "label": "部",
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "北海遁E,
+        "東北�E北関東",
+        "首�E圁E,
+        "中部",
+        "関西",
+        "中四国",
+        "九巁E,
+        "東日本",
+        "西日本",
+        "営業開発事業本部",
+        "エクスプレス事業本部",
+        "国隁E,
+        "開発部",
+        "営業管琁E��",
+        "管琁E��部",
+        "社長室",
+        "人材派遣事業部",
+        "都市型開発",
+        "営業DX本部",
+        "SOWG"
+      ]
+    },
+    {
+      "name": "ID__c",
+      "label": "取引�EID�E�裏頁E���E�E,
+      "type": "string",
+      "custom": true,
+      "length": 255,
+      "picklistValues": []
+    },
+    {
+      "name": "Branch__c",
+      "label": "支庁E,
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "札幌支庁E,
+        "函館支庁E,
+        "旭川支庁E,
+        "秋田支庁E,
+        "盛岡支庁E,
+        "仙台支庁E,
+        "郡山支庁E,
+        "長野支庁E,
+        "松本支庁E,
+        "新潟支庁E,
+        "前橋支庁E,
+        "宁E�E宮支庁E,
+        "大宮支庁E,
+        "草加支庁E,
+        "茨城支庁E,
+        "市川支庁E,
+        "十E��支庁E,
+        "柏支庁E,
+        "横浜支庁E,
+        "厚木支庁E,
+        "町田支庁E,
+        "金沢支庁E,
+        "富山支庁E,
+        "名古屋支庁E,
+        "岡崎支庁E,
+        "静岡支庁E,
+        "浜松支庁E,
+        "四日市支庁E,
+        "小牧支庁E,
+        "豊橋支庁E,
+        "京都支庁E,
+        "奈良支庁E,
+        "大阪支庁E,
+        "堺支庁E,
+        "姫路支庁E,
+        "神戸支庁E,
+        "尼崎支庁E,
+        "岡山支庁E,
+        "庁E��支庁E,
+        "松山支庁E,
+        "高松支庁E,
+        "福岡支庁E,
+        "熊本支庁E,
+        "鹿児島支庁E,
+        "沖縁E��庁E,
+        "東京北支庁E,
+        "東京東支庁E,
+        "東京西支庁E,
+        "契紁E��支庁E,
+        "都市型営業チ�Eム",
+        "チE��カチ�Eム",
+        "リコーチ�Eム",
+        "関西OP支庁E,
+        "フライシングチ�Eム",
+        "第�E�CSチ�Eム",
+        "第2CSチ�Eム",
+        "第3CSチ�Eム",
+        "第4CSチ�Eム",
+        "セールスチ�Eム",
+        "国際宁E�Eチ�Eム",
+        "事業開発",
+        "あゆみ野支庁E,
+        "大阪ベイサイド支庁E,
+        "本社�E��E市型開発�E�E,
+        "杉並チE�E",
+        "関西オペレーション支庁E,
+        "東京南デチE,
+        "東京南支庁E,
+        "成田空港営業所",
+        "羽田空港営業所",
+        "関西空港営業所",
+        "湾岸支庁E,
+        "麻币E��庁E,
+        "大阪長柁E��流センター",
+        "江東物流センター",
+        "川崎物流センター",
+        "大田物流センター",
+        "新砂物流センター",
+        "本社",
+        "メチE��カル推進室",
+        "津支庁E
+      ]
+    },
+    {
+      "name": "ID2__c",
+      "label": "顧客/パ�EトナーID",
+      "type": "string",
+      "custom": true,
+      "length": 255,
+      "picklistValues": []
+    },
+    {
+      "name": "pref_list__c",
+      "label": "展開地埁E,
+      "type": "multipicklist",
+      "custom": true,
+      "length": 4099,
+      "picklistValues": [
+        "北海遁E,
+        "青森省E,
+        "岩手県",
+        "宮城県",
+        "秋田省E,
+        "山形省E,
+        "福島省E,
+        "茨城県",
+        "栁E��省E,
+        "群馬省E,
+        "埼玉県",
+        "十E��省E,
+        "東京都",
+        "神奈川県",
+        "新潟県",
+        "富山省E,
+        "石川県",
+        "福井県",
+        "山梨省E,
+        "長野県",
+        "岐�E省E,
+        "静岡省E,
+        "愛知省E,
+        "三重省E,
+        "滋賀省E,
+        "京都庁E,
+        "大阪庁E,
+        "兵庫省E,
+        "奈良省E,
+        "和歌山省E,
+        "鳥取県",
+        "島根省E,
+        "岡山省E,
+        "庁E��省E,
+        "山口省E,
+        "徳島省E,
+        "香川県",
+        "愛媛県",
+        "高知省E,
+        "福岡省E,
+        "佐賀省E,
+        "長崎県",
+        "熊本省E,
+        "大刁E��",
+        "宮崎県",
+        "鹿児島省E,
+        "沖縁E��"
+      ]
+    },
+    {
+      "name": "ObjID__c",
+      "label": "マニュアルNo.",
+      "type": "string",
+      "custom": true,
+      "length": 255,
+      "picklistValues": []
+    },
+    {
+      "name": "DistanceExceedsReqInfor__c",
+      "label": "趁E��請求情報メモ",
+      "type": "string",
+      "custom": true,
+      "length": 255,
+      "picklistValues": []
+    },
+    {
+      "name": "DistanceUnitOver__c",
+      "label": "趁E��単価�E�距離�E�E,
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Zenkoku_tenkai__c",
+      "label": "全国展開期征E,
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "あり"
+      ]
+    },
+    {
+      "name": "Next_Case__c",
+      "label": "次の稼働�E�E�カバ�E枠�E�要否",
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "忁E��E,
+        "不要E
+      ]
+    },
+    {
+      "name": "End_reason__c",
+      "label": "稼働終亁E��刁E,
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "枠刁E,
+        "入替",
+        "支援→持込刁E��",
+        "条件変更",
+        "管琁E��当老E�E予測趁E��変更"
+      ]
+    },
+    {
+      "name": "End_reason_dai__c",
+      "label": "稼働終亁E��由�E�大区刁E��E,
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "【枠刁E��荷主事由",
+        "【枠刁E��当社事由",
+        "【枠刁E��稼働老E��連事由",
+        "【枠刁E��コロナ影響",
+        "【�E替】荷主希望",
+        "【�E替】パートナー希望",
+        "【�E替】当社希望",
+        "【条件変更】契紁E��件",
+        "【条件変更】委託条件",
+        "【条件変更】契紁E��よ�E委託条件",
+        "【その他、E
+      ]
+    },
+    {
+      "name": "End_reason_chu__c",
+      "label": "稼働終亁E��由�E�中区刁E��E,
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "【荷主】繁忙期終亁E��また�E季節枠契紁E�E終亁E,
+        "【荷主】荷主社冁E��の人事異動による人員余剰、又はドライバ�Eを採用",
+        "【荷主】料金面から社冁E�E送に刁E��替ぁE,
+        "【荷主】荷主の事業縮小、また�E配送する物量�E減封E,
+        "【荷主】定期皁E��配送が忁E��でなくなっぁE,
+        "【荷主】料金による他社刁E���E�当社のほぁE��料��が高い。獲られた相手を右枠に�E�E,
+        "【荷主】サービス冁E��による他社刁E��(同一料��だが他社のほぁE��サービスが優れてぁE��、を含む)",
+        "【荷主】会社倒産・事業所閉鎖・未収（�E恐れ�E�E,
+        "【荷主】稼働老E��の不満が�E発して枠刁E���E�詳細忁E��E��E,
+        "【荷主】上記以外�E荷主事情による他社刁E���E�詳細忁E��E��E,
+        "【当社】当社への不満が大きく枠刁E���E�詳細忁E��E��E,
+        "【当社】当�Eの説明とサービス冁E��に相違（詳細忁E��E��E,
+        "【当社】単価アチE�E交渉に失敗し当社から契紁E��亁E��し�E�E�詳細忁E��E��E,
+        "【当社】契紁E�E容と仕事�E容の相違（詳細忁E��E��E,
+        "【当社】コンプラ上�E問題（詳細忁E��E��E,
+        "【当社】荷主からの入替要請に応えられず枠刁E��・稼働停止�E�詳細忁E��E��E,
+        "【当社】その他当社事情により契紁E��亁E��当社から契紁E��亁E��申し�Eれるケース。）（詳細忁E��E��E,
+        "【稼働老E��突然の離脱により枠刁E��・稼働停止�E�詳細忁E��E��E,
+        "【稼働老E��重鎮パ�Eトナーの離脱�E��E替要請なし）がきっかけとなり枠刁E��・稼働停止",
+        "【稼働老E��傷痁E��きっかけとなり枠刁E��・稼働停止",
+        "【�E替】荷主と稼働老E�E関係悪匁E,
+        "【�E替】稼働老E�E技量不足",
+        "【�E替】長ぁE��離を走りたくなぁE,
+        "【�E替】宁E�EがイヤだっぁE,
+        "【�E替】早朝�E深夜稼働がイヤ",
+        "【�E替】稼働日が安定しなぁE,
+        "【�E替】�E送する地域がイヤ",
+        "【�E替】�E達�Eが多くてイヤ",
+        "【�E替】付帯作業が多くてイヤ",
+        "【�E替】荷物が重くてイヤ",
+        "【�E替】もっと稼ぎたぁE��めE,
+        "【�E替】他社紹介�E仕事をするから",
+        "【�E替】�E己稼働で別の荷主の仕事をするから",
+        "【�E替】他社に就職してドライバ�E社員になるかめE,
+        "【�E替】高齢のため引退したかっぁE,
+        "【�E替】運送ではなぁE��仕事をめE��たくなっぁE,
+        "【�E替】この稼働老E��他�E枠めE���E仕事で使ぁE��ぁE,
+        "【�E替】荷主クレーム",
+        "【�E替】病気�Eケガ・体調不良",
+        "【�E替】家族�E介護",
+        "【�E替】稼働老E�E家庭事情又�E業老E�E部の事情",
+        "【�E替】D職および営業職からの入替",
+        "【条件変更】収益構造マイナスインパクチE,
+        "【条件変更】収益構造プラスインパクチE,
+        "【条件変更】収益構造変更なぁE,
+        "【その他】詳細に明記してください�E�E,
+        "【条件変更�E�コロナ影響�E�】時間短縮",
+        "【条件変更�E�コロナ影響�E�】日数減封E,
+        "【条件変更�E�コロナ影響�E�】時間短縮�E�日数減封E,
+        "【条件変更�E�コロナ影響�E�】物量減封E
+      ]
+    },
+    {
+      "name": "End_reason_detail__c",
+      "label": "稼働終亁E��由�E�詳細�E�E,
+      "type": "textarea",
+      "custom": true,
+      "length": 32768,
+      "picklistValues": []
+    },
+    {
+      "name": "Change_Signs__c",
+      "label": "入替の允E��を感じたか",
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "はぁE,
+        "ぁE��ぁE
+      ]
+    },
+    {
+      "name": "Change_Signs_detail__c",
+      "label": "どの様な允E��だったか",
+      "type": "textarea",
+      "custom": true,
+      "length": 32768,
+      "picklistValues": []
+    },
+    {
+      "name": "Change_Signs_Act__c",
+      "label": "允E��に対して手を打ったか",
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "はぁE,
+        "ぁE��ぁE
+      ]
+    },
+    {
+      "name": "End_after__c",
+      "label": "稼働終亁E���E今後�E",
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "ウェイチE,
+        "離脱",
+        "休業",
+        "すぐ他�E枠に配軁E
+      ]
+    },
+    {
+      "name": "IndustryMain__c",
+      "label": "産業刁E��（大�E�E,
+      "type": "string",
+      "custom": true,
+      "length": 1300,
+      "picklistValues": []
+    },
+    {
+      "name": "Anken_Status_Point__c",
+      "label": "案件スチE�EタスポインチE,
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Partner_Keiyaku_type__c",
+      "label": "パ�Eトナー契紁E��別�E�現時点�E�E,
+      "type": "string",
+      "custom": true,
+      "length": 1300,
+      "picklistValues": []
+    },
+    {
+      "name": "Brand_New_Check__c",
+      "label": "純新規チェチE��",
+      "type": "boolean",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Honbu_Biko__c",
+      "label": "本部備老E,
+      "type": "textarea",
+      "custom": true,
+      "length": 255,
+      "picklistValues": []
+    },
+    {
+      "name": "Keiyaku_keiro__c",
+      "label": "契紁E��路",
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "チE��アポから�E力開拁E,
+        "休眠顧客の復活",
+        "既存客の増軁E,
+        "毎年依頼のある定期モチE,
+        "社冁E��ら�E紹仁E,
+        "顧客・外部からの紹仁E
+      ]
+    },
+    {
+      "name": "Kado_Syuuryou_Point__c",
+      "label": "稼働終亁E��刁E�EインチE,
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Anken_Kubun_Point__c",
+      "label": "案件区刁E�EインチE,
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "MainSub_Kubun_Point__c",
+      "label": "メイン�E�サブ区刁E�EインチE,
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Waku_Point_Sub1__c",
+      "label": "枠ポイント（サブ＝１！E,
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Waku_Point_SubGenzan__c",
+      "label": "枠ポイント（サブ減算！E,
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Reference_Date__c",
+      "label": "基準日",
+      "type": "date",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Zou_Gen_Kubun__c",
+      "label": "増減区刁E,
+      "type": "string",
+      "custom": true,
+      "length": 1300,
+      "picklistValues": []
+    },
+    {
+      "name": "Getsunai_Syuryo_Kubun__c",
+      "label": "月�E終亁E��刁E,
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "TankaUP_Kousyou_FLG__c",
+      "label": "単価アチE�E交渉フラグ",
+      "type": "boolean",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Tanka_Up_kousyou_kaisi__c",
+      "label": "単価アチE�E交渉（開始日�E�未使用",
+      "type": "date",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Tanka_Up_kousyou_End__c",
+      "label": "単価アチE�E交渉（終亁E���E�未使用",
+      "type": "date",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Tanka_UP_kousyou_kekka__c",
+      "label": "単価アチE�E交渉状況E��未使用�E�E,
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "交渉中",
+        "成功",
+        "失敁E
+      ]
+    },
+    {
+      "name": "OpputunitiesOfCopySource__c",
+      "label": "案件(コピ�E允E��E,
+      "type": "reference",
+      "custom": true,
+      "length": 18,
+      "picklistValues": []
+    },
+    {
+      "name": "Tanka_Up_kousyou_text__c",
+      "label": "単価アチE�E交渉（コメント！E,
+      "type": "textarea",
+      "custom": true,
+      "length": 1000,
+      "picklistValues": []
+    },
+    {
+      "name": "AlreadyDispatched__c",
+      "label": "配車済み",
+      "type": "boolean",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "AutoUpdate__c",
+      "label": "自動更新",
+      "type": "boolean",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "CancelDate__c",
+      "label": "売上停止日",
+      "type": "date",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "CaseENdTIME__c",
+      "label": "案件終亁E��晁E,
+      "type": "datetime",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "DeliveryItemsPerDay__c",
+      "label": "配送個数/日(平坁E��　�E�不要E��E,
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "OpputunityCancel__c",
+      "label": "売上停止",
+      "type": "boolean",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "OverDistancePartner__c",
+      "label": "パ�Eトナー距離趁E��料��",
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "OverDistanceShipper__c",
+      "label": "荷主距離趁E��料��",
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "OverTimePartner__c",
+      "label": "パ�Eトナー時間趁E��料��",
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "OverTimeShipper__c",
+      "label": "荷主時間趁E��料��",
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "SendBackCheck__c",
+      "label": "差し戻しチェチE��",
+      "type": "boolean",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "gyoumubu_saisyu_date__c",
+      "label": "業務部最終確認日晁E,
+      "type": "datetime",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "kijungai_gekkan_uri__c",
+      "label": "基準外（月間売上！E,
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "月間200丁E�E未満",
+        "月間200丁E�E以丁E
+      ]
+    },
+    {
+      "name": "kijungai_saito__c",
+      "label": "基準外（�E金サイト！E,
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "40日以冁E,
+        "40日趁E
+      ]
+    },
+    {
+      "name": "kijungai_syuukin__c",
+      "label": "基準外（集釁E0丁E��E��E,
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "1日当ためE0丁E�E以丁E,
+        "1日当ためE0丁E�E趁E
+      ]
+    },
+    {
+      "name": "prefecture_list__c",
+      "label": "都道府県リスチE,
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "北海遁E,
+        "青森省E,
+        "岩手県",
+        "宮城県",
+        "秋田省E,
+        "山形省E,
+        "福島省E,
+        "茨城県",
+        "栁E��省E,
+        "群馬省E,
+        "埼玉県",
+        "十E��省E,
+        "東京都",
+        "神奈川県",
+        "新潟県",
+        "富山省E,
+        "石川県",
+        "福井県",
+        "山梨省E,
+        "長野県",
+        "岐�E省E,
+        "静岡省E,
+        "愛知省E,
+        "三重省E,
+        "滋賀省E,
+        "京都庁E,
+        "大阪庁E,
+        "兵庫省E,
+        "奈良省E,
+        "和歌山省E,
+        "鳥取県",
+        "島根省E,
+        "岡山省E,
+        "庁E��省E,
+        "山口省E,
+        "徳島省E,
+        "香川県",
+        "愛媛県",
+        "高知省E,
+        "福岡省E,
+        "佐賀省E,
+        "長崎県",
+        "熊本省E,
+        "大刁E��",
+        "宮崎県",
+        "鹿児島省E,
+        "沖縁E��"
+      ]
+    },
+    {
+      "name": "uriage_ringi__c",
+      "label": "売上稟議�E�年間売上！E,
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "年間！E00丁E�E未満",
+        "年間！E00丁E�E以丁E,
+        "【使用不可】年間！E00丁E�E以丁E000丁E�E未満",
+        "【使用不可】年間！E000丁E�E以丁E
+      ]
+    },
+    {
+      "name": "start_time_Mon__c",
+      "label": "開始時間（月曜日�E�E,
+      "type": "time",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "End_time_Mon__c",
+      "label": "終亁E��間（月曜日�E�E,
+      "type": "time",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Restraint_Time__c",
+      "label": "拘束時間",
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Restraint_Time_Per_Month__c",
+      "label": "月間拘束時間",
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "OvertimeBid__c",
+      "label": "趁E��時間単価",
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Partner_Keiyaku_type_temp__c",
+      "label": "パ�Eトナー契紁E��別",
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "支援",
+        "持込",
+        "業老E,
+        "雁E��"
+      ]
+    },
+    {
+      "name": "Field1__c",
+      "label": "パ�Eトナー契紁E��別�E�不要E��E,
+      "type": "string",
+      "custom": true,
+      "length": 10,
+      "picklistValues": []
+    },
+    {
+      "name": "Waku_Point_SubGenzan_seisu__c",
+      "label": "枠ポイント（サブ＝１）獲征E,
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "kyori_tyouka_keisan_kubun__c",
+      "label": "距離趁E��計算区刁E��委託！E,
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "月極",
+        "日極"
+      ]
+    },
+    {
+      "name": "Status_kopi_moto__c",
+      "label": "案件スチE�Eタス�E�コピ�E允E��E,
+      "type": "string",
+      "custom": true,
+      "length": 1300,
+      "picklistValues": []
+    },
+    {
+      "name": "eigyoubu_biko__c",
+      "label": "営業部備老E,
+      "type": "textarea",
+      "custom": true,
+      "length": 2000,
+      "picklistValues": []
+    },
+    {
+      "name": "filename_Estimates__c",
+      "label": "ファイル名（見積書�E�E,
+      "type": "string",
+      "custom": true,
+      "length": 1300,
+      "picklistValues": []
+    },
+    {
+      "name": "output_estimates__c",
+      "label": "出力フラグ�E�見積書�E�E,
+      "type": "boolean",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Filename_order__c",
+      "label": "ファイル名（発注書�E�E,
+      "type": "string",
+      "custom": true,
+      "length": 1300,
+      "picklistValues": []
+    },
+    {
+      "name": "Output_order__c",
+      "label": "出力フラグ�E�発注書�E�E,
+      "type": "boolean",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Filename_Specification__c",
+      "label": "ファイル名（仕様書�E�E,
+      "type": "string",
+      "custom": true,
+      "length": 1300,
+      "picklistValues": []
+    },
+    {
+      "name": "output_Specification__c",
+      "label": "出力フラグ�E�仕様書�E�E,
+      "type": "boolean",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Filename_Instructions__c",
+      "label": "ファイル名（個別業務説明書�E�E,
+      "type": "string",
+      "custom": true,
+      "length": 1300,
+      "picklistValues": []
+    },
+    {
+      "name": "Output_Instructions__c",
+      "label": "出力フラグ�E�個別業務説明書�E�E,
+      "type": "boolean",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "waku_point_kakutoku_sabugen__c",
+      "label": "枠ポイント（サブ減算）獲征E,
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "waku_point_subgenzan_syuryo__c",
+      "label": "枠ポイント（サブ減算）終亁E,
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Anken_kubun_spot__c",
+      "label": "契紁E��刁E���E市型�E�E,
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "契紁E���E�専属！E,
+        "契紁E���E�定時雁E���E�E,
+        "長期スポッチE,
+        "短期スポッチE,
+        "特需",
+        "条件変更"
+      ]
+    },
+    {
+      "name": "LendingGoods__c",
+      "label": "貸与品",
+      "type": "string",
+      "custom": true,
+      "length": 255,
+      "picklistValues": []
+    },
+    {
+      "name": "Befor_ContractPrice_day__c",
+      "label": "前契紁E��価�E�日額！E,
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "waku_point_kakutoku_sabugen_test__c",
+      "label": "枠ポイント（サブ減算）獲得／検証用",
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "waku_point_subgenzan_syuryo_test__c",
+      "label": "枠ポイント（サブ減算）終亁E��検証用",
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Befor_ContractPrice_month__c",
+      "label": "前契紁E��価�E�月額！E,
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "New_ContractPrice_day__c",
+      "label": "新契紁E��価�E�日額！E,
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "New_ContractPrice_month__c",
+      "label": "新契紁E��価�E�月額！E,
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Accuracy_start__c",
+      "label": "確度�E�開始！E,
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "未宁E,
+        "案件の開始が2か月以冁E,
+        "案件の開始が2か月以丁E
+      ]
+    },
+    {
+      "name": "Tanka_Up_kousyou_Background__c",
+      "label": "単価アチE�E交渉経緯",
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "自力交渁E,
+        "褁E��枠まとめて自力交渁E,
+        "全国案件まとめて自力交渁E,
+        "他Gr交渉による単価アチE�E"
+      ]
+    },
+    {
+      "name": "Acquisition_history__c",
+      "label": "獲得経緯",
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "チE��アポ（独自ネタ�E�E,
+        "チE��アポ！EFコールリスト！E,
+        "飛�E込み",
+        "他グループから�E紹仁E,
+        "他荷主からの紹仁E,
+        "パ�Eトナー、業老E��ら�E紹仁E,
+        "荷主からのアプローチE,
+        "既存コースの増軁E,
+        "新コースの受訁E,
+        "他グループから�E波叁E,
+        "全国案件",
+        "災害稼働停止から復活",
+        "稼働枠数減少から�E復活",
+        "荷主社員配送から�E復活",
+        "他社配送から�E復活",
+        "ISからの社冁E��携",
+        "派遣営業からの紹仁E,
+        "常設チE��アポ企E
+      ]
+    },
+    {
+      "name": "yojitsutype__c",
+      "label": "予実タイチE,
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "予箁E
+      ]
+    },
+    {
+      "name": "logiroot_priority__c",
+      "label": "優先度",
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "優允E,
+        "普送E,
+        "不要E��納品先変動�E�E,
+        "NG"
+      ]
+    },
+    {
+      "name": "logiroot_Precautions__c",
+      "label": "注意事頁E,
+      "type": "textarea",
+      "custom": true,
+      "length": 32768,
+      "picklistValues": []
+    },
+    {
+      "name": "Scheduled_sales_calculation__c",
+      "label": "予定売丁E月（計算用�E�E,
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "After_replacement__c",
+      "label": "入替後稼働老E��刁E,
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "パ�Eトナー ↁEパ�Eトナー",
+        "パ�Eトナー ↁE業老E,
+        "パ�Eトナー ↁE雁E��",
+        "業老EↁE業老E,
+        "業老EↁEパ�Eトナー",
+        "業老EↁE雁E��",
+        "雁E�� ↁEパ�Eトナー",
+        "雁E�� ↁE業老E,
+        "雁E�� ↁE雁E��"
+      ]
+    },
+    {
+      "name": "logiroot_In_charge__c",
+      "label": "ロジルート担彁E,
+      "type": "reference",
+      "custom": true,
+      "length": 18,
+      "picklistValues": []
+    },
+    {
+      "name": "Reason_for_loss_Matter__c",
+      "label": "失注琁E���E�案件�E�E,
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "忁E��台数が変動する",
+        "曜日限定である",
+        "曜日が変動する",
+        "積み地・降ろし地が変動する",
+        "短時間である",
+        "時間帯が変動する",
+        "配車が困難な時間帯である",
+        "�E�ｔ車以丁E,
+        "スポット�Eみ",
+        "そ�E仁E
+      ]
+    },
+    {
+      "name": "Lost_comment__c",
+      "label": "失注コメンチE,
+      "type": "textarea",
+      "custom": true,
+      "length": 32768,
+      "picklistValues": []
+    },
+    {
+      "name": "logiroot_final_report__c",
+      "label": "ロジルート作�E渁E,
+      "type": "boolean",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "filename_Ankensaisan__c",
+      "label": "ファイル名（採算シート！E,
+      "type": "string",
+      "custom": true,
+      "length": 1300,
+      "picklistValues": []
+    },
+    {
+      "name": "logiroot_ridingday__c",
+      "label": "ロジルート同乗日",
+      "type": "date",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "logiroot_comment__c",
+      "label": "ロジルートコメンチE,
+      "type": "textarea",
+      "custom": true,
+      "length": 32768,
+      "picklistValues": []
+    },
+    {
+      "name": "OperationEndDate_Copy__c",
+      "label": "稼働終亁E���E�管琁E���E�E,
+      "type": "date",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Getunaisyuryou_copy__c",
+      "label": "月�E終亁E��刁E��コピ�E�E�E,
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Shitsuchuanken_chushutsu__c",
+      "label": "失注案件抽出�E��E市型用�E�E,
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "抽出渁E
+      ]
+    },
+    {
+      "name": "Yotei_Genka_keisan__c",
+      "label": "予定原価/月（計算用�E�E,
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Yotei_Arari_Keisan__c",
+      "label": "予定粗利/月（計算用�E�E,
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "gyoumucyuuijikou__c",
+      "label": "業務注意事頁E,
+      "type": "textarea",
+      "custom": true,
+      "length": 32768,
+      "picklistValues": []
+    },
+    {
+      "name": "meinsabu_ura__c",
+      "label": "メイン/サブ（裏！E,
+      "type": "string",
+      "custom": true,
+      "length": 1300,
+      "picklistValues": []
+    },
+    {
+      "name": "daisou_hituyousei__c",
+      "label": "代走有無",
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "忁E��E,
+        "不要E,
+        "要相諁E
+      ]
+    },
+    {
+      "name": "anaumejyouhou1__c",
+      "label": "代走可能老E��１！E,
+      "type": "reference",
+      "custom": true,
+      "length": 18,
+      "picklistValues": []
+    },
+    {
+      "name": "anaumejyouhou2__c",
+      "label": "代走可能老E��２！E,
+      "type": "reference",
+      "custom": true,
+      "length": 18,
+      "picklistValues": []
+    },
+    {
+      "name": "anaumejyouhou3__c",
+      "label": "代走可能老E��３！E,
+      "type": "reference",
+      "custom": true,
+      "length": 18,
+      "picklistValues": []
+    },
+    {
+      "name": "kokyaku2__c",
+      "label": "顧客�E�E,
+      "type": "string",
+      "custom": true,
+      "length": 1300,
+      "picklistValues": []
+    },
+    {
+      "name": "kyarakuta__c",
+      "label": "顧客のキャラクター",
+      "type": "multipicklist",
+      "custom": true,
+      "length": 4099,
+      "picklistValues": [
+        "穏やかな性格�E�温厚！E,
+        "親刁E,
+        "几帳面",
+        "協力皁E,
+        "せっかち",
+        "意地が悪ぁE,
+        "ずぼらな性格",
+        "融通がきかなぁE,
+        "横柁E,
+        "金に煩ぁE
+      ]
+    },
+    {
+      "name": "kyarakuta_hosoku__c",
+      "label": "キャラクター補足",
+      "type": "textarea",
+      "custom": true,
+      "length": 100000,
+      "picklistValues": []
+    },
+    {
+      "name": "gyoumunotokusei__c",
+      "label": "業務�E特性",
+      "type": "textarea",
+      "custom": true,
+      "length": 100000,
+      "picklistValues": []
+    },
+    {
+      "name": "futaigyoumusyousai__c",
+      "label": "付帯業務�E詳細",
+      "type": "textarea",
+      "custom": true,
+      "length": 100000,
+      "picklistValues": []
+    },
+    {
+      "name": "Densikeiyaku_soufusaki__c",
+      "label": "契紁E��送付�E",
+      "type": "reference",
+      "custom": true,
+      "length": 18,
+      "picklistValues": []
+    },
+    {
+      "name": "tokuyakujikou__c",
+      "label": "特紁E��頁E,
+      "type": "textarea",
+      "custom": true,
+      "length": 32768,
+      "picklistValues": []
+    },
+    {
+      "name": "fairumei_kobetukeiyaku__c",
+      "label": "ファイル名（個別契紁E���E�E,
+      "type": "string",
+      "custom": true,
+      "length": 1300,
+      "picklistValues": []
+    },
+    {
+      "name": "output_kobetukeiyaku__c",
+      "label": "出力フラグ�E�個別契紁E���E�E,
+      "type": "boolean",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "keiyakusyo_syubetsu__c",
+      "label": "契紁E��形弁E,
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "電子契紁E,
+        "書面契紁E,
+        "先方契紁E��"
+      ]
+    },
+    {
+      "name": "Wakukubun__c",
+      "label": "枠区刁E,
+      "type": "string",
+      "custom": true,
+      "length": 1300,
+      "picklistValues": []
+    },
+    {
+      "name": "yoteiuriage_day__c",
+      "label": "予定売丁E日�E�計算用�E�E,
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "yoteigenka_day__c",
+      "label": "予定原価/日�E�計算用�E�E,
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "yoteiarari_day__c",
+      "label": "予定粗利/日�E�計算用�E�E,
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "over_13000__c",
+      "label": "High/Low判宁E,
+      "type": "string",
+      "custom": true,
+      "length": 1300,
+      "picklistValues": []
+    },
+    {
+      "name": "saisyuujyukoubi__c",
+      "label": "EL最終受講日",
+      "type": "date",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "jyukousya_mail__c",
+      "label": "メール�E�実稼働老E��E,
+      "type": "email",
+      "custom": true,
+      "length": 80,
+      "picklistValues": []
+    },
+    {
+      "name": "Part1Score__c",
+      "label": "第一部点数",
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Part2Score__c",
+      "label": "第二部点数",
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Part3Score__c",
+      "label": "第三部点数",
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "haisoukubun__c",
+      "label": "配送区刁E,
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "個�E",
+        "ルート�E送E,
+        "エリア配送E,
+        "作業",
+        "そ�E仁E
+      ]
+    },
+    {
+      "name": "omonakamotu__c",
+      "label": "主な貨物",
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "Amazon",
+        "楽天",
+        "モノタロウ",
+        "カウネッチE,
+        "アスクル",
+        "た�Eめ�EめE,
+        "佐巁E,
+        "ヤマト",
+        "西濁E,
+        "JP",
+        "ネットスーパ�E",
+        "ホ�Eムセンター",
+        "ドラチE��ストア",
+        "家具・インチE��ア",
+        "フ�Eドデリバリー",
+        "医薬品E,
+        "ワクチン",
+        "検佁E,
+        "医療機器",
+        "医療材斁E,
+        "歯科医療器杁E,
+        "歯科技工物",
+        "基盤",
+        "精寁E��定機器",
+        "空気動工具",
+        "電動工具",
+        "ドリル",
+        "歯軁E,
+        "バルチE,
+        "ベアリング",
+        "仮設賁E��",
+        "水道賁E��",
+        "電設賁E��",
+        "断熱杁E,
+        "床材",
+        "壁材",
+        "壁紁E,
+        "タイル",
+        "接着剤",
+        "塗料",
+        "ねじ�EボルチE,
+        "風呂�Eトイレ",
+        "保安用品E,
+        "ガラス",
+        "自動車部品E乗用)",
+        "自動車部品EトラチE��)",
+        "タイヤ・ホイール",
+        "バイク部品E,
+        "バッチE��ー・カーナビ",
+        "飲斁E,
+        "水",
+        "酁E,
+        "コーヒ�E・紁E��",
+        "乾物顁E,
+        "調味斁E,
+        "粉顁E,
+        "パン",
+        "麺顁E,
+        "米穀",
+        "弁当�E惣菁E,
+        "青果",
+        "精肁E,
+        "鮮魁E,
+        "大豁E��品E,
+        "卵・乳製品E,
+        "菓子製品E,
+        "生菓孁Eケーキ・和菓孁E",
+        "冷蔵食品",
+        "冷凍食品",
+        "建橁E,
+        "イベンチE,
+        "リネン",
+        "パナソニック",
+        "日竁E,
+        "東芁E,
+        "三菱",
+        "ソニ�E",
+        "シャーチE,
+        "富士送E,
+        "ダイキン",
+        "引越し・梱匁E��E��",
+        "雑誁E,
+        "事務用品E,
+        "販俁E��",
+        "日用品�E雑貨",
+        "制朁E,
+        "トナーカートリチE��",
+        "EC・宁E�E",
+        "書籍�E雑誌�Eタウン誁E,
+        "書顁E,
+        "新聁E,
+        "介護・福祉用具",
+        "研究用賁E��",
+        "クリーニング",
+        "宿泊施設向けリネン",
+        "医療機関向けリネン",
+        "おしぼめE,
+        "渁E��用品E,
+        "教材",
+        "匁E��E��匁E��E��",
+        "玩具",
+        "金型・金属加工品E,
+        "ゴム製品E,
+        "斁E�E",
+        "コピ�E用紁E,
+        "オフィス家具",
+        "マット（レンタル含む�E�E,
+        "モチE�E�E�レンタル含む�E�E,
+        "そ�E仁E
+      ]
+    },
+    {
+      "name": "toriatukaigyousyu__c",
+      "label": "取扱ぁE��種",
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "医療�E検体�E介護福祁E,
+        "建設・建機�E保安用品E,
+        "自動軁Eバイク部品�E用品E,
+        "タイヤ",
+        "機械部品�E工具",
+        "家電・PC修琁E,
+        "食品・飲料�E弁彁E,
+        "渁E��用品�EマッチE,
+        "リネン",
+        "日用品�E雑貨",
+        "斁E�E・トナー",
+        "書類�E書籍�E新聁E,
+        "引越し",
+        "EC・宁E�E・お買物便",
+        "そ�E仁E
+      ]
+    },
+    {
+      "name": "sonota_gyousyu__c",
+      "label": "そ�E他（取扱ぁE��種�E�E,
+      "type": "textarea",
+      "custom": true,
+      "length": 255,
+      "picklistValues": []
+    },
+    {
+      "name": "sonota_kamotu__c",
+      "label": "そ�E他（主な貨物�E�E,
+      "type": "textarea",
+      "custom": true,
+      "length": 255,
+      "picklistValues": []
+    },
+    {
+      "name": "omonaotodokesaki__c",
+      "label": "主なお届け允E,
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "法人",
+        "個人",
+        "法人・個人",
+        "社冁E
+      ]
+    },
+    {
+      "name": "Keisaibi__c",
+      "label": "掲載日",
+      "type": "date",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Operationstartmonth__c",
+      "label": "稼働開始月�E�レポ�Eト用�E�E,
+      "type": "string",
+      "custom": true,
+      "length": 1300,
+      "picklistValues": []
+    },
+    {
+      "name": "churnmonth__c",
+      "label": "稼働終亁E���E�レポ�Eト用�E�E,
+      "type": "string",
+      "custom": true,
+      "length": 1300,
+      "picklistValues": []
+    },
+    {
+      "name": "emptyframereplacement__c",
+      "label": "空枠/入替�E�予定を含む�E�E,
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "空枠",
+        "入替"
+      ]
+    },
+    {
+      "name": "prefecturesSalesStrategy__c",
+      "label": "☁E�E道府県�E�営業戦略�E�E,
+      "type": "string",
+      "custom": true,
+      "length": 10,
+      "picklistValues": []
+    },
+    {
+      "name": "municipalities__c",
+      "label": "☁E��区町村（営業戦略�E�E,
+      "type": "string",
+      "custom": true,
+      "length": 100,
+      "picklistValues": []
+    },
+    {
+      "name": "agelimitdevelopment__c",
+      "label": "年齢制陁E,
+      "type": "string",
+      "custom": true,
+      "length": 10,
+      "picklistValues": []
+    },
+    {
+      "name": "remarksmemo__c",
+      "label": "備老E��モ�E�空枠/入替�E�E,
+      "type": "textarea",
+      "custom": true,
+      "length": 32768,
+      "picklistValues": []
+    },
+    {
+      "name": "hiddenflag__c",
+      "label": "非表示フラグ【開発用、E,
+      "type": "boolean",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Start_yyyymm__c",
+      "label": "開始月",
+      "type": "string",
+      "custom": true,
+      "length": 1300,
+      "picklistValues": []
+    },
+    {
+      "name": "End_YYYYmm__c",
+      "label": "終亁E��",
+      "type": "string",
+      "custom": true,
+      "length": 1300,
+      "picklistValues": []
+    },
+    {
+      "name": "End_date_for_R__c",
+      "label": "稼働終亁E���E�レポ�Eト用�E�E,
+      "type": "date",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Record_HunterAddress__c",
+      "label": "【Record Hunter用】稼働地",
+      "type": "string",
+      "custom": true,
+      "length": 1300,
+      "picklistValues": []
+    },
+    {
+      "name": "Resion__c",
+      "label": "契紁E��当所属（仮�E�E,
+      "type": "string",
+      "custom": true,
+      "length": 1300,
+      "picklistValues": []
+    },
+    {
+      "name": "Yotei_riekiritu_cop__c",
+      "label": "予定利益率/朁E,
+      "type": "percent",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "account_department__c",
+      "label": "取引�E�E�E��署吁E案件)",
+      "type": "string",
+      "custom": true,
+      "length": 1300,
+      "picklistValues": []
+    },
+    {
+      "name": "DeadDate__c",
+      "label": "失注日",
+      "type": "date",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "EstimateDate__c",
+      "label": "見積り日",
+      "type": "date",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "ApplicationScreeningDate__c",
+      "label": "申込審査開始日",
+      "type": "date",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "SalesApprovalStartDate__c",
+      "label": "売上稟議申請日",
+      "type": "date",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "DateOfCreateToEstimate__c",
+      "label": "案件作�E�E�見積りまでの経過日数",
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "NumberOfDaysSinceCreate__c",
+      "label": "案件作�Eからの経過日数",
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "NumberOfDateSinceEstimate__c",
+      "label": "見積日からの経過日数",
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "numberofDateSinceApply__c",
+      "label": "申込審査開始から�E経過日数",
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "NumberOfDateSinceSalesApply__c",
+      "label": "売上稟議申請から�E経過日数",
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "SalesApprovedDate__c",
+      "label": "売上稟議承認日",
+      "type": "date",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "NumberOfDateSinceSalesApproved__c",
+      "label": "売上稟議承認から�E経過日数",
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "dispatcher__c",
+      "label": "配車担当老E,
+      "type": "reference",
+      "custom": true,
+      "length": 18,
+      "picklistValues": []
+    },
+    {
+      "name": "Eigyousuishin_kakutoku__c",
+      "label": "営業推進獲征E,
+      "type": "boolean",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "AddressForDisplay__c",
+      "label": "住所�E�表示用�E�E,
+      "type": "string",
+      "custom": true,
+      "length": 1300,
+      "picklistValues": []
+    },
+    {
+      "name": "Haisyasinsei_check__c",
+      "label": "配車申請中",
+      "type": "boolean",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Haisya_hiketu_check__c",
+      "label": "配車申請否決",
+      "type": "boolean",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Uriageringi_check__c",
+      "label": "売上稟議申請中",
+      "type": "boolean",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Uriageringi_hiketu__c",
+      "label": "売上稟議否決",
+      "type": "boolean",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Mousikomi_check__c",
+      "label": "申込審査申請中",
+      "type": "boolean",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Moushikomi_hiketu_check__c",
+      "label": "申込審査否決",
+      "type": "boolean",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Haisya_OK__c",
+      "label": "配車申請可決",
+      "type": "boolean",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Siten_ura__c",
+      "label": "支店（�E表示�E�E,
+      "type": "string",
+      "custom": true,
+      "length": 1300,
+      "picklistValues": []
+    },
+    {
+      "name": "Invoicec_number__c",
+      "label": "適格請求書登録番号",
+      "type": "string",
+      "custom": true,
+      "length": 1300,
+      "picklistValues": []
+    },
+    {
+      "name": "Field220240529__c",
+      "label": "管琁E��当老E���E表示�E�E,
+      "type": "string",
+      "custom": true,
+      "length": 1300,
+      "picklistValues": []
+    },
+    {
+      "name": "LBCryougyousyu__c",
+      "label": "LBC_業種",
+      "type": "string",
+      "custom": true,
+      "length": 1300,
+      "picklistValues": []
+    },
+    {
+      "name": "tourokubangousyutokujyoukyou__c",
+      "label": "登録番号取得状況E,
+      "type": "string",
+      "custom": true,
+      "length": 1300,
+      "picklistValues": []
+    },
+    {
+      "name": "El_score__c",
+      "label": "EL点数�E�E7点満点�E�E,
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Manual__c",
+      "label": "マニュアルNo�E�枝番なし！E,
+      "type": "string",
+      "custom": true,
+      "length": 1300,
+      "picklistValues": []
+    },
+    {
+      "name": "URL__c",
+      "label": "案件URL",
+      "type": "string",
+      "custom": true,
+      "length": 1300,
+      "picklistValues": []
+    },
+    {
+      "name": "CompanyDriver__c",
+      "label": "業老E��稼働老E��E,
+      "type": "reference",
+      "custom": true,
+      "length": 18,
+      "picklistValues": []
+    },
+    {
+      "name": "StartYearMonth__c",
+      "label": "稼働開始年月（レポ�Eト用�E�E,
+      "type": "string",
+      "custom": true,
+      "length": 1300,
+      "picklistValues": []
+    },
+    {
+      "name": "ContractType__c",
+      "label": "契紁E��慁E,
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "定期",
+        "契紁E��",
+        "スポッチE
+      ]
+    },
+    {
+      "name": "WaitingCharge__c",
+      "label": "征E��料",
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "WaitUnitMinute__c",
+      "label": "単位（征E��料�E�E,
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "10刁E,
+        "15刁E,
+        "20刁E,
+        "30刁E
+      ]
+    },
+    {
+      "name": "AdvanceConditionsByWait__c",
+      "label": "繰上条件�E�征E��料�E�E,
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "10刁E,
+        "15刁E,
+        "20刁E,
+        "30刁E
+      ]
+    },
+    {
+      "name": "CustodyFee__c",
+      "label": "保管斁E,
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "ReshipmentCharge__c",
+      "label": "再�E送料",
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "CancellationCharge__c",
+      "label": "キャンセル斁E,
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "AdmissionFee__c",
+      "label": "立ち寁E��斁E,
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "BuildingFee__c",
+      "label": "同ビル斁E,
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "TransportationExpenses__c",
+      "label": "交通代�E�税込�E�※高速料・駐車料・航空搭載�E公共機関・ホテル・そ�E仁E,
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "ExcludeFromInputRules__c",
+      "label": "入力規則・フローから除夁E,
+      "type": "boolean",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "txtStartTime__c",
+      "label": "見積用�E�稼働開始時閁E,
+      "type": "string",
+      "custom": true,
+      "length": 1300,
+      "picklistValues": []
+    },
+    {
+      "name": "txtEndTime__c",
+      "label": "見積用�E�稼働終亁E��閁E,
+      "type": "string",
+      "custom": true,
+      "length": 1300,
+      "picklistValues": []
+    },
+    {
+      "name": "estimate_calculation_result__c",
+      "label": "見積_計算結果",
+      "type": "string",
+      "custom": true,
+      "length": 255,
+      "picklistValues": []
+    },
+    {
+      "name": "estimate_contract_unit_price__c",
+      "label": "見積_日極単価",
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "estimate_applied_restriction_time__c",
+      "label": "見積_適用拘束時間",
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "estimate_applied_standard_distance__c",
+      "label": "見積_適用基準距離",
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "estimate_early_morning_night_surcharge__c",
+      "label": "見積_早朝�E深夜割墁E,
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "estimate_holiday_surcharge__c",
+      "label": "見積_祝休日割墁E,
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "estimate_delivery_expense__c",
+      "label": "見積_配送経費",
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "estimate_option_fee__c",
+      "label": "見積_オプション料��",
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "estimate_excess_distance__c",
+      "label": "見積_趁E��距離",
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "estimate_excess_time__c",
+      "label": "見積_時間趁E��",
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "estimate_notes__c",
+      "label": "見積_メモ欁E,
+      "type": "textarea",
+      "custom": true,
+      "length": 32768,
+      "picklistValues": []
+    },
+    {
+      "name": "estimate_unit_discount_rate__c",
+      "label": "見積用�E�基本単価値引率",
+      "type": "percent",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "estimate_unit_discount_amount__c",
+      "label": "見積用�E�基本単価値引顁E,
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "estimate_time_discount_rate__c",
+      "label": "見積用�E�時間趁E��値引率",
+      "type": "percent",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "estimate_time_discount_amount__c",
+      "label": "見積用�E�時間趁E��値引顁E,
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Gyousya_kasan__c",
+      "label": "業老E��算率",
+      "type": "percent",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Gyousya_kasan_check__c",
+      "label": "業老E��算チェチE��",
+      "type": "boolean",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Keitai_jituskadou__c",
+      "label": "携帯�E�実稼働老E��E,
+      "type": "phone",
+      "custom": true,
+      "length": 40,
+      "picklistValues": []
+    },
+    {
+      "name": "Shimei_jituskadou__c",
+      "label": "氏名�E�実稼働老E��E,
+      "type": "string",
+      "custom": true,
+      "length": 50,
+      "picklistValues": []
+    },
+    {
+      "name": "Gyousyamei_jituskadou__c",
+      "label": "業老E���E�実稼働老E��E,
+      "type": "string",
+      "custom": true,
+      "length": 50,
+      "picklistValues": []
+    },
+    {
+      "name": "NumberOfDateFromOperationToScheduleEnd__c",
+      "label": "稼働終亁E��定日までの日数",
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "NumberOfDateFromOperationToEnd__c",
+      "label": "稼働終亁E��までの日数",
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "OperationEndDateUpdateDate__c",
+      "label": "稼働終亁E��更新日",
+      "type": "date",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "OperationScheduleEndDateUpdateDate__c",
+      "label": "稼働終亁E��定日更新日",
+      "type": "date",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Yoteiuriage_zougenchi_dya__c",
+      "label": "予定売丁E日�E�増減値�E�E,
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "OpportunityType__c",
+      "label": "案件種別",
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "定期便",
+        "チE��カ",
+        "契紁E��"
+      ]
+    },
+    {
+      "name": "OpportunityAccuracyFirst__c",
+      "label": "確度�E��E回！E,
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "見込A�E�１か月以冁E���E�営業追客�E�E,
+        "見込B�E�３か月以冁E���E�営業追客�E�E,
+        "IS追客　�E�長期的に見た軽定期ニ�Eズあり�E�E,
+        "見込なし　�E�追客なし！E
+      ]
+    },
+    {
+      "name": "OpportunityAccuracy__c",
+      "label": "確度�E�最新�E�E,
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "見込A�E�１か月以冁E���E�営業追客�E�E,
+        "見込B�E�３か月以冁E���E�営業追客�E�E,
+        "IS追客　�E�長期的に見た軽定期ニ�Eズあり�E�E,
+        "見込なし　�E�追客なし！E
+      ]
+    },
+    {
+      "name": "CustomerNeeds__c",
+      "label": "顧客ニ�Eズ�E�最新�E�E,
+      "type": "multipicklist",
+      "custom": true,
+      "length": 4099,
+      "picklistValues": [
+        "ニ�Eズ違い",
+        "定期便配送E,
+        "契紁E��配送E,
+        "スポット�E送E,
+        "人材派遣",
+        "国際輸送E,
+        "そ�E仁E
+      ]
+    },
+    {
+      "name": "CustomerNeedsVehicle__c",
+      "label": "車両ニ�Eズ�E�最新�E�E,
+      "type": "multipicklist",
+      "custom": true,
+      "length": 4099,
+      "picklistValues": [
+        "軽�E�バン�E�E,
+        "軽�E�トラチE��・幌！E,
+        "軽�E��E蔵・冷凍！E,
+        "1�E�（バン�E�E,
+        "1�E�（バン以外！E,
+        "2�E�（箱�E�E,
+        "2�E�（平ボディ�E�E,
+        "2�E�（�E蔵・冷凍！E,
+        "バイク・自転車�EHC",
+        "そ�E他車両"
+      ]
+    },
+    {
+      "name": "CustomerNeedsFirst__c",
+      "label": "顧客ニ�Eズ�E��E回！E,
+      "type": "multipicklist",
+      "custom": true,
+      "length": 4099,
+      "picklistValues": [
+        "ニ�Eズ違い",
+        "定期便配送E,
+        "契紁E��配送E,
+        "スポット�E送E,
+        "人材派遣",
+        "国際輸送E,
+        "そ�E仁E
+      ]
+    },
+    {
+      "name": "CustomerNeedsVehicleFirst__c",
+      "label": "車両ニ�Eズ�E��E回！E,
+      "type": "multipicklist",
+      "custom": true,
+      "length": 4099,
+      "picklistValues": [
+        "軽�E�バン�E�E,
+        "軽�E�トラチE��・幌！E,
+        "軽�E��E蔵・冷凍！E,
+        "1�E�（バン�E�E,
+        "1�E�（バン以外！E,
+        "2�E�（箱�E�E,
+        "2�E�（平ボディ�E�E,
+        "2�E�（�E蔵・冷凍！E,
+        "バイク・自転車�EHC",
+        "そ�E他車両"
+      ]
+    },
+    {
+      "name": "Keyman__c",
+      "label": "キーマン",
+      "type": "reference",
+      "custom": true,
+      "length": 18,
+      "picklistValues": []
+    },
+    {
+      "name": "LatestVisitDate__c",
+      "label": "最新訪問日",
+      "type": "date",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Kettukasyousai2__c",
+      "label": "結果詳細�E�①現在の配送体制、②顧客の課題！E,
+      "type": "textarea",
+      "custom": true,
+      "length": 32768,
+      "picklistValues": []
+    },
+    {
+      "name": "Kettukasyousai3__c",
+      "label": "結果詳細�E�③提案�E容と次回アクション、④トピチE��ス�E�E,
+      "type": "textarea",
+      "custom": true,
+      "length": 32768,
+      "picklistValues": []
+    },
+    {
+      "name": "Status__c",
+      "label": "案件スチE�Eタス※",
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "ニ�EズなぁE,
+        "育成終亁E��他案件進行中�E�E,
+        "長期育成案件",
+        "アポ取征E,
+        "啁E��E,
+        "見積り",
+        "営業追客",
+        "申込審査",
+        "売上稟議申諁E,
+        "契紁E空枠",
+        "配車済み",
+        "稼働終亁E
+      ]
+    },
+    {
+      "name": "ExpectedTimeOfContract__c",
+      "label": "成紁E��込み時期",
+      "type": "date",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "DateOfNextFollowup__c",
+      "label": "次回追客日",
+      "type": "date",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "ReasonForNotClosingDeal__c",
+      "label": "成紁E��至らなぁE��由",
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "稼働条件調整中",
+        "金額交渉中",
+        "雁E��人材での募集状況をもう少し見たぁE,
+        "他社からも話を聞ぁE��ぁE��",
+        "現在は允E��してぁE��のでタイミングを見てぁE��",
+        "上長決済征E���E�外注承認が下りなぁE��E,
+        "そ�E仁E
+      ]
+    },
+    {
+      "name": "VisitPerson__c",
+      "label": "訪問老E,
+      "type": "reference",
+      "custom": true,
+      "length": 18,
+      "picklistValues": []
+    },
+    {
+      "name": "Jitsukadousya_check__c",
+      "label": "実稼働老E��報入力渁E,
+      "type": "boolean",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "ReasonForNoNeed__c",
+      "label": "ニ�Eズなし理由",
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "スポット�Eみ",
+        "配送なぁE,
+        "対応車格夁E,
+        "路線便のみ"
+      ]
+    },
+    {
+      "name": "ReasonForLongNurturing__c",
+      "label": "長期育成理由",
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "雁E��人材での募集状況をもう少し見たぁE,
+        "軽配送ニーズがあるが、他社で稼働してぁE��",
+        "自社配送人員で現在は允E��",
+        "現在はコストが合わぁE,
+        "先方会社方針（�E製化！E,
+        "ドライバ�E採用が決まっぁE,
+        "そ�E仁E
+      ]
+    },
+    {
+      "name": "OtherCustomerNeeds__c",
+      "label": "そ�E他顧客ニ�Eズ",
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "ジチE��スタチE��ニ�Eズ",
+        "他エリアニ�Eズ",
+        "該当なぁE
+      ]
+    },
+    {
+      "name": "days_since_last_visit__c",
+      "label": "最新訪問日からの経過日数",
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Hikeijyou_FLG__c",
+      "label": "非計丁E,
+      "type": "boolean",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Partner_ex__c",
+      "label": "パ�Eトナー�E�コピ�E允E��E,
+      "type": "string",
+      "custom": true,
+      "length": 1300,
+      "picklistValues": []
+    },
+    {
+      "name": "CliantID__c",
+      "label": "顧客ID",
+      "type": "string",
+      "custom": true,
+      "length": 1300,
+      "picklistValues": []
+    },
+    {
+      "name": "Field220240530__c",
+      "label": "啁E��E��果�E�テスト！E,
+      "type": "textarea",
+      "custom": true,
+      "length": 32768,
+      "picklistValues": []
+    },
+    {
+      "name": "Field220240531__c",
+      "label": "配送物【テスト、E,
+      "type": "string",
+      "custom": true,
+      "length": 255,
+      "picklistValues": []
+    },
+    {
+      "name": "OperationStartMonthReport__c",
+      "label": "稼働開始月",
+      "type": "date",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "TotalScore__c",
+      "label": "スコア�E�合計！E,
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "CheckDoneHearing__c",
+      "label": "業老E��琁Eヒアリング実施済み",
+      "type": "boolean",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "ReasonForOnBoard__c",
+      "label": "業老E��定理由",
+      "type": "string",
+      "custom": true,
+      "length": 255,
+      "picklistValues": []
+    },
+    {
+      "name": "Giqconnect_user__c",
+      "label": "ジチE��コネクチE,
+      "type": "string",
+      "custom": true,
+      "length": 1300,
+      "picklistValues": []
+    },
+    {
+      "name": "Score_picking__c",
+      "label": "スコアリング�E�ピチE��ング�E�E,
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Score_shiwake__c",
+      "label": "スコアリング�E�仕�Eけ！E,
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Score_kenpin__c",
+      "label": "スコアリング�E�検品�E�E,
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Partner_Keiyaku_type_temp_copy__c",
+      "label": "パ�Eトナー契紁E��別�E�コピ�E允E��E,
+      "type": "string",
+      "custom": true,
+      "length": 1300,
+      "picklistValues": []
+    },
+    {
+      "name": "Partner_Assignment_Type__c",
+      "label": "新入店�E戻り区刁E,
+      "type": "string",
+      "custom": true,
+      "length": 1300,
+      "picklistValues": []
+    },
+    {
+      "name": "Wakudori_Summary__c",
+      "label": "枠取りサマリ",
+      "type": "string",
+      "custom": true,
+      "length": 1300,
+      "picklistValues": []
+    },
+    {
+      "name": "Fairly_light_per_hour__c",
+      "label": "1時間当たり契紁E��価",
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Number_of_days_since_sales_request__c",
+      "label": "売上稟議承認日�E�稼働開始日　経過日数",
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "MinEndDate__c",
+      "label": "終亁E��と終亁E��定日�E�最小！E,
+      "type": "date",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Anken_URL__c",
+      "label": "案件URL",
+      "type": "string",
+      "custom": true,
+      "length": 1300,
+      "picklistValues": []
+    },
+    {
+      "name": "Effective_negotiation_determination__c",
+      "label": "有効啁E��E��定（�E回！E,
+      "type": "string",
+      "custom": true,
+      "length": 1300,
+      "picklistValues": []
+    },
+    {
+      "name": "Effective_negotiation_determination_new__c",
+      "label": "有効啁E��E��定（最新�E�E,
+      "type": "string",
+      "custom": true,
+      "length": 1300,
+      "picklistValues": []
+    },
+    {
+      "name": "FirstVisitDate__c",
+      "label": "初回訪問日",
+      "type": "date",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Current_Term_Active_Flag__c",
+      "label": "今期稼働FLG",
+      "type": "boolean",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Next_Term_Active_Flag__c",
+      "label": "来期稼働FLG",
+      "type": "boolean",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Jitsukadousya_copy__c",
+      "label": "実稼働老E��報コピ�E",
+      "type": "boolean",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "MatchingSuteetasu__c",
+      "label": "マッチングスチE�Eタス",
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "候補老E��宁E,
+        "PT候補老E��めE,
+        "業老E��補あめE,
+        "候補老E��訁E,
+        "業老E�E車済み",
+        "PT配車済み",
+        "雁E��配車済み",
+        "入替回避",
+        "失注",
+        "見込み",
+        "見込み終亁E,
+        "庁E��用",
+        "庁E��用終亁E
+      ]
+    },
+    {
+      "name": "MatchingJoukyou__c",
+      "label": "マッチング進捗状況E,
+      "type": "textarea",
+      "custom": true,
+      "length": 32768,
+      "picklistValues": []
+    },
+    {
+      "name": "KoukokuSuteetasu__c",
+      "label": "庁E��スチE�Eタス",
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "求人希望",
+        "求人不要E,
+        "掲載中"
+      ]
+    },
+    {
+      "name": "MochikomiGentei__c",
+      "label": "持込限宁E,
+      "type": "boolean",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Shinninushimei__c",
+      "label": "真荷主吁E,
+      "type": "string",
+      "custom": true,
+      "length": 30,
+      "picklistValues": []
+    },
+    {
+      "name": "Logi_Ukeoikaisou__c",
+      "label": "ロジクエスト�E請負階層",
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "允E��E,
+        "一次諁E,
+        "二次諁E,
+        "三次請以陁E
+      ]
+    },
+    {
+      "name": "Partner_Ukeoikaisou__c",
+      "label": "パ�Eトナーの請負階層",
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "一次諁E,
+        "二次諁E,
+        "三次請以陁E
+      ]
+    },
+    {
+      "name": "Jitsukadoosha_Ukeoikaisou__c",
+      "label": "実稼働老E�E請負階層",
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "一次諁E,
+        "二次諁E,
+        "三次請以陁E
+      ]
+    },
+    {
+      "name": "Shinninushi_Check__c",
+      "label": "真荷主名一致",
+      "type": "boolean",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Jikkadosha_Jyuusyo__c",
+      "label": "実稼働老E��属�E住所",
+      "type": "string",
+      "custom": true,
+      "length": 255,
+      "picklistValues": []
+    },
+    {
+      "name": "Ankenkubun_kopi_moto__c",
+      "label": "案件区刁E��コピ�E允E��E,
+      "type": "string",
+      "custom": true,
+      "length": 1300,
+      "picklistValues": []
+    },
+    {
+      "name": "itakutanka_zougenchi_kopi_moto__c",
+      "label": "委託単価増減値�E�コピ�E允E��E,
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Itakutanka_Zougen_tuki__c",
+      "label": "委託単価/月（増減値�E�E,
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Itakutanka_Tuki__c",
+      "label": "委託単価/朁E,
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Kadoujikan_Henkou__c",
+      "label": "稼働時間変更値",
+      "type": "string",
+      "custom": true,
+      "length": 1300,
+      "picklistValues": []
+    },
+    {
+      "name": "Kadounissu_Henkochi__c",
+      "label": "予定稼働日数変更値",
+      "type": "string",
+      "custom": true,
+      "length": 1300,
+      "picklistValues": []
+    },
+    {
+      "name": "SubmitCheckIndividualJobDescription__c",
+      "label": "個別業務説明書送信",
+      "type": "boolean",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "DateTimeOfIndividualJobDescriptionSubmis__c",
+      "label": "個別業務説明書送信日晁E,
+      "type": "datetime",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "WorkingDay_Copy__c",
+      "label": "稼働曜日�E�コピ�E允E��E,
+      "type": "string",
+      "custom": true,
+      "length": 1300,
+      "picklistValues": []
+    },
+    {
+      "name": "OperationStartDate_Copysource__c",
+      "label": "稼働開始日�E�コピ�E允E��E,
+      "type": "date",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Field220240532__c",
+      "label": "契紁E��価/時（時間換算！E,
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Tankikubun__c",
+      "label": "短期区刁E,
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "季節枠以夁E,
+        "季節枠�E�毎年受注�E�E
+      ]
+    },
+    {
+      "name": "taioubi__c",
+      "label": "対応日",
+      "type": "date",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "kanryoubi__c",
+      "label": "完亁E��",
+      "type": "date",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "KADO_YOBI_GETU__c",
+      "label": "稼働曜日�E�月曜日�E�E,
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "KADO_YOBI_KA__c",
+      "label": "稼働曜日�E�火曜日�E�E,
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "KADO_YOBI_SUI__c",
+      "label": "稼働曜日�E�水曜日�E�E,
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "KADO_YOBI_MOKU__c",
+      "label": "稼働曜日�E�木曜日�E�E,
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "KADO_YOBI_KIN__c",
+      "label": "稼働曜日�E���曜日�E�E,
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "KADO_YOBI_DO__c",
+      "label": "稼働曜日�E�土曜日�E�E,
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "KADO_YOBI_NITI__c",
+      "label": "稼働曜日�E�日曜日�E�E,
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "KADO_YOTEI_NISSUU_AUTO__c",
+      "label": "稼働予定日数�E��E動計算！E,
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "KOMA_KIJUN__c",
+      "label": "コマ基準値",
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Filename_Noppo__c",
+      "label": "ファイル名（稼働日報�E�E,
+      "type": "string",
+      "custom": true,
+      "length": 1300,
+      "picklistValues": []
+    },
+    {
+      "name": "Anken_kubun_syoki__c",
+      "label": "案件区刁E���E期値�E�E,
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "新要E,
+        "新墁E,
+        "増軁E,
+        "入替",
+        "条件変更",
+        "単価アチE�E",
+        "復活",
+        "コロナ復活",
+        "管琁E��当老E�E予測趁E��変更"
+      ]
+    },
+    {
+      "name": "Kado_kaisi_syoki__c",
+      "label": "稼働開始日�E��E期値�E�E,
+      "type": "date",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "KADO_YOBI_SYUKU__c",
+      "label": "稼働曜日�E�祝日�E�E,
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Anken_syoukaisya__c",
+      "label": "案件紹介老E,
+      "type": "reference",
+      "custom": true,
+      "length": 18,
+      "picklistValues": []
+    },
+    {
+      "name": "komasuuCP__c",
+      "label": "コマ数�E�EP�E�E,
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Partner_kubun_base__c",
+      "label": "パ�Eトナー区刁E,
+      "type": "string",
+      "custom": true,
+      "length": 1300,
+      "picklistValues": []
+    },
+    {
+      "name": "Partner_kubun_ex__c",
+      "label": "パ�Eトナー区刁E��コピ�E允E��E,
+      "type": "string",
+      "custom": true,
+      "length": 1300,
+      "picklistValues": []
+    },
+    {
+      "name": "Zogen_Uriage__c",
+      "label": "�E�増減）予定売丁E朁E,
+      "type": "string",
+      "custom": true,
+      "length": 8,
+      "picklistValues": []
+    },
+    {
+      "name": "Zogen_Genka__c",
+      "label": "�E�増減）予定原価/朁E,
+      "type": "string",
+      "custom": true,
+      "length": 8,
+      "picklistValues": []
+    },
+    {
+      "name": "Zogen_Arari__c",
+      "label": "�E�増減）粗利/朁E,
+      "type": "string",
+      "custom": true,
+      "length": 8,
+      "picklistValues": []
+    },
+    {
+      "name": "Zogen_Kadonissu__c",
+      "label": "�E�増減）稼働日数",
+      "type": "string",
+      "custom": true,
+      "length": 8,
+      "picklistValues": []
+    },
+    {
+      "name": "Zogen_Keitakutanka__c",
+      "label": "�E�増減）契紁E��価",
+      "type": "string",
+      "custom": true,
+      "length": 8,
+      "picklistValues": []
+    },
+    {
+      "name": "Zogen_keiyakujikantyoka__c",
+      "label": "�E�増減）契紁E��間趁E��",
+      "type": "string",
+      "custom": true,
+      "length": 8,
+      "picklistValues": []
+    },
+    {
+      "name": "Zogen_Kyorityouka__c",
+      "label": "�E�増減）契紁E��離趁E��",
+      "type": "string",
+      "custom": true,
+      "length": 8,
+      "picklistValues": []
+    },
+    {
+      "name": "Zogen_Itakutanka__c",
+      "label": "�E�増減）委託単価",
+      "type": "string",
+      "custom": true,
+      "length": 8,
+      "picklistValues": []
+    },
+    {
+      "name": "Zogen_Itakujikantyouka__c",
+      "label": "�E�増減）委託時間趁E��",
+      "type": "string",
+      "custom": true,
+      "length": 8,
+      "picklistValues": []
+    },
+    {
+      "name": "Zogen_Itakukyorityouka__c",
+      "label": "�E�増減）委託距離趁E��",
+      "type": "string",
+      "custom": true,
+      "length": 8,
+      "picklistValues": []
+    },
+    {
+      "name": "jikaijyukoubi__c",
+      "label": "EL次回受講日",
+      "type": "date",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "ELrejyukoubi__c",
+      "label": "EL再受講日",
+      "type": "date",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "RePart1Score__c",
+      "label": "第一部点数�E��E�E�E,
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "RePart2Score__c",
+      "label": "第二部点数�E��E�E�E,
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "RePart3Score__c",
+      "label": "第三部点数�E��E�E�E,
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "syoukaisya_keiyaku_kubun__c",
+      "label": "紹介老E��紁E��刁E,
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "拁E��老E��介まで",
+        "見積作�Eまで",
+        "申込獲得まで",
+        "契紁E��で全て自劁E,
+        "同行�Eみ"
+      ]
+    },
+    {
+      "name": "Tankaup_kousyou__c",
+      "label": "単価アチE�E交渉状況E,
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "成功",
+        "失敁E,
+        "交渉中",
+        "対象夁E
+      ]
+    },
+    {
+      "name": "Tankaup_yoteibi__c",
+      "label": "単価アチE�E交渉予定日",
+      "type": "date",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Tankaup_kousyoubi__c",
+      "label": "単価アチE�E交渉日",
+      "type": "date",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Irekaeyotei_Check__c",
+      "label": "入替予定枠",
+      "type": "boolean",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Tankaup_tekiou__c",
+      "label": "単価アチE�E適応日(未使用�E�E,
+      "type": "date",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Tankaup_tekioubi__c",
+      "label": "単価アチE�E適応日",
+      "type": "date",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Block_FY22__c",
+      "label": "本部�E�EY22�E�E,
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "地域物流本部",
+        "都市物流本部",
+        "営業開発本部",
+        "営業企画本部",
+        "国際事業本部",
+        "管琁E��部",
+        "社長室・営業管琁E��",
+        "人材派遣事業本部",
+        "リース事業本部",
+        "そ�E仁E
+      ]
+    },
+    {
+      "name": "Group_FY22__c",
+      "label": "部・主管支店！EY22�E�E,
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "北海道主管",
+        "東北主管",
+        "北関東北信越主管",
+        "東関東主管",
+        "都市物流営業部�E�定期便・神奈川！E,
+        "東海主管",
+        "京滋奈主管",
+        "大阪和歌山主管",
+        "兵庫主管",
+        "中国主管",
+        "四国主管",
+        "九州主管",
+        "都市物流営業部�E�定期便・東京�E�E,
+        "都市物流営業部�E�緊急便�E�E,
+        "関西事業Gr",
+        "関西オペレーションGr",
+        "コントロールGr",
+        "大阪営業部設立準備室",
+        "マ�EケチE��ング戦略部",
+        "宁E�E事業推進部",
+        "プロジェクト推進部",
+        "フォワーチE��ング事業部",
+        "通関部",
+        "グローバルEC営業部",
+        "インサイドセールス部",
+        "チE��タル戦略部",
+        "パ�Eトナーサクセス部",
+        "管琁E��",
+        "営業管琁E��",
+        "人材派遣事業部",
+        "そ�E仁E,
+        "リース事業部"
+      ]
+    },
+    {
+      "name": "Yotei_riekiritu__c",
+      "label": "予定利益率/月（計算用�E�E,
+      "type": "percent",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Haken_PJ_keisu__c",
+      "label": "派遣PJ案件�E�係数)",
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "kakutoku_koma_keisuu__c",
+      "label": "獲得コマ数�E�係数用�E�E,
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Torihikisakibumon__c",
+      "label": "取引�E部門",
+      "type": "string",
+      "custom": true,
+      "length": 1300,
+      "picklistValues": []
+    },
+    {
+      "name": "filename_Iraisyo__c",
+      "label": "ファイル名（依頼書�E�E,
+      "type": "string",
+      "custom": true,
+      "length": 1300,
+      "picklistValues": []
+    },
+    {
+      "name": "Output_Iraisyo__c",
+      "label": "出力フラグ�E�依頼書�E�E,
+      "type": "boolean",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Haisyasyouninbi__c",
+      "label": "配車承認日",
+      "type": "datetime",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Syouninsinsei_mail__c",
+      "label": "承認申請老E��ール",
+      "type": "email",
+      "custom": true,
+      "length": 80,
+      "picklistValues": []
+    },
+    {
+      "name": "itakutanka_kopi_moto__c",
+      "label": "委託単価�E�コピ�E允E��E,
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Itakutanka_henkouchi__c",
+      "label": "委託単価変更値",
+      "type": "string",
+      "custom": true,
+      "length": 1300,
+      "picklistValues": []
+    },
+    {
+      "name": "Keiyaku_kopi_moto__c",
+      "label": "契紁E��価�E�コピ�E允E��E,
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Yoteiuriage_kopi_moto__c",
+      "label": "予定売丁E月（計算用�E�（コピ�E允E��E,
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Yoteiarari_kopi_moto__c",
+      "label": "予定粗利/月（計算用�E�（コピ�E允E��E,
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Yoteiarariritu_kopi_moto__c",
+      "label": "予定利益率/月（計算用�E�（コピ�E允E��E,
+      "type": "percent",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Keiyakutanka_henkouchi__c",
+      "label": "契紁E��価変更値",
+      "type": "string",
+      "custom": true,
+      "length": 1300,
+      "picklistValues": []
+    },
+    {
+      "name": "Yotei_riekiritu_henkouchi__c",
+      "label": "予定利益率/月（計算用�E�変更値",
+      "type": "percent",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "yoteiuriage_day_kopi_moto__c",
+      "label": "予定売丁E日�E�計算用�E�（コピ�E允E��E,
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "yoteiarari_day_kopi_moto__c",
+      "label": "予定粗利/日�E�計算用�E�（コピ�E允E��E,
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Yotei_Genka_keisan_kopi_moto__c",
+      "label": "予定原価/月（計算用�E�（コピ�E允E��E,
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "yoteigenka_day_kopi_moto__c",
+      "label": "予定原価/日�E�計算用�E�（コピ�E允E��E,
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Keiyaku_zougenchi__c",
+      "label": "契紁E��価増減値",
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "itakutanka_zougenchi__c",
+      "label": "委託単価増減値",
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Yoteiuriage_zougenchi__c",
+      "label": "予定売丁E月（増減値�E�E,
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Yoteiarari_zougenchi__c",
+      "label": "予定粗利/月（増減値�E�E,
+      "type": "currency",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Yoteiarariritu_zougenchi__c",
+      "label": "予定利益率/月（増減値�E�E,
+      "type": "percent",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Haisyasinsei_komento__c",
+      "label": "配車承認申請老E��メンチE,
+      "type": "textarea",
+      "custom": true,
+      "length": 32768,
+      "picklistValues": []
+    },
+    {
+      "name": "Daisou_komento__c",
+      "label": "代走コメンチE,
+      "type": "textarea",
+      "custom": true,
+      "length": 32768,
+      "picklistValues": []
+    },
+    {
+      "name": "churncontract__c",
+      "label": "枠刁E枠取判宁E,
+      "type": "string",
+      "custom": true,
+      "length": 1300,
+      "picklistValues": []
+    },
+    {
+      "name": "Score_syuukin__c",
+      "label": "スコアリング�E�集金！E,
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Score_hattusou__c",
+      "label": "スコアリング�E�発送E��E,
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Score_nyuuko__c",
+      "label": "スコアリング�E��E庫作業�E�E,
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Score_konpou__c",
+      "label": "スコアリング�E�梱匁E��業�E�E,
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Score_seihin__c",
+      "label": "スコアリング�E�製品整琁E��E,
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Score_tanmatsu__c",
+      "label": "スコアリング�E�端末作業�E�E,
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Nanido_cyuu__c",
+      "label": "難易度�E�中�E�判宁E,
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "churncontractday__c",
+      "label": "枠刁E枠取　日仁E,
+      "type": "date",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "ScoreT_goukei__c",
+      "label": "合計値",
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "churncontractno__c",
+      "label": "枠叁E枠刁E��",
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Score_teisuu__c",
+      "label": "スコアリング�E�定数納品管琁E��E,
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Score_setuchi__c",
+      "label": "スコアリング�E�設置絁E��！E,
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Score_data__c",
+      "label": "スコアリング�E�データ入力！E,
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Nanido_kou__c",
+      "label": "難易度�E�高）判宁E,
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Kadoueria__c",
+      "label": "稼働エリア",
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "中忁E��から30刁E��冁E,
+        "中忁E��から60刁E��冁E,
+        "中忁E��から60刁E��丁E
+      ]
+    },
+    {
+      "name": "Score_kousoku__c",
+      "label": "拘束時間判宁E,
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Score_haisoukyori__c",
+      "label": "配送距離/日判宁E,
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Score_kadoueria__c",
+      "label": "稼働エリア判宁E,
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Score_haisoukubun__c",
+      "label": "配送区刁E��宁E,
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Score_nenreiseigen__c",
+      "label": "年齢制限判宁E,
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Score_ban__c",
+      "label": "スコアリング�E�バン�E�E,
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Score_horo__c",
+      "label": "スコアリング�E�幌車！E,
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Score_reizou__c",
+      "label": "スコアリング�E��E蔵車！E,
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Score_reitou__c",
+      "label": "スコアリング�E��E凍車！E,
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Score_hira__c",
+      "label": "スコアリング�E�平ボデイ�E�E,
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Score_syasyu__c",
+      "label": "車種区刁E��宁E,
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Score_keiyaku__c",
+      "label": "契紁E��価判宁E,
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Score_goukei__c",
+      "label": "案件スコア合訁E,
+      "type": "double",
+      "custom": true,
+      "length": 0,
+      "picklistValues": []
+    },
+    {
+      "name": "Kyuujin__c",
+      "label": "求人",
+      "type": "picklist",
+      "custom": true,
+      "length": 255,
+      "picklistValues": [
+        "求人希望",
+        "求人不要E,
+        "掲載中"
+      ]
+    }
+  ]
+}

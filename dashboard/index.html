@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>サミット営業成績ダッシュボード</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script src="./firebase-config.js"></script>
+<script type="module" src="./auth-guard.js"></script>
+<script type="module" src="./data-loader.js"></script>
+<style>
+:root {
+  --c-t1: #FFB3B3; --c-t2: #A5D8FF; --c-t3: #B2F2BB; --c-t4: #FFD8A8;
+  --c-t1-dark: #E07070; --c-t2-dark: #4A98D8; --c-t3-dark: #4CAF50; --c-t4-dark: #F59E0B;
+  --c-primary: #2E5C8A; --c-accent: #6A8FB0;
+  --c-bg: #F7F9FC; --c-card: #FFFFFF; --c-border: #E2E8F0;
+  --c-text: #1F2937; --c-text-sub: #6B7280;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Yu Gothic','Hiragino Sans','Meiryo',sans-serif; background: var(--c-bg); color: var(--c-text); line-height: 1.6; }
+header { background: linear-gradient(135deg,var(--c-primary),var(--c-accent)); color: white; padding: 14px 24px; }
+header h1 { font-size: 20px; font-weight: 700; }
+header .meta { font-size: 12px; opacity: 0.85; margin-top: 2px; }
+nav { background: white; border-bottom: 1px solid var(--c-border); padding: 0 24px; display: flex; overflow-x: auto; }
+nav button { background: none; border: none; padding: 14px 20px; font-size: 14px; font-weight: 600; color: var(--c-text-sub); cursor: pointer; border-bottom: 3px solid transparent; white-space: nowrap; }
+nav button.active { color: var(--c-primary); border-bottom-color: var(--c-primary); }
+nav button:hover { color: var(--c-primary); }
+.filter-bar { background: var(--c-card); border-bottom: 1px solid var(--c-border); padding: 10px 24px; display: flex; flex-direction: column; gap: 8px; }
+.filter-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.filter-row .label { font-size: 12px; font-weight: 700; color: var(--c-text-sub); min-width: 56px; }
+.pill { padding: 5px 12px; border: 1px solid var(--c-border); border-radius: 14px; background: white; color: var(--c-text-sub); font-size: 12px; font-weight: 600; cursor: pointer; }
+.pill.active { background: var(--c-primary); color: white; border-color: var(--c-primary); }
+.pill:hover:not(.active) { background: var(--c-bg); }
+.filter-info { font-size: 11px; color: var(--c-text-sub); margin-left: auto; }
+main { max-width: 1200px; margin: 0 auto; padding: 20px 24px; }
+.section { display: none; }
+.section.active { display: block; }
+.kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 14px; margin-bottom: 20px; }
+.kpi-box { background: var(--c-card); border-radius: 12px; padding: 14px 18px; border: 1px solid var(--c-border); }
+.kpi-box .label { font-size: 11px; color: var(--c-text-sub); margin-bottom: 2px; }
+.kpi-box .value { font-size: 22px; font-weight: 700; color: var(--c-primary); }
+.kpi-box .value small { font-size: 13px; color: var(--c-text-sub); margin-left: 3px; }
+h2 { font-size: 15px; font-weight: 700; color: var(--c-primary); margin: 18px 0 10px; padding-bottom: 4px; border-bottom: 2px solid var(--c-border); }
+.team-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 20px; }
+.team-card { border-radius: 14px; padding: 16px 18px; cursor: pointer; transition: transform 0.15s, box-shadow 0.15s; position: relative; overflow: hidden; border: 1px solid var(--c-border); background: white; }
+.team-card:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
+.team-card .accent { position: absolute; top: 0; left: 0; width: 100%; height: 5px; }
+.team-card[data-team="T1"] .accent { background: var(--c-t1); }
+.team-card[data-team="T2"] .accent { background: var(--c-t2); }
+.team-card[data-team="T3"] .accent { background: var(--c-t3); }
+.team-card[data-team="T4"] .accent { background: var(--c-t4); }
+.team-card .rank { font-size: 10px; color: var(--c-text-sub); font-weight: 600; margin-top: 2px; }
+.team-card .name { font-size: 20px; font-weight: 700; margin-top: 2px; }
+.team-card .pt { font-size: 28px; font-weight: 700; color: var(--c-primary); margin: 6px 0 2px; }
+.team-card .pt small { font-size: 12px; color: var(--c-text-sub); margin-left: 2px; }
+.team-card .stats { display: flex; gap: 12px; font-size: 11px; color: var(--c-text-sub); margin-top: 6px; flex-wrap: wrap; }
+.team-card .money { font-size: 13px; color: var(--c-text); font-weight: 600; margin-top: 6px; }
+.team-card .money small { font-size: 10px; color: var(--c-text-sub); font-weight: 400; }
+.chart-card { background: var(--c-card); border-radius: 12px; padding: 16px; margin-bottom: 18px; border: 1px solid var(--c-border); }
+.chart-card .title { font-size: 13px; font-weight: 700; color: var(--c-primary); margin-bottom: 10px; }
+.chart-wrap { position: relative; height: 260px; }
+table.ranking { width: 100%; border-collapse: collapse; background: var(--c-card); border-radius: 10px; overflow: hidden; border: 1px solid var(--c-border); font-size: 13px; }
+table.ranking th, table.ranking td { padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--c-border); }
+table.ranking th { background: var(--c-bg); font-weight: 700; color: var(--c-text-sub); font-size: 11px; text-transform: uppercase; letter-spacing: 0.3px; }
+table.ranking tr:last-child td { border-bottom: none; }
+table.ranking tr.clickable { cursor: pointer; }
+table.ranking tr.clickable:hover { background: var(--c-bg); }
+table.ranking td.num { text-align: right; font-variant-numeric: tabular-nums; }
+.rank-badge { display: inline-block; width: 26px; height: 26px; line-height: 26px; text-align: center; border-radius: 50%; font-weight: 700; font-size: 11px; background: var(--c-bg); color: var(--c-text-sub); }
+.rank-badge.gold { background: #FFD700; color: #4D3800; }
+.rank-badge.silver { background: #C0C0C0; color: #333; }
+.rank-badge.bronze { background: #CD7F32; color: white; }
+.team-tag { display: inline-block; padding: 2px 9px; border-radius: 9px; font-size: 10px; font-weight: 700; }
+.team-tag[data-team="T1"] { background: var(--c-t1); color: #7A2020; }
+.team-tag[data-team="T2"] { background: var(--c-t2); color: #1E4670; }
+.team-tag[data-team="T3"] { background: var(--c-t3); color: #1F5A2C; }
+.team-tag[data-team="T4"] { background: var(--c-t4); color: #7A4500; }
+.back-link { display: inline-block; margin-bottom: 10px; color: var(--c-accent); cursor: pointer; font-size: 12px; font-weight: 600; }
+.back-link:hover { color: var(--c-primary); }
+.detail-header { background: var(--c-card); border-radius: 12px; padding: 18px 20px; margin-bottom: 14px; border: 1px solid var(--c-border); display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.detail-header .swatch { width: 44px; height: 44px; border-radius: 50%; flex-shrink: 0; }
+.detail-header .name { font-size: 22px; font-weight: 700; }
+.detail-header .stats { color: var(--c-text-sub); font-size: 12px; }
+.empty { background: var(--c-card); border: 2px dashed var(--c-border); border-radius: 12px; padding: 40px 20px; text-align: center; color: var(--c-text-sub); }
+.btn { display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; border: 1px solid var(--c-border); background: white; color: var(--c-text-sub); }
+.btn:hover { background: var(--c-bg); color: var(--c-primary); }
+.btn.primary { background: var(--c-primary); color: white; border-color: var(--c-primary); }
+.btn.primary:hover { background: #1f4670; }
+.btn.success { background: #059669; color: white; border-color: #059669; }
+.btn.success:hover { background: #047857; }
+.btn-group { display: flex; gap: 6px; }
+.modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 100; justify-content: center; align-items: flex-start; padding: 40px 20px; overflow-y: auto; }
+.modal.active { display: flex; }
+.modal-body { background: white; border-radius: 12px; max-width: 800px; width: 100%; max-height: calc(100vh - 80px); overflow-y: auto; padding: 24px; position: relative; }
+.modal-close { position: absolute; top: 12px; right: 16px; background: none; border: none; font-size: 22px; cursor: pointer; color: var(--c-text-sub); }
+.modal-close:hover { color: var(--c-text); }
+.modal h3 { color: var(--c-primary); font-size: 18px; font-weight: 700; margin-bottom: 4px; padding-right: 32px; }
+.modal .sub-title { font-size: 12px; color: var(--c-text-sub); margin-bottom: 16px; }
+.modal table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 8px; margin-bottom: 16px; }
+.modal table th, .modal table td { padding: 6px 10px; border-bottom: 1px solid var(--c-border); text-align: left; }
+.modal table th { background: var(--c-bg); font-size: 11px; font-weight: 700; color: var(--c-text-sub); text-transform: uppercase; }
+.modal table td.num { text-align: right; font-variant-numeric: tabular-nums; }
+.modal table tr.total { background: var(--c-bg); font-weight: 700; }
+.modal .kvtable td:first-child { color: var(--c-text-sub); font-size: 11px; width: 40%; }
+@media (max-width: 640px) {
+  main { padding: 14px; }
+  header h1 { font-size: 16px; }
+  nav button { padding: 12px 14px; font-size: 13px; }
+  .modal-body { padding: 18px; }
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>🏔 サミット営業成績ダッシュボード</h1>
+  <div class="meta" id="meta"></div>
+</header>
+<nav>
+  <button data-view="overview" class="active">全体</button>
+  <button data-view="teams">チーム別</button>
+  <button data-view="individuals">個人別</button>
+  <button data-view="monthly">月別推移</button>
+  <button data-view="financials">実績（売上/粗利）</button>
+  <button data-view="import-csv">📥 実績取込</button>
+</nav>
+<div class="filter-bar">
+  <div class="filter-row">
+    <span class="label">年度:</span>
+    <div id="fy-pills" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+  </div>
+  <div class="filter-row">
+    <span class="label">期間:</span>
+    <div id="month-pills" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+    <div class="filter-info" id="filter-info"></div>
+  </div>
+</div>
+<main>
+  <section id="overview" class="section active"></section>
+  <section id="teams" class="section"></section>
+  <section id="individuals" class="section"></section>
+  <section id="monthly" class="section"></section>
+  <section id="financials" class="section"></section>
+  <section id="import-csv" class="section"></section>
+  <section id="team-detail" class="section"></section>
+  <section id="individual-detail" class="section"></section>
+</main>
+<div class="modal" id="modal-deal-detail">
+  <div class="modal-body">
+    <button class="modal-close" onclick="closeModal()">×</button>
+    <div id="deal-detail-body"></div>
+  </div>
+</div>
+<div class="modal" id="modal-deal-financial">
+  <div class="modal-body">
+    <button class="modal-close" onclick="closeModal()">×</button>
+    <div id="deal-financial-body"></div>
+  </div>
+</div>
+<script>
+const TEAM_INFO = { T1:{name:'富士',color:'#FFB3B3',dark:'#E07070'}, T2:{name:'立山',color:'#A5D8FF',dark:'#4A98D8'}, T3:{name:'剱',color:'#B2F2BB',dark:'#4CAF50'}, T4:{name:'白山',color:'#FFD8A8',dark:'#F59E0B'} };
+const TEAM_IDS = ['T1','T2','T3','T4'];
+
+let SUMMARY = null, DEALS = null, FINANCIALS = null;
+function initAfterDataReady() {
+  SUMMARY = window.__SUMMARY__;
+  DEALS = window.__DEALS__;
+  FINANCIALS = window.__FINANCIALS__;
+  if (!SUMMARY) {
+    document.querySelector('main').innerHTML = '<div class="empty"><h2>データが読み込めません</h2></div>';
+    return;
+  }
+  document.getElementById('meta').textContent = buildMetaLine();
+  renderFyPills(); renderMonthPills(); updateFilterInfo(); renderOverview();
+}
+if (window.__SUMMARY__) {
+  // 既存data.js経由（後方互換）
+  initAfterDataReady();
+} else {
+  window.addEventListener('summit-data-ready', initAfterDataReady);
+}
+
+let currentFY = 'all', currentMonth = 'all', currentView = 'overview';
+
+function fyMonths(fy) {
+  if (!fy.startsWith('FY')) return [];
+  const y = Number(fy.slice(2));
+  const a = [];
+  for (let m=4;m<=12;m++) a.push(y + '-' + String(m).padStart(2,'0'));
+  for (let m=1;m<=3;m++) a.push((y+1) + '-' + String(m).padStart(2,'0'));
+  return a;
+}
+function ymInFY(ym, fy) { return ym && fy.startsWith('FY') && fyMonths(fy).includes(ym); }
+
+function getAggregate() {
+  if (currentMonth !== 'all') return (SUMMARY.aggregateByPeriod && SUMMARY.aggregateByPeriod[currentMonth]) || emptyAgg();
+  if (currentFY !== 'all') return (SUMMARY.aggregateByFiscalYear && SUMMARY.aggregateByFiscalYear[currentFY]) || emptyAgg();
+  return SUMMARY.aggregate;
+}
+function emptyAgg() { return { totalPoint:0, totalDeals:0, totalIssues:0, members:[], teams:[], monthly:[], rankings:{individual:[],team:[]} }; }
+
+// 案件ID → 獲得年度（FY）のマップ
+function dealsFiscalYearMap() {
+  const m = {};
+  if (!DEALS || !DEALS.deals) return m;
+  for (const d of DEALS.deals) {
+    const fy = yearMonthToFY(d.yearMonth);
+    if (fy) m[d.id] = fy;
+  }
+  return m;
+}
+function yearMonthToFY(ym) {
+  if (!ym || !/^\d{4}-\d{2}$/.test(ym)) return null;
+  const y = Number(ym.slice(0, 4));
+  const mo = Number(ym.slice(5, 7));
+  return 'FY' + (mo >= 4 ? y : y - 1);
+}
+
+function getFinancialsForPeriod() {
+  const empty = { revenue:0, grossProfit:0, byTeam:{}, byMember:{}, byMonth:{}, matchedRows:[] };
+  if (!FINANCIALS || !FINANCIALS.matchedRows) return empty;
+  const dealFy = dealsFiscalYearMap();
+  const filtered = FINANCIALS.matchedRows.filter(r => {
+    // 「年度内完結」ルール: 案件獲得年度と実績月の年度が一致するもののみ集計
+    const acquiredFy = dealFy[r.dealId];
+    if (!acquiredFy) return false;
+    const recordFy = yearMonthToFY(r.yearMonth);
+    if (recordFy !== acquiredFy) return false;
+    // 期間フィルタ
+    if (currentMonth !== 'all') return r.yearMonth === currentMonth;
+    if (currentFY !== 'all') return acquiredFy === currentFY;
+    return true;
+  });
+  const out = { revenue:0, grossProfit:0, byTeam:{}, byMember:{}, byMonth:{}, matchedRows:filtered };
+  for (const r of filtered) {
+    out.revenue += r.revenue; out.grossProfit += r.grossProfit;
+    const team = r.teamId || '?';
+    if (!out.byTeam[team]) out.byTeam[team] = { revenue:0, grossProfit:0, deals:0 };
+    out.byTeam[team].revenue += r.revenue; out.byTeam[team].grossProfit += r.grossProfit; out.byTeam[team].deals++;
+    const mk = (r.ownerName || '?') + '|' + team;
+    if (!out.byMember[mk]) out.byMember[mk] = { ownerName:r.ownerName||'?', teamId:team, revenue:0, grossProfit:0, deals:0 };
+    out.byMember[mk].revenue += r.revenue; out.byMember[mk].grossProfit += r.grossProfit; out.byMember[mk].deals++;
+    if (!out.byMonth[r.yearMonth]) out.byMonth[r.yearMonth] = { revenue:0, grossProfit:0, deals:0 };
+    out.byMonth[r.yearMonth].revenue += r.revenue; out.byMonth[r.yearMonth].grossProfit += r.grossProfit; out.byMonth[r.yearMonth].deals++;
+  }
+  return out;
+}
+
+function fmtPt(n) { return (Math.round(n*100)/100).toFixed(2); }
+function fmtYen(n) { return '¥' + Math.round(n).toLocaleString(); }
+function rankBadge(r) { const c=r===1?'gold':r===2?'silver':r===3?'bronze':''; return '<span class="rank-badge '+c+'">'+r+'</span>'; }
+function teamTag(t) { const i=TEAM_INFO[t]||{name:t}; return '<span class="team-tag" data-team="'+t+'">'+t+' '+i.name+'</span>'; }
+function escHtml(s) { return String(s ?? '').replace(/[<>&"]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c])); }
+
+function renderFyPills() {
+  const c = document.getElementById('fy-pills');
+  const fys = ['all'];
+  if (SUMMARY.aggregateByFiscalYear) for (const fy of Object.keys(SUMMARY.aggregateByFiscalYear).sort()) fys.push(fy);
+  c.innerHTML = '';
+  for (const fy of fys) {
+    const b = document.createElement('button');
+    b.className = 'pill' + (fy===currentFY?' active':'');
+    b.textContent = fy==='all' ? '全期間' : fy;
+    b.onclick = () => { currentFY = fy; currentMonth = 'all'; renderFyPills(); renderMonthPills(); updateFilterInfo(); renderCurrentView(); };
+    c.appendChild(b);
+  }
+}
+function renderMonthPills() {
+  const c = document.getElementById('month-pills');
+  c.innerHTML = '';
+  let ms = ['all'];
+  if (currentFY === 'all') {
+    if (SUMMARY.aggregateByPeriod) for (const ym of Object.keys(SUMMARY.aggregateByPeriod).sort()) ms.push(ym);
+  } else {
+    for (const ym of fyMonths(currentFY)) if (SUMMARY.aggregateByPeriod && SUMMARY.aggregateByPeriod[ym]) ms.push(ym);
+  }
+  for (const m of ms) {
+    const b = document.createElement('button');
+    b.className = 'pill' + (m===currentMonth?' active':'');
+    b.textContent = m==='all' ? '累積' : m;
+    b.onclick = () => { currentMonth = m; renderMonthPills(); updateFilterInfo(); renderCurrentView(); };
+    c.appendChild(b);
+  }
+}
+function updateFilterInfo() {
+  const a = getAggregate(); const fin = getFinancialsForPeriod();
+  const label = currentMonth !== 'all' ? currentMonth+'単月' : currentFY !== 'all' ? currentFY+'累積' : '全期間累積';
+  document.getElementById('filter-info').textContent =
+    '表示中: ' + label + ' / 案件 ' + a.totalDeals + '件 / ' + fmtPt(a.totalPoint) + 'pt' +
+    (fin.revenue > 0 ? ' / 売上 ' + fmtYen(fin.revenue) : '');
+}
+
+function renderCurrentView() {
+  ({overview:renderOverview, teams:renderTeams, individuals:renderIndividuals, monthly:renderMonthly, financials:renderFinancials, 'import-csv':renderImportCsv}[currentView] || (()=>{}))();
+}
+
+function parseCsvLine(line) {
+  const out = []; let cur = ''; let q = false;
+  for (let i = 0; i < line.length; i++) {
+    const c = line[i];
+    if (q) {
+      if (c === '"') { if (line[i+1] === '"') { cur += '"'; i++; } else { q = false; } }
+      else cur += c;
+    } else {
+      if (c === ',') { out.push(cur); cur = ''; }
+      else if (c === '"') q = true;
+      else cur += c;
+    }
+  }
+  out.push(cur);
+  return out;
+}
+
+// CSVのパース結果を保持
+let csvParsedRows = null;
+
+function renderImportCsv() {
+  const sec = document.getElementById('import-csv');
+  let html = '<h2>📥 実績データ取込</h2>';
+  html += '<div style="background:white;border:1px solid var(--c-border);border-radius:12px;padding:20px;margin-bottom:16px">';
+  html += '<p style="font-size:13px;color:var(--c-text-sub);margin-bottom:12px">月別売上・粗利CSVをアップロードしてください。同じ月（配送年月）のデータが既に存在する場合は、その月のデータを削除してから新しいデータに置き換えます（UPSERT）。Firestore に直接書き込まれ、ダッシュボードに即時反映されます。</p>';
+  html += '<input type="file" id="csv-file" accept=".csv" style="margin-bottom:12px" /><br>';
+  html += '<button id="btn-preview" class="btn primary">プレビュー</button>';
+  html += '<button id="btn-import" class="btn success" style="margin-left:6px" disabled>取込実行（Firestore書込）</button>';
+  html += '<div id="csv-preview" style="margin-top:16px"></div>';
+  html += '<div id="csv-import-progress" style="margin-top:16px"></div>';
+  html += '</div>';
+  sec.innerHTML = html;
+  document.getElementById('btn-preview').addEventListener('click', previewCsv);
+  document.getElementById('btn-import').addEventListener('click', importCsvToFirestore);
+}
+
+function previewCsv() {
+  const file = document.getElementById('csv-file').files[0];
+  if (!file) { alert('ファイルを選択してください'); return; }
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const text = String(e.target.result).replace(/^﻿/, '');
+    const lines = text.split(/\r?\n/).filter(l => l.trim() !== '');
+    if (lines.length < 2) { document.getElementById('csv-preview').innerHTML = '<div class="empty">行数が不足しています</div>'; return; }
+    const header = parseCsvLine(lines[0]);
+    const idx = {
+      ym: header.findIndex(h => h.includes('配送年月')),
+      mn: header.findIndex(h => h.includes('マニュアル番号')),
+      rev: header.findIndex(h => h.includes('売上合計')),
+      cp: header.findIndex(h => h.includes('CP用原価合計')),
+      wd: header.findIndex(h => h.includes('稼働日数')),
+    };
+    if (idx.ym < 0 || idx.mn < 0 || idx.rev < 0 || idx.cp < 0) {
+      document.getElementById('csv-preview').innerHTML = '<div class="empty">CSVヘッダに必須カラムが見つかりません</div>';
+      return;
+    }
+    const months = new Set();
+    let totalRev = 0, totalGp = 0, rowCount = 0;
+    const sample = [];
+    for (let i = 1; i < lines.length; i++) {
+      const c = parseCsvLine(lines[i]);
+      const ym = String(c[idx.ym] || '').replace(/['"]/g,'').trim();
+      const mn = String(c[idx.mn] || '').replace(/['"]/g,'').trim();
+      const rev = Number(c[idx.rev]) || 0;
+      const cp = Number(c[idx.cp]) || 0;
+      if (!ym || !mn) continue;
+      months.add(ym);
+      totalRev += rev;
+      totalGp += rev - cp;
+      rowCount++;
+      if (sample.length < 5) sample.push({ ym, mn, rev, gp: rev - cp });
+    }
+    // パース結果を保持（取込実行で使う）
+    csvParsedRows = [];
+    for (let i = 1; i < lines.length; i++) {
+      const c = parseCsvLine(lines[i]);
+      const ym = String(c[idx.ym] || '').replace(/['"]/g,'').trim();
+      const mn = String(c[idx.mn] || '').replace(/['"]/g,'').trim();
+      const rev = Number(c[idx.rev]) || 0;
+      const cp = Number(c[idx.cp]) || 0;
+      const wd = Number(c[idx.wd] >= 0 ? c[idx.wd] : 0) || 0;
+      if (!ym || !mn) continue;
+      // YYYYMM → YYYY-MM
+      const ymNorm = /^\d{6}$/.test(ym) ? ym.slice(0,4) + '-' + ym.slice(4,6) : ym;
+      csvParsedRows.push({ yearMonth: ymNorm, manualNo: mn, revenue: rev, grossProfit: rev - cp, workdays: wd, costTotal: 0 });
+    }
+
+    const sortedMonths = Array.from(months).sort();
+    let html = '<h3 style="margin-bottom:8px">プレビュー</h3>';
+    html += '<table class="ranking"><tbody>';
+    html += '<tr><td>ファイル名</td><td><strong>'+file.name+'</strong></td></tr>';
+    html += '<tr><td>有効行数</td><td>'+rowCount+'</td></tr>';
+    html += '<tr><td>対象月（配送年月）</td><td><strong>'+sortedMonths.join(', ')+'</strong></td></tr>';
+    html += '<tr><td>合計売上</td><td>'+fmtYen(totalRev)+'</td></tr>';
+    html += '<tr><td>合計粗利</td><td>'+fmtYen(totalGp)+'</td></tr>';
+    html += '</tbody></table>';
+    html += '<h3 style="margin:16px 0 8px">先頭5行のサンプル</h3>';
+    html += '<table class="ranking"><thead><tr><th>配送年月</th><th>マニュアル番号</th><th class="num">売上</th><th class="num">粗利</th></tr></thead><tbody>';
+    for (const r of sample) html += '<tr><td>'+r.ym+'</td><td>'+r.mn+'</td><td class="num">'+fmtYen(r.rev)+'</td><td class="num">'+fmtYen(r.gp)+'</td></tr>';
+    html += '</tbody></table>';
+    document.getElementById('csv-preview').innerHTML = html;
+    document.getElementById('btn-import').disabled = false;
+  };
+  reader.readAsText(file, 'UTF-8');
+}
+
+async function importCsvToFirestore() {
+  if (!csvParsedRows || csvParsedRows.length === 0) { alert('先に「プレビュー」を実行してください'); return; }
+  const fileName = document.getElementById('csv-file').files[0]?.name || '(unknown)';
+  const progress = document.getElementById('csv-import-progress');
+  const setProgress = (html) => { progress.innerHTML = html; };
+
+  if (!confirm('対象月のデータを削除して、CSVの内容で置き換えます。よろしいですか？')) return;
+
+  document.getElementById('btn-import').disabled = true;
+  document.getElementById('btn-preview').disabled = true;
+
+  try {
+    setProgress('<div style="padding:12px;background:var(--c-bg);border-radius:8px;font-size:13px">⏳ Firestoreに接続中...</div>');
+    const { getFirestore, collection, query, where, getDocs, writeBatch, doc, serverTimestamp }
+      = await import('https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js');
+    const { getApp } = await import('https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js');
+    const db = getFirestore(getApp());
+    const user = window.__AUTH__?.auth?.currentUser;
+    const actor = user?.email || 'unknown';
+
+    // 1. 対象月一覧
+    const months = Array.from(new Set(csvParsedRows.map(r => r.yearMonth))).sort();
+    setProgress('<div style="padding:12px;background:var(--c-bg);border-radius:8px;font-size:13px">📋 対象月: ' + months.join(', ') + '<br>🗑 既存データ削除中...</div>');
+
+    // 2. 該当月のドキュメント削除
+    let totalDeleted = 0;
+    for (const ym of months) {
+      const q = query(collection(db, 'monthly_revenue'), where('yearMonth', '==', ym));
+      const snap = await getDocs(q);
+      const docs = snap.docs;
+      for (let i = 0; i < docs.length; i += 500) {
+        const batch = writeBatch(db);
+        for (const d of docs.slice(i, i + 500)) batch.delete(d.ref);
+        await batch.commit();
+      }
+      totalDeleted += docs.length;
+      setProgress('<div style="padding:12px;background:var(--c-bg);border-radius:8px;font-size:13px">🗑 ' + ym + ': ' + docs.length + ' 件削除（累計 ' + totalDeleted + ' 件）</div>');
+    }
+
+    // 3. dealsをFirestoreから取得して manualNo→deal のマップを作る
+    setProgress('<div style="padding:12px;background:var(--c-bg);border-radius:8px;font-size:13px">🔗 案件マスタ読込中（突合用）...</div>');
+    const dealsSnap = await getDocs(collection(db, 'deals'));
+    const manualToDeal = new Map();
+    dealsSnap.docs.forEach(d => {
+      const data = d.data();
+      if (data.manualNo) manualToDeal.set(String(data.manualNo).trim(), { id: d.id, ...data });
+    });
+
+    // 4. 突合して書き込みリストを作成
+    const writes = [];
+    let matched = 0, unmatched = 0;
+    for (const r of csvParsedRows) {
+      const deal = manualToDeal.get(String(r.manualNo).trim());
+      if (!deal) { unmatched++; continue; }
+      matched++;
+      const fy = (() => {
+        if (!r.yearMonth || !/^\d{4}-\d{2}$/.test(r.yearMonth)) return null;
+        const y = Number(r.yearMonth.slice(0, 4));
+        const m = Number(r.yearMonth.slice(5, 7));
+        return 'FY' + (m >= 4 ? y : y - 1);
+      })();
+      writes.push({
+        id: r.yearMonth + '_' + deal.id,
+        data: {
+          yearMonth: r.yearMonth,
+          fiscalYear: fy,
+          dealId: deal.id,
+          manualNo: r.manualNo,
+          ownerName: deal.ownerName,
+          teamId: deal.teamId,
+          revenue: r.revenue,
+          grossProfit: r.grossProfit,
+          workdays: r.workdays,
+          uploadedAt: serverTimestamp(),
+          uploadedBy: actor,
+          sourceFile: fileName,
+        }
+      });
+    }
+
+    // 5. バッチ書込
+    setProgress('<div style="padding:12px;background:var(--c-bg);border-radius:8px;font-size:13px">✍ 突合: ' + matched + ' 件 / 未突合: ' + unmatched + ' 件<br>書込中...</div>');
+    let written = 0;
+    for (let i = 0; i < writes.length; i += 500) {
+      const batch = writeBatch(db);
+      for (const w of writes.slice(i, i + 500)) batch.set(doc(db, 'monthly_revenue', w.id), w.data);
+      await batch.commit();
+      written += Math.min(500, writes.length - i);
+      setProgress('<div style="padding:12px;background:var(--c-bg);border-radius:8px;font-size:13px">✍ 書込中: ' + written + ' / ' + writes.length + '</div>');
+    }
+
+    // 6. meta/sync_status 更新
+    const metaBatch = writeBatch(db);
+    metaBatch.set(doc(db, 'meta', 'sync_status'), {
+      lastCsvImport: serverTimestamp(),
+      lastCsvImportMonths: months,
+      lastCsvImportRows: written,
+      lastCsvImportBy: actor,
+    }, { merge: true });
+    metaBatch.set(doc(collection(db, 'audit_log')), {
+      actor, action: 'csv_import',
+      target: 'monthly_revenue',
+      detail: { months, rows: written, matched, unmatched, fileName },
+      occurredAt: serverTimestamp(),
+    });
+    await metaBatch.commit();
+
+    setProgress(
+      '<div style="padding:14px;background:#d1fae5;border:1px solid #059669;border-radius:8px;font-size:13px;color:#064e3b">' +
+      '✅ <strong>取込完了！</strong><br>' +
+      '対象月: ' + months.join(', ') + '<br>' +
+      '削除: ' + totalDeleted + ' 件 / 書込: ' + written + ' 件（突合' + matched + ' / 未突合' + unmatched + '）<br>' +
+      '<button class="btn primary" style="margin-top:10px" onclick="location.reload()">ダッシュボードを再読込</button>' +
+      '</div>'
+    );
+    document.getElementById('btn-preview').disabled = false;
+  } catch (err) {
+    setProgress('<div style="padding:14px;background:#fee2e2;border:1px solid #DC2626;border-radius:8px;font-size:13px;color:#7f1d1d">❌ エラー: ' + (err.message || err) + '</div>');
+    document.getElementById('btn-import').disabled = false;
+    document.getElementById('btn-preview').disabled = false;
+    console.error(err);
+  }
+}
+
+function renderOverview() {
+  const a = getAggregate(); const fin = getFinancialsForPeriod();
+  const sec = document.getElementById('overview');
+  let html = '<div class="kpi-row">';
+  html += '<div class="kpi-box"><div class="label">合計ポイント</div><div class="value">'+fmtPt(a.totalPoint)+'<small>pt</small></div></div>';
+  html += '<div class="kpi-box"><div class="label">案件数</div><div class="value">'+a.totalDeals+'<small>件</small></div></div>';
+  html += '<div class="kpi-box"><div class="label">合計売上</div><div class="value" style="font-size:18px">'+fmtYen(fin.revenue)+'</div></div>';
+  html += '<div class="kpi-box"><div class="label">合計粗利</div><div class="value" style="font-size:18px">'+fmtYen(fin.grossProfit)+'</div></div>';
+  html += '</div><h2>🏆 チームランキング</h2><div class="team-grid">';
+  for (const t of a.rankings.team) {
+    const info = TEAM_INFO[t.teamId] || {name:t.teamId};
+    const team = a.teams.find(x => x.teamId === t.teamId);
+    const ft = fin.byTeam[t.teamId] || {revenue:0,grossProfit:0};
+    html += '<div class="team-card" data-team="'+t.teamId+'" data-team-id="'+t.teamId+'">';
+    html += '<div class="accent"></div>';
+    html += '<div class="rank">'+(t.rank===1?'🥇 ':t.rank===2?'🥈 ':t.rank===3?'🥉 ':'')+'第'+t.rank+'位 / '+t.teamId+'</div>';
+    html += '<div class="name">'+info.name+'</div>';
+    html += '<div class="pt">'+fmtPt(t.point)+'<small>pt</small></div>';
+    if (team) html += '<div class="stats"><span>案件 '+team.totalDeals+'件</span><span>M '+team.mainCount+'/S '+team.subCount+'</span></div>';
+    html += '<div class="money">'+fmtYen(ft.revenue)+' <small>売上</small></div>';
+    html += '<div class="money">'+fmtYen(ft.grossProfit)+' <small>粗利</small></div></div>';
+  }
+  html += '</div><div class="chart-card"><div class="title">チーム別ポイント</div><div class="chart-wrap"><canvas id="ch-teams"></canvas></div></div>';
+  html += '<h2>🌟 個人ランキング TOP 10</h2><table class="ranking"><thead><tr><th>順位</th><th>メンバー</th><th>チーム</th><th class="num">pt</th><th class="num">案件</th><th class="num">月間予定売上</th><th class="num">売上実績累計</th><th class="num">粗利実績累計</th></tr></thead><tbody>';
+  for (const r of a.rankings.individual.slice(0,10)) {
+    const mf = getMemberFinancialsCumulative(r.ownerName);
+    html += '<tr class="clickable" data-member="'+r.ownerName+'"><td>'+rankBadge(r.rank)+'</td><td><strong>'+r.ownerName+'</strong></td><td>'+teamTag(r.teamId)+'</td><td class="num"><strong>'+fmtPt(r.point)+'pt</strong></td><td class="num">'+r.deals+'件</td><td class="num">'+fmtYen(mf.plan)+'</td><td class="num">'+fmtYen(mf.cumRev)+'</td><td class="num">'+fmtYen(mf.cumGp)+'</td></tr>';
+  }
+  html += '</tbody></table>';
+  sec.innerHTML = html;
+  setTimeout(() => {
+    const ctx = document.getElementById('ch-teams'); if (!ctx) return;
+    new Chart(ctx, { type:'bar', data:{labels:a.rankings.team.map(t=>TEAM_INFO[t.teamId]?.name||t.teamId), datasets:[{data:a.rankings.team.map(t=>t.point), backgroundColor:a.rankings.team.map(t=>TEAM_INFO[t.teamId]?.color||'#ccc'), borderRadius:8}]}, options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}}});
+  }, 50);
+  attachClickHandlers(sec);
+}
+
+function renderTeams() {
+  const a = getAggregate(); const fin = getFinancialsForPeriod();
+  const sec = document.getElementById('teams');
+  let html = '<h2>チーム別詳細</h2><div class="team-grid">';
+  for (const t of a.teams.sort((x,y)=>y.totalPoint-x.totalPoint)) {
+    const info = TEAM_INFO[t.teamId] || {name:t.teamId};
+    const ft = fin.byTeam[t.teamId] || {revenue:0,grossProfit:0};
+    html += '<div class="team-card" data-team="'+t.teamId+'" data-team-id="'+t.teamId+'"><div class="accent"></div>';
+    html += '<div class="rank">'+t.teamId+'</div><div class="name">'+info.name+'</div>';
+    html += '<div class="pt">'+fmtPt(t.totalPoint)+'<small>pt</small></div>';
+    html += '<div class="stats"><span>案件 '+t.totalDeals+'件</span><span>'+t.memberCount+'名</span></div>';
+    html += '<div class="stats"><span>M '+t.mainCount+' / S '+t.subCount+'</span></div>';
+    html += '<div class="money">'+fmtYen(ft.revenue)+' <small>売上</small></div>';
+    html += '<div class="money">'+fmtYen(ft.grossProfit)+' <small>粗利</small></div></div>';
+  }
+  sec.innerHTML = html + '</div>';
+  attachClickHandlers(sec);
+}
+
+function renderIndividuals() {
+  const a = getAggregate(); const fin = getFinancialsForPeriod();
+  const sec = document.getElementById('individuals');
+  let html = '<h2>個人ランキング（全員）</h2><table class="ranking"><thead><tr><th>順位</th><th>メンバー</th><th>チーム</th><th class="num">pt</th><th class="num">案件</th><th class="num">月間予定売上</th><th class="num">売上実績累計</th><th class="num">粗利実績累計</th></tr></thead><tbody>';
+  for (const r of a.rankings.individual) {
+    const mf = getMemberFinancialsCumulative(r.ownerName);
+    html += '<tr class="clickable" data-member="'+r.ownerName+'"><td>'+rankBadge(r.rank)+'</td><td><strong>'+r.ownerName+'</strong></td><td>'+teamTag(r.teamId)+'</td><td class="num"><strong>'+fmtPt(r.point)+'pt</strong></td><td class="num">'+r.deals+'件</td><td class="num">'+fmtYen(mf.plan)+'</td><td class="num">'+fmtYen(mf.cumRev)+'</td><td class="num">'+fmtYen(mf.cumGp)+'</td></tr>';
+  }
+  sec.innerHTML = html + '</tbody></table>';
+  attachClickHandlers(sec);
+}
+
+function renderMonthly() {
+  const a = getAggregate(); const sec = document.getElementById('monthly');
+  let html = '<h2>月別推移</h2><div class="chart-card"><div class="title">月別ポイント（チーム別積み上げ）</div><div class="chart-wrap" style="height:320px"><canvas id="ch-monthly"></canvas></div></div>';
+  html += '<table class="ranking"><thead><tr><th>年月</th><th class="num">合計pt</th><th class="num">案件</th>';
+  for (const tid of TEAM_IDS) html += '<th class="num">'+tid+'</th>';
+  html += '</tr></thead><tbody>';
+  for (const m of a.monthly) {
+    html += '<tr><td><strong>'+m.yearMonth+'</strong></td><td class="num"><strong>'+fmtPt(m.totalPoint)+'</strong></td><td class="num">'+m.totalDeals+'</td>';
+    for (const tid of TEAM_IDS) html += '<td class="num">'+(m.byTeam[tid]!=null?fmtPt(m.byTeam[tid]):'-')+'</td>';
+    html += '</tr>';
+  }
+  sec.innerHTML = html + '</tbody></table>';
+  setTimeout(() => {
+    const ctx = document.getElementById('ch-monthly'); if (!ctx) return;
+    new Chart(ctx, { type:'bar', data:{labels:a.monthly.map(m=>m.yearMonth), datasets:TEAM_IDS.map(tid=>({label:tid+' '+TEAM_INFO[tid].name, data:a.monthly.map(m=>m.byTeam[tid]||0), backgroundColor:TEAM_INFO[tid].color, borderRadius:4}))}, options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top'}},scales:{x:{stacked:true},y:{stacked:true,beginAtZero:true}}}});
+  }, 50);
+}
+
+function renderFinancials() {
+  const fin = getFinancialsForPeriod(); const sec = document.getElementById('financials');
+  if (!FINANCIALS) { sec.innerHTML = '<div class="empty">実績データがありません</div>'; return; }
+  let html = '<h2>実績（売上・粗利）</h2><div class="kpi-row">';
+  html += '<div class="kpi-box"><div class="label">合計売上</div><div class="value" style="font-size:20px">'+fmtYen(fin.revenue)+'</div></div>';
+  html += '<div class="kpi-box"><div class="label">合計粗利</div><div class="value" style="font-size:20px">'+fmtYen(fin.grossProfit)+'</div></div>';
+  html += '<div class="kpi-box"><div class="label">粗利率</div><div class="value">'+(fin.revenue>0?((fin.grossProfit/fin.revenue)*100).toFixed(1):'0')+'<small>%</small></div></div>';
+  html += '<div class="kpi-box"><div class="label">実績行数</div><div class="value">'+fin.matchedRows.length+'<small>行</small></div></div>';
+  html += '</div><div class="chart-card"><div class="title">月別実績</div><div class="chart-wrap" style="height:300px"><canvas id="ch-fin"></canvas></div></div>';
+  html += '<h2>チーム別実績</h2><table class="ranking"><thead><tr><th>チーム</th><th class="num">売上</th><th class="num">粗利</th><th class="num">粗利率</th><th class="num">行</th></tr></thead><tbody>';
+  for (const tid of TEAM_IDS) {
+    const t = fin.byTeam[tid] || {revenue:0,grossProfit:0,deals:0};
+    const rate = t.revenue>0?((t.grossProfit/t.revenue)*100).toFixed(1):'0';
+    html += '<tr><td>'+teamTag(tid)+'</td><td class="num">'+fmtYen(t.revenue)+'</td><td class="num">'+fmtYen(t.grossProfit)+'</td><td class="num">'+rate+'%</td><td class="num">'+t.deals+'</td></tr>';
+  }
+  html += '</tbody></table><h2>個人別実績</h2><table class="ranking"><thead><tr><th>メンバー</th><th>チーム</th><th class="num">売上</th><th class="num">粗利</th><th class="num">粗利率</th><th class="num">行</th></tr></thead><tbody>';
+  for (const m of Object.values(fin.byMember).sort((a,b)=>b.revenue-a.revenue)) {
+    const rate = m.revenue>0?((m.grossProfit/m.revenue)*100).toFixed(1):'0';
+    html += '<tr><td><strong>'+m.ownerName+'</strong></td><td>'+teamTag(m.teamId)+'</td><td class="num">'+fmtYen(m.revenue)+'</td><td class="num">'+fmtYen(m.grossProfit)+'</td><td class="num">'+rate+'%</td><td class="num">'+m.deals+'</td></tr>';
+  }
+  sec.innerHTML = html + '</tbody></table>';
+  setTimeout(() => {
+    const ctx = document.getElementById('ch-fin'); if (!ctx) return;
+    const months = Object.keys(fin.byMonth).sort();
+    new Chart(ctx, { type:'bar', data:{labels:months, datasets:[{label:'売上', data:months.map(m=>fin.byMonth[m].revenue), backgroundColor:'#A5D8FF', borderRadius:4},{label:'粗利', data:months.map(m=>fin.byMonth[m].grossProfit), backgroundColor:'#B2F2BB', borderRadius:4}]}, options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top'}},scales:{y:{beginAtZero:true}}}});
+  }, 50);
+}
+
+function showTeamDetail(teamId) {
+  setActiveSection('team-detail');
+  const a = getAggregate(); const fin = getFinancialsForPeriod();
+  const info = TEAM_INFO[teamId] || {name:teamId,color:'#ccc'};
+  const team = a.teams.find(t => t.teamId === teamId);
+  const ft = fin.byTeam[teamId] || {revenue:0,grossProfit:0};
+  const members = a.members.filter(m => m.teamId === teamId).sort((x,y)=>y.totalPoint-x.totalPoint);
+  let html = '<span class="back-link" onclick="goBack(\'overview\')">← 戻る</span>';
+  html += '<div class="detail-header"><div class="swatch" style="background:'+info.color+'"></div>';
+  html += '<div><div class="name">'+teamId+' '+info.name+'</div>';
+  if (team) html += '<div class="stats">'+fmtPt(team.totalPoint)+'pt / 案件 '+team.totalDeals+'件 / '+team.memberCount+'名</div>';
+  html += '<div class="stats">売上 '+fmtYen(ft.revenue)+' / 粗利 '+fmtYen(ft.grossProfit)+'</div></div></div>';
+  html += '<h2>メンバー</h2><table class="ranking"><thead><tr><th>順位</th><th>メンバー</th><th class="num">pt</th><th class="num">案件</th><th class="num">月間予定売上</th><th class="num">売上実績累計</th><th class="num">粗利実績累計</th></tr></thead><tbody>';
+  members.forEach((m,i) => {
+    const mf = getMemberFinancialsCumulative(m.ownerName);
+    html += '<tr class="clickable" data-member="'+m.ownerName+'"><td>'+rankBadge(i+1)+'</td><td><strong>'+m.ownerName+'</strong></td><td class="num"><strong>'+fmtPt(m.totalPoint)+'</strong></td><td class="num">'+m.totalDeals+'</td><td class="num">'+fmtYen(mf.plan)+'</td><td class="num">'+fmtYen(mf.cumRev)+'</td><td class="num">'+fmtYen(mf.cumGp)+'</td></tr>';
+  });
+  document.getElementById('team-detail').innerHTML = html + '</tbody></table>';
+  attachClickHandlers(document.getElementById('team-detail'));
+}
+
+function showIndividualDetail(ownerName) {
+  setActiveSection('individual-detail');
+  const a = getAggregate(); const fin = getFinancialsForPeriod();
+  const m = a.members.find(x => x.ownerName === ownerName);
+  if (!m) { document.getElementById('individual-detail').innerHTML = '<div class="empty">未検出</div>'; return; }
+  const info = TEAM_INFO[m.teamId] || {name:m.teamId,color:'#ccc'};
+  const rank = a.rankings.individual.find(r => r.ownerName === ownerName);
+  const fm = fin.byMember[ownerName+'|'+m.teamId] || {revenue:0,grossProfit:0};
+
+  // 担当案件リスト（DEALSから抽出。期間フィルタ適用）
+  const personDeals = getPersonDeals(ownerName);
+
+  let html = '<span class="back-link" onclick="goBack(\'individuals\')">← 戻る</span>';
+  html += '<div class="detail-header"><div class="swatch" style="background:'+info.color+'"></div>';
+  html += '<div><div class="name">'+m.ownerName+' '+teamTag(m.teamId)+'</div>';
+  html += '<div class="stats">'+fmtPt(m.totalPoint)+'pt / 案件 '+m.totalDeals+'件 / 順位 '+(rank?.rank ?? '?')+'位</div>';
+  html += '<div class="stats">売上 '+fmtYen(fm.revenue)+' / 粗利 '+fmtYen(fm.grossProfit)+' / M '+m.mainCount+' S '+m.subCount+'</div>';
+  html += '<div class="stats" style="font-size:11px">'+(m.ownerEmail||'')+'</div></div></div>';
+
+  html += '<h2>担当案件リスト（'+personDeals.length+'件）</h2>';
+  if (personDeals.length === 0) {
+    html += '<div class="empty">この期間の案件はありません</div>';
+  } else {
+    html += '<table class="ranking"><thead><tr><th>稼働開始</th><th>案件名</th><th>M/S</th><th class="num">時単価</th><th class="num">pt</th><th>区分</th><th>操作</th></tr></thead><tbody>';
+    for (const d of personDeals) {
+      const msLabel = d.msKbn === 'main' ? 'メイン' : d.msKbn === 'sub' ? 'サブ' : '?';
+      html += '<tr>';
+      html += '<td>'+(d.operationStartDate ? d.operationStartDate.slice(0,10) : '-')+'</td>';
+      html += '<td>'+escHtml(d.name)+'</td>';
+      html += '<td>'+msLabel+'</td>';
+      html += '<td class="num">'+(d.hourlyRate != null ? fmtYen(d.hourlyRate) : '-')+'</td>';
+      html += '<td class="num"><strong>'+fmtPt(d.point)+'pt</strong></td>';
+      html += '<td>'+escHtml(d.classification || '-')+'</td>';
+      html += '<td><div class="btn-group">';
+      html += '<button class="btn primary" onclick="showDealDetail(\''+d.id+'\')">詳細</button>';
+      html += '<button class="btn success" onclick="showDealFinancial(\''+d.id+'\')">実績</button>';
+      html += '</div></td></tr>';
+    }
+    html += '</tbody></table>';
+  }
+
+  html += '<h2>係数内訳</h2><table class="ranking"><thead><tr><th>係数</th><th class="num">案件数</th></tr></thead><tbody>';
+  for (const [k,v] of Object.entries(m.coefBreakdown || {}).sort()) {
+    html += '<tr><td><strong>'+k+'</strong></td><td class="num">'+v+'件</td></tr>';
+  }
+  html += '</tbody></table>';
+
+  document.getElementById('individual-detail').innerHTML = html;
+}
+
+function getPersonDeals(ownerName) {
+  if (!DEALS || !DEALS.deals) return [];
+  return DEALS.deals.filter(d => {
+    if (d.ownerName !== ownerName) return false;
+    if (currentMonth !== 'all') return d.yearMonth === currentMonth;
+    if (currentFY !== 'all') return ymInFY(d.yearMonth, currentFY);
+    return true;
+  });
+}
+
+/**
+ * 個人ランキング用: 期間内獲得案件の
+ *  - SF月間予定売上の合計（plan）
+ *  - それら案件の年度内累積売上実績（cumRev）
+ *  - それら案件の年度内累積粗利実績（cumGp）
+ */
+function getMemberFinancialsCumulative(ownerName) {
+  const personDeals = getPersonDeals(ownerName);
+  const dealIds = new Set(personDeals.map(d => d.id));
+  const plan = personDeals.reduce((s, d) => s + (d.monthlyRevenue || 0), 0);
+  // 案件ID → 獲得年度
+  const dealFy = {};
+  for (const d of personDeals) {
+    const fy = yearMonthToFY(d.yearMonth);
+    if (fy) dealFy[d.id] = fy;
+  }
+  let cumRev = 0, cumGp = 0;
+  if (FINANCIALS && FINANCIALS.matchedRows) {
+    for (const r of FINANCIALS.matchedRows) {
+      if (!dealIds.has(r.dealId)) continue;
+      // 「年度内完結」ルール: 案件獲得年度と実績月の年度が一致するもののみ集計
+      const acquiredFy = dealFy[r.dealId];
+      if (!acquiredFy) continue;
+      const recordFy = yearMonthToFY(r.yearMonth);
+      if (recordFy !== acquiredFy) continue;
+      cumRev += r.revenue;
+      cumGp += r.grossProfit;
+    }
+  }
+  return { plan, cumRev, cumGp };
+}
+
+function showDealDetail(dealId) {
+  if (!DEALS) { alert('案件詳細データがありません'); return; }
+  const d = DEALS.deals.find(x => x.id === dealId);
+  if (!d) { alert('案件が見つかりません: ' + dealId); return; }
+  const info = TEAM_INFO[d.teamId] || {name:d.teamId||'?'};
+  let html = '<h3>'+escHtml(d.name)+'</h3>';
+  html += '<div class="sub-title">担当: '+escHtml(d.ownerName)+' '+teamTag(d.teamId)+' / 案件ID: <code>'+escHtml(d.id)+'</code></div>';
+  html += '<table class="kvtable">';
+  html += '<tr><td>マニュアル番号</td><td>'+escHtml(d.manualNo)+'</td></tr>';
+  html += '<tr><td>稼働開始日</td><td>'+(d.operationStartDate?d.operationStartDate.slice(0,10):'-')+'</td></tr>';
+  html += '<tr><td>稼働開始予定日</td><td>'+(d.plannedStartDate?d.plannedStartDate.slice(0,10):'-')+'</td></tr>';
+  html += '<tr><td>ステータス</td><td>'+escHtml(d.status)+'</td></tr>';
+  html += '<tr><td>案件区分</td><td>'+escHtml(d.classification)+'</td></tr>';
+  html += '<tr><td>MS区分</td><td>'+escHtml(d.msKbnRaw)+' ('+escHtml(d.msKbn)+')</td></tr>';
+  html += '<tr><td>月間売上（SF予測）</td><td>'+(d.monthlyRevenue!=null?fmtYen(d.monthlyRevenue):'-')+'</td></tr>';
+  html += '<tr><td>契約金額</td><td>'+(d.contractPrice!=null?fmtYen(d.contractPrice):'-')+'</td></tr>';
+  html += '<tr><td>拘束時間</td><td>'+(d.dailyHours!=null?d.dailyHours+'h':'-')+'</td></tr>';
+  html += '<tr><td>時間当たり単価</td><td>'+(d.hourlyRate!=null?fmtYen(d.hourlyRate):'-')+'</td></tr>';
+  html += '<tr><td>時間当たり係数</td><td>'+(d.hourlyCoef!=null?'x'+Number(d.hourlyCoef).toFixed(1):'-')+(d.hourlyCoefLabel?' ('+escHtml(d.hourlyCoefLabel)+')':'')+'</td></tr>';
+  html += '<tr><td>メイン/サブpt</td><td>'+(d.basePoint!=null?d.basePoint:'-')+'</td></tr>';
+  html += '<tr><td><strong>獲得ポイント</strong></td><td><strong style="color:#2E5C8A;font-size:16px">'+fmtPt(d.point)+'pt</strong></td></tr>';
+  html += '<tr><td>登録日</td><td>'+(d.registeredAt?String(d.registeredAt).slice(0,10):'-')+'</td></tr>';
+  html += '<tr><td>最終更新</td><td>'+(d.lastModifiedAt?String(d.lastModifiedAt).slice(0,10):'-')+'</td></tr>';
+  html += '<tr><td>担当者メアド</td><td>'+escHtml(d.ownerEmail)+'</td></tr>';
+  if (d.issues && d.issues.length) html += '<tr><td>要修正</td><td style="color:#DC2626">'+d.issues.map(escHtml).join('<br>')+'</td></tr>';
+  html += '</table>';
+  document.getElementById('deal-detail-body').innerHTML = html;
+  document.getElementById('modal-deal-detail').classList.add('active');
+}
+
+function showDealFinancial(dealId) {
+  if (!DEALS) { alert('案件データがありません'); return; }
+  const d = DEALS.deals.find(x => x.id === dealId);
+  if (!d) { alert('案件が見つかりません'); return; }
+  const rows = (FINANCIALS && FINANCIALS.matchedRows) ? FINANCIALS.matchedRows.filter(r => r.dealId === dealId) : [];
+  // 案件の獲得年度
+  const dealAcquiredFy = yearMonthToFY(d.yearMonth);
+  // 「年度内完結」ルール: 案件獲得年度と実績月の年度が一致するもののみ表示
+  const filtered = rows
+    .filter(r => yearMonthToFY(r.yearMonth) === dealAcquiredFy)
+    .sort((a,b) => a.yearMonth.localeCompare(b.yearMonth));
+  let html = '<h3>' + escHtml(d.name) + ' — 月別実績</h3>';
+  html += '<div class="sub-title">担当: ' + escHtml(d.ownerName) + ' ' + teamTag(d.teamId) + ' / マニュアル番号: ' + escHtml(d.manualNo) + ' / 稼働開始: ' + (d.operationStartDate ? String(d.operationStartDate).slice(0,10) : '-') + '</div>';
+  if (filtered.length === 0) {
+    html += '<div class="empty">この案件の実績データがまだありません</div>';
+  } else {
+    html += '<table><thead><tr><th>年月</th><th class="num">売上</th><th class="num">粗利</th><th class="num">粗利率</th><th class="num">累積売上</th><th class="num">累積粗利</th></tr></thead><tbody>';
+    let cR = 0, cG = 0;
+    for (const r of filtered) {
+      cR += r.revenue; cG += r.grossProfit;
+      const rate = r.revenue > 0 ? ((r.grossProfit / r.revenue) * 100).toFixed(1) : '0';
+      html += '<tr><td><strong>' + r.yearMonth + '</strong></td><td class="num">' + fmtYen(r.revenue) + '</td><td class="num">' + fmtYen(r.grossProfit) + '</td><td class="num">' + rate + '%</td><td class="num">' + fmtYen(cR) + '</td><td class="num">' + fmtYen(cG) + '</td></tr>';
+    }
+    const tR = filtered.reduce((s,r) => s + r.revenue, 0);
+    const tG = filtered.reduce((s,r) => s + r.grossProfit, 0);
+    const tRate = tR > 0 ? ((tG / tR) * 100).toFixed(1) : '0';
+    html += '<tr class="total"><td>' + (currentFY !== 'all' ? currentFY : '全期間') + '累積</td><td class="num">' + fmtYen(tR) + '</td><td class="num">' + fmtYen(tG) + '</td><td class="num">' + tRate + '%</td><td class="num">-</td><td class="num">-</td></tr>';
+    html += '</tbody></table><div class="chart-wrap" style="height:240px"><canvas id="ch-deal-fin"></canvas></div>';
+  }
+  document.getElementById('deal-financial-body').innerHTML = html;
+  document.getElementById('modal-deal-financial').classList.add('active');
+  if (filtered.length > 0) setTimeout(() => {
+    const ctx = document.getElementById('ch-deal-fin'); if (!ctx) return;
+    new Chart(ctx, { type:'bar', data:{labels:filtered.map(r=>r.yearMonth), datasets:[{label:'売上', data:filtered.map(r=>r.revenue), backgroundColor:'#A5D8FF', borderRadius:4},{label:'粗利', data:filtered.map(r=>r.grossProfit), backgroundColor:'#B2F2BB', borderRadius:4}]}, options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top'}},scales:{y:{beginAtZero:true}}}});
+  }, 50);
+}
+
+function closeModal() {
+  document.querySelectorAll('.modal.active').forEach(m => m.classList.remove('active'));
+}
+document.querySelectorAll('.modal').forEach(m => m.addEventListener('click', e => { if (e.target === m) closeModal(); }));
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+function goBack(view) { currentView = view; setActiveTab(view); setActiveSection(view); renderCurrentView(); }
+function setActiveSection(id) { document.querySelectorAll('.section').forEach(s => s.classList.remove('active')); const el = document.getElementById(id); if (el) el.classList.add('active'); }
+function setActiveTab(view) { document.querySelectorAll('nav button').forEach(b => b.classList.toggle('active', b.dataset.view === view)); }
+function attachClickHandlers(sec) {
+  sec.querySelectorAll('[data-team-id]').forEach(el => el.addEventListener('click', () => showTeamDetail(el.dataset.teamId)));
+  sec.querySelectorAll('[data-member]').forEach(el => el.addEventListener('click', () => showIndividualDetail(el.dataset.member)));
+}
+document.querySelectorAll('nav button').forEach(btn => btn.addEventListener('click', () => { currentView = btn.dataset.view; setActiveTab(currentView); setActiveSection(currentView); renderCurrentView(); }));
+
+function buildMetaLine() {
+  const parts = [];
+  if (SUMMARY.computedAt) parts.push('集計日時: ' + new Date(SUMMARY.computedAt).toLocaleString('ja-JP'));
+  if (DEALS && DEALS.deals && DEALS.deals.length > 0) {
+    let maxIso = '';
+    for (const d of DEALS.deals) if (d.lastModifiedAt && String(d.lastModifiedAt) > maxIso) maxIso = String(d.lastModifiedAt);
+    if (maxIso) parts.push('SF案件 最終更新: ' + new Date(maxIso).toLocaleString('ja-JP'));
+  }
+  if (FINANCIALS && FINANCIALS.matchedRows && FINANCIALS.matchedRows.length > 0) {
+    const yms = FINANCIALS.matchedRows.map(r => r.yearMonth).filter(Boolean).sort();
+    if (yms.length > 0) parts.push('実績データ: ' + yms[0] + ' 〜 ' + yms[yms.length - 1] + '（' + FINANCIALS.matchedRows.length + '行）');
+  }
+  return parts.join('  /  ');
+}
+</script>
+</body>
+</html>

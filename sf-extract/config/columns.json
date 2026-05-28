@@ -1,0 +1,37 @@
+{
+  "$comment": "Salesforce 案件オブジェクト（Oppotunities__c）の論理名 → API名マッピング。",
+  "objectApiName": "Oppotunities__c",
+  "fields": {
+    "id": "Id",
+    "name": "Name",
+    "manualNo": "Manual__c",
+    "ownerName": "PersoninCharge__r.Name",
+    "ownerEmail": "PersoninCharge__r.Email",
+    "msKbn": "Item__c",
+    "monthlyRevenue": "Scheduled_sales_calculation__c",
+    "contractPrice": "ContractPrice__c",
+    "monthlyWorkdays": "KADO_YOTEI_NISSUU_AUTO__c",
+    "dailyHours": "Restraint_Time__c",
+    "status": "Status__c",
+    "classification": "OpputunityClassification__c",
+    "operationStartDate": "OperationStartDate__c",
+    "plannedStartDate": "PlannedStartDate__c",
+    "registeredAt": "CreatedDate",
+    "lastModifiedAt": "LastModifiedDate"
+  },
+  "filters": {
+    "statusInclude": ["配車済み", "稼働終了"],
+    "classificationInclude": ["新規", "増車", "新増", "復活"],
+    "msKbnInclude": ["メイン", "サブ"],
+    "operationStartFrom": "2025-04-01"
+  },
+  "$msKbnValues": {
+    "main": "メイン",
+    "sub": "サブ"
+  },
+  "$notes": {
+    "ownerMatch": "PersoninCharge__r.Name IN (氏名) OR PersoninCharge__r.Email IN (メアド) の OR 条件で照合する。表記揺れ救済のため。",
+    "operationStartFrom": "OperationStartDate__c >= この日 で抽出。空文字または未設定なら無効。",
+    "msKbnInclude": "Item__c のpicklist値。スポットは本抽出から除外。"
+  }
+}

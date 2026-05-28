@@ -1,0 +1,70 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ============= ヘルパー関数 =============
+    function isLoggedIn() {
+      return request.auth != null;
+    }
+
+    function emailDomain() {
+      return request.auth.token.email.split('@')[1];
+    }
+
+    function isAllowedDomain() {
+      return isLoggedIn() &&
+        (emailDomain() == 'logiquest.co.jp' || emailDomain() == 'qqbp.co.jp');
+    }
+
+    function isAdmin() {
+      return isAllowedDomain() &&
+        exists(/databases/$(database)/documents/members/$(request.auth.token.email)) &&
+        get(/databases/$(database)/documents/members/$(request.auth.token.email)).data.role == 'admin';
+    }
+
+    // ============= コレクションごとのルール =============
+
+    // チーム: 全認証ユーザー読み取り可、書き込みは管理者のみ
+    match /teams/{id} {
+      allow read: if isAllowedDomain();
+      allow write: if isAdmin();
+    }
+
+    // メンバー
+    match /members/{email} {
+      allow read: if isAllowedDomain();
+      allow write: if isAdmin();
+    }
+
+    // 案件
+    match /deals/{id} {
+      allow read: if isAllowedDomain();
+      allow write: if isAdmin();
+    }
+
+    // 月別売上・粗利（CSV取込）
+    match /monthly_revenue/{id} {
+      allow read: if isAllowedDomain();
+      allow write: if isAdmin();
+    }
+
+    // 設定値
+    match /settings/{id} {
+      allow read: if isAllowedDomain();
+      allow write: if isAdmin();
+    }
+
+    // メタ情報
+    match /meta/{id} {
+      allow read: if isAllowedDomain();
+      allow write: if isAdmin();
+    }
+
+    // 監査ログ: 全員が作成、管理者だけ閲覧、変更・削除は不可
+    match /audit_log/{id} {
+      allow read: if isAdmin();
+      allow create: if isAllowedDomain();
+      allow update, delete: if false;
+    }
+  }
+}

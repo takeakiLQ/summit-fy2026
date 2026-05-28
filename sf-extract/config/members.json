@@ -1,0 +1,31 @@
+{
+  "$comment": "サミット研修対象メンバー20名。Salesforce の PersoninCharge__r.Name（氏名）と完全一致でマッチングするため、SF側の表記に合わせる（例: 𠮷野 泰祐 は変体文字 𠮷）。",
+  "teams": [
+    { "id": "T1", "name": "富士", "color": "#FFB3B3" },
+    { "id": "T2", "name": "立山", "color": "#A5D8FF" },
+    { "id": "T3", "name": "剱",   "color": "#B2F2BB" },
+    { "id": "T4", "name": "白山", "color": "#FFD8A8" }
+  ],
+  "members": [
+    { "team": "T1", "name": "今井 浩二",   "email": "koji.imai@logiquest.co.jp" },
+    { "team": "T1", "name": "新居 寿幸",   "email": "toshiyuki.nii@logiquest.co.jp" },
+    { "team": "T1", "name": "松村 優樹",   "email": "yuki.matsumura@logiquest.co.jp" },
+    { "team": "T1", "name": "沖田 博之",   "email": "hiroyuki.okita@logiquest.co.jp" },
+    { "team": "T1", "name": "北 憲治",     "email": "kenji.kita@logiquest.co.jp" },
+    { "team": "T2", "name": "谷川 義喜",   "email": "yoshiki.tanigawa@logiquest.co.jp" },
+    { "team": "T2", "name": "岩尾 慶",     "email": "kei.iwao@logiquest.co.jp" },
+    { "team": "T2", "name": "羽生 良二",   "email": "ryoji.hanyu@logiquest.co.jp" },
+    { "team": "T2", "name": "山田 裕太",   "email": "yuta.yamada@logiquest.co.jp" },
+    { "team": "T2", "name": "柿沼 龍征",   "email": "ryusei.kakinuma@logiquest.co.jp" },
+    { "team": "T3", "name": "本多 健裕",   "email": "kensuke.honda@logiquest.co.jp" },
+    { "team": "T3", "name": "山田 真大",   "email": "mahiro.yamada@logiquest.co.jp" },
+    { "team": "T3", "name": "田村 憲",     "email": "satoshi.tamura@logiquest.co.jp" },
+    { "team": "T3", "name": "奥村 一志",   "email": "kazushi.okumura@logiquest.co.jp" },
+    { "team": "T3", "name": "小笠原 大翼", "email": "daisuke.ogasawara@logiquest.co.jp" },
+    { "team": "T4", "name": "横尾 明仁",   "email": "akihito.yoko@logiquest.co.jp" },
+    { "team": "T4", "name": "脇田 拓馬",   "email": "takuma.wakida@logiquest.co.jp" },
+    { "team": "T4", "name": "𠮷野 泰祐",   "email": "taisuke.yoshino@logiquest.co.jp" },
+    { "team": "T4", "name": "清水 啓介",   "email": "keisuke.shimizu@logiquest.co.jp" },
+    { "team": "T4", "name": "見本 直弥",   "email": "naoya.mimoto@logiquest.co.jp" }
+  ]
+}

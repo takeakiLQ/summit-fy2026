@@ -1,0 +1,32 @@
+# Node.js
+node_modules/
+**/node_modules/
+*.log
+
+# 環境変数・秘密鍵（絶対にコミットしない）
+.env
+**/.env
+.env.local
+**/.env.local
+service-account.json
+**/service-account.json
+firebase-adminsdk-*.json
+**/firebase-adminsdk-*.json
+*.serviceaccount.json
+
+# 各モジュールの output（生成物・データ）
+output/
+**/output/
+
+# ローカル CSV サンプル（実データなのでpush禁止）
+csv-samples/
+
+# ダッシュボードの自動生成 data.js
+dashboard/data.js
+
+# 生成ドキュメント
+*.pdf
+
+# OS関連
+.DS_Store
+Thumbs.db

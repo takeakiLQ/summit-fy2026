@@ -1,0 +1,21 @@
+{
+  "$comment": "CSV取込のカラムマッピング。CSVのフォーマットに変更があったらここを編集。コードは触らない。",
+  "encoding": "utf-8",
+  "columns": {
+    "yearMonth": "配送年月",
+    "manualNo": "マニュアル番号",
+    "revenueTotal": "売上合計",
+    "costTotal": "原価合計",
+    "cpCostTotal": "CP用原価合計",
+    "workdays": "稼働日数"
+  },
+  "$formula": {
+    "revenue": "revenueTotal",
+    "grossProfit": "revenueTotal - cpCostTotal"
+  },
+  "$notes": {
+    "encoding": "UTF-8 (BOMあり/なし両対応)。Shift-JIS の場合は 'shift-jis' に変更。",
+    "yearMonth": "CSVの「配送年月」カラムは YYYYMM 形式（例: '202604'）。出力JSONでは YYYY-MM に変換。",
+    "manualNo": "SF側の Manual__c とこの値で突合する。"
+  }
+}

@@ -1,0 +1,5 @@
+
+> sf-extract@0.1.0 extract
+> tsx src/index.ts --describe
+
+[sf-extract] Salesforce 郢ｧ
