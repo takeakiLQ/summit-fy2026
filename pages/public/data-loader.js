@@ -94,6 +94,7 @@ async function loadData(opts = {}) {
     financialsByPeriod: summaryRaw.financialsByPeriod || {},
     financialsByFiscalYear: summaryRaw.financialsByFiscalYear || {},
     memberFinancials: summaryRaw.memberFinancials || {},
+    monthsByKind: summaryRaw.monthsByKind || {},
   };
 
   window.__SUMMARY__ = summary;

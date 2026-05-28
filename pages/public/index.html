@@ -1144,7 +1144,14 @@ function injectUserInfo() {
 function buildMetaLine() {
   const parts = [];
   if (SUMMARY.computedAt) parts.push('SFデータ更新日時: ' + new Date(SUMMARY.computedAt).toLocaleString('ja-JP'));
-  if (SUMMARY.financialsByPeriod) {
+  const mbk = SUMMARY.monthsByKind || {};
+  const segs = [];
+  if (mbk.Qhai && mbk.Qhai.count > 0) segs.push('Qhai: ' + mbk.Qhai.min + '〜' + mbk.Qhai.max);
+  if (mbk.ByQ && mbk.ByQ.count > 0) segs.push('ByQ: ' + mbk.ByQ.min + '〜' + mbk.ByQ.max);
+  if (segs.length > 0) {
+    parts.push('実績データ ' + segs.join(' / '));
+  } else if (SUMMARY.financialsByPeriod) {
+    // 後方互換: monthsByKindがまだない場合
     const yms = Object.keys(SUMMARY.financialsByPeriod).filter(Boolean).sort();
     if (yms.length > 0) parts.push('実績データ: ' + yms[0] + ' 〜 ' + yms[yms.length - 1]);
   }

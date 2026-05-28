@@ -50,19 +50,25 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     await env.DB.prepare('DELETE FROM monthly_revenue WHERE year_month = ?').bind(ym).run();
   }
 
+  // dealId → kind マップ
+  const dealKindRes = await env.DB.prepare('SELECT id, kind FROM deals').all<{ id: string; kind: string }>();
+  const dealIdToKind = new Map<string, string>();
+  for (const d of dealKindRes.results || []) dealIdToKind.set(d.id, d.kind || 'Qhai');
+
   // 新データ書込
   const insertSql = `
     INSERT INTO monthly_revenue (
       id, year_month, fiscal_year, deal_id, manual_no,
       owner_name, team_id, revenue, gross_profit, workdays,
-      uploaded_at, uploaded_by, source_file
-    ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)
+      uploaded_at, uploaded_by, source_file, kind
+    ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)
     ON CONFLICT(id) DO UPDATE SET
       year_month=excluded.year_month, fiscal_year=excluded.fiscal_year,
       deal_id=excluded.deal_id, manual_no=excluded.manual_no,
       owner_name=excluded.owner_name, team_id=excluded.team_id,
       revenue=excluded.revenue, gross_profit=excluded.gross_profit, workdays=excluded.workdays,
-      uploaded_at=excluded.uploaded_at, uploaded_by=excluded.uploaded_by, source_file=excluded.source_file
+      uploaded_at=excluded.uploaded_at, uploaded_by=excluded.uploaded_by, source_file=excluded.source_file,
+      kind=excluded.kind
   `;
   const stmts: D1PreparedStatement[] = [];
   for (const r of body.rows) {
@@ -71,7 +77,8 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       id, r.yearMonth, yearMonthToFY(r.yearMonth), r.dealId, r.manualNo ?? null,
       r.ownerName ?? null, r.teamId ?? null,
       r.revenue ?? 0, r.grossProfit ?? 0, r.workdays ?? 0,
-      now, body.uploadedBy || 'system', body.sourceFile || null
+      now, body.uploadedBy || 'system', body.sourceFile || null,
+      dealIdToKind.get(r.dealId) || 'Qhai'
     ));
   }
   for (let i = 0; i < stmts.length; i += 50) {

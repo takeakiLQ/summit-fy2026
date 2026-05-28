@@ -46,7 +46,7 @@ export async function recomputeSummary(env: Env) {
     }));
 
   // 実績データ取得
-  const finRes = await env.DB.prepare('SELECT year_month, deal_id, owner_name, team_id, revenue, gross_profit FROM monthly_revenue').all<any>();
+  const finRes = await env.DB.prepare('SELECT year_month, deal_id, owner_name, team_id, revenue, gross_profit, kind FROM monthly_revenue').all<any>();
   const rows: FinancialRow[] = (finRes.results || []).map((r: any) => ({
     yearMonth: r.year_month,
     dealId: r.deal_id,
@@ -55,6 +55,20 @@ export async function recomputeSummary(env: Env) {
     revenue: r.revenue || 0,
     grossProfit: r.gross_profit || 0,
   }));
+
+  // kind 別の月範囲（ヘッダ表示用）
+  const kindMonthMap: Record<string, Set<string>> = { ByQ: new Set(), Qhai: new Set() };
+  for (const r of (finRes.results || []) as any[]) {
+    const k = r.kind || 'Qhai';
+    if (!kindMonthMap[k]) kindMonthMap[k] = new Set();
+    if (r.year_month) kindMonthMap[k].add(r.year_month);
+  }
+  const monthsByKind: Record<string, { min: string; max: string; count: number }> = {};
+  for (const [k, months] of Object.entries(kindMonthMap)) {
+    if (months.size === 0) continue;
+    const sorted = Array.from(months).sort();
+    monthsByKind[k] = { min: sorted[0]!, max: sorted[sorted.length - 1]!, count: sorted.length };
+  }
 
   // 集計
   const overall = aggregate(filtered);
@@ -70,6 +84,7 @@ export async function recomputeSummary(env: Env) {
     financialsByPeriod: fin.financialsByPeriod,
     financialsByFiscalYear: fin.financialsByFiscalYear,
     memberFinancials: fin.memberFinancials,
+    monthsByKind,  // {ByQ: {min,max,count}, Qhai: {min,max,count}}
     activeMemberCount: activeMemberEmails.size,
     activeTeamCount: activeTeamIds.size,
     sourceDeals: filtered.length,

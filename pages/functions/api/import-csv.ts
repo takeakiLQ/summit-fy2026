@@ -42,11 +42,11 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   const months = body.months || Array.from(new Set(body.rows.map(r => r.yearMonth)));
 
   // 案件マスタを取得（manualNo→deal）
-  const dealsRes = await env.DB.prepare('SELECT id, manual_no, owner_name, team_id FROM deals').all<{ id: string; manual_no: string; owner_name: string; team_id: string }>();
-  const manualToDeal = new Map<string, { id: string; ownerName: string; teamId: string }>();
+  const dealsRes = await env.DB.prepare('SELECT id, manual_no, owner_name, team_id, kind FROM deals').all<{ id: string; manual_no: string; owner_name: string; team_id: string; kind: string }>();
+  const manualToDeal = new Map<string, { id: string; ownerName: string; teamId: string; kind: string }>();
   for (const d of dealsRes.results || []) {
     if (d.manual_no) {
-      manualToDeal.set(String(d.manual_no).trim(), { id: d.id, ownerName: d.owner_name, teamId: d.team_id });
+      manualToDeal.set(String(d.manual_no).trim(), { id: d.id, ownerName: d.owner_name, teamId: d.team_id, kind: d.kind || 'Qhai' });
     }
   }
 
@@ -62,8 +62,8 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     INSERT INTO monthly_revenue (
       id, year_month, fiscal_year, deal_id, manual_no,
       owner_name, team_id, revenue, gross_profit, workdays,
-      uploaded_at, uploaded_by, source_file
-    ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)
+      uploaded_at, uploaded_by, source_file, kind
+    ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)
   `;
   const stmts: D1PreparedStatement[] = [];
   let matched = 0, unmatched = 0;
@@ -76,7 +76,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       id, r.yearMonth, yearMonthToFY(r.yearMonth), deal.id, r.manualNo,
       deal.ownerName, deal.teamId,
       r.revenue || 0, r.grossProfit || 0, r.workdays || 0,
-      now, user.email, body.fileName || null
+      now, user.email, body.fileName || null, deal.kind
     ));
   }
   for (let i = 0; i < stmts.length; i += 50) {
