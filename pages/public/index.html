@@ -865,10 +865,26 @@ function renderTeams() {
 function renderIndividuals() {
   const a = getAggregate();
   const sec = document.getElementById('individuals');
+
+  // ランキングに案件0件のアクティブメンバーも含める
+  const ranked = (a.rankings.individual || []).map(r => ({ ...r }));
+  const inRanking = new Set(ranked.map(r => r.ownerName));
+  const allMembers = (window.__MEMBERS__ || []);
+  for (const m of allMembers) {
+    if (!inRanking.has(m.name)) {
+      ranked.push({ ownerName: m.name, teamId: m.team, point: 0, deals: 0, rank: 0 });
+    }
+  }
+  // ポイント降順で再ソート＋順位振り直し
+  ranked.sort((a,b) => b.point - a.point || (a.ownerName||'').localeCompare(b.ownerName||''));
+  ranked.forEach((r,i) => r.rank = i + 1);
+
   let html = '<h2>個人ランキング（全員）</h2><table class="ranking"><thead><tr><th>順位</th><th>メンバー</th><th>チーム</th><th class="num">pt</th><th class="num">案件</th><th class="num">月間予定売上</th><th class="num">売上実績累計</th><th class="num">粗利実績累計</th></tr></thead><tbody>';
-  for (const r of a.rankings.individual) {
+  for (const r of ranked) {
     const mf = getMemberFinancialsCumulative(r.ownerName);
-    html += '<tr class="clickable" data-member="'+r.ownerName+'"><td>'+rankBadge(r.rank)+'</td><td><strong>'+r.ownerName+'</strong></td><td>'+teamTag(r.teamId)+'</td><td class="num"><strong>'+fmtPt(r.point)+'pt</strong></td><td class="num">'+r.deals+'件</td><td class="num">'+fmtYen(mf.plan)+'</td><td class="num">'+fmtYen(mf.cumRev)+'</td><td class="num">'+fmtYen(mf.cumGp)+'</td></tr>';
+    // 0pt なら行を薄く
+    const rowStyle = r.point === 0 ? ' style="opacity:0.55"' : '';
+    html += '<tr class="clickable"'+rowStyle+' data-member="'+r.ownerName+'"><td>'+rankBadge(r.rank)+'</td><td><strong>'+r.ownerName+'</strong></td><td>'+teamTag(r.teamId)+'</td><td class="num"><strong>'+fmtPt(r.point)+'pt</strong></td><td class="num">'+r.deals+'件</td><td class="num">'+fmtYen(mf.plan)+'</td><td class="num">'+fmtYen(mf.cumRev)+'</td><td class="num">'+fmtYen(mf.cumGp)+'</td></tr>';
   }
   sec.innerHTML = html + '</tbody></table>';
   attachClickHandlers(sec);
