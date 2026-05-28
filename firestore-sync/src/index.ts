@@ -12,6 +12,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { db, batchSet, deleteWhere, FieldValue, projectRoot } from './firestore.js';
+import { aggregate, aggregateByMonth, aggregateByFiscalYear, type Deal } from './aggregate.js';
 
 interface CliArgs {
   teamsOnly: boolean;
@@ -216,6 +217,280 @@ async function syncDeals(): Promise<void> {
     lastSfSyncOrphansDeleted: orphansDeleted,
     lastSfSyncBy: 'firestore-sync',
   }, { merge: true });
+
+  // 集計サマリーを生成（active=true なメンバーのみ）
+  await syncSummaries(data.deals || []);
+}
+
+/**
+ * 全期間・FY別・月別の集計サマリーを Firestore に書き込む
+ * （activeメンバー/activeチームの案件だけで集計）
+ * 売上・粗利の財務集計も含めて、ダッシュボードはこれを読むだけで主要画面を描画できる
+ */
+async function syncSummaries(allDeals: Record<string, unknown>[]): Promise<void> {
+  console.log('[3.5/4] 集計サマリーを Firestore に書込（active対象のみで集計）');
+
+  // Firestoreからactive=trueなチーム・メンバーを取得
+  const teamsSnap = await db.collection('teams').get();
+  const membersSnap = await db.collection('members').get();
+  const activeTeamIds = new Set<string>();
+  teamsSnap.forEach(d => { if (d.data().active !== false) activeTeamIds.add(d.id); });
+  const activeMemberEmails = new Set<string>();
+  const activeMemberNames = new Set<string>();
+  membersSnap.forEach(d => {
+    const data = d.data();
+    if (data.active === false) return;
+    if (data.email) activeMemberEmails.add(data.email);
+    if (data.name) activeMemberNames.add(data.name);
+  });
+  console.log('  active: ' + activeTeamIds.size + ' チーム / ' + activeMemberEmails.size + ' メンバー');
+
+  // dealsをactiveでフィルタ
+  const filteredRaw = allDeals.filter((d: Record<string, unknown>) => {
+    const teamId = d.teamId as string | undefined;
+    if (teamId && !activeTeamIds.has(teamId)) return false;
+    const ownerEmail = d.ownerEmail as string | undefined;
+    const ownerName = d.ownerName as string | undefined;
+    if (ownerEmail) return activeMemberEmails.has(ownerEmail);
+    if (ownerName) return activeMemberNames.has(ownerName);
+    return false;
+  });
+  const filtered: Deal[] = filteredRaw.map((d: Record<string, unknown>) => ({
+    id: String(d.id),
+    ownerName: d.ownerName as string | undefined,
+    ownerEmail: d.ownerEmail as string | undefined,
+    teamId: d.teamId as string | undefined,
+    yearMonth: d.yearMonth as string | undefined,
+    point: Number(d.point) || 0,
+    msKbn: d.msKbn as string | undefined,
+    hourlyCoef: d.hourlyCoef as number | null | undefined,
+    hasIssue: Boolean(d.hasIssue),
+  }));
+  console.log('  集計対象: ' + filtered.length + ' / ' + allDeals.length + ' 件（非アクティブ除外）');
+
+  // ポイント集計
+  const overall = aggregate(filtered);
+  const byPeriod = aggregateByMonth(filtered);
+  const byFy = aggregateByFiscalYear(filtered);
+
+  // 財務集計（monthly_revenue を Firestore から取得して集計）
+  // 月間予定売上は deals 側、売上/粗利実績は monthly_revenue 側
+  console.log('  monthly_revenue を取得して財務集計を生成中...');
+  const monthlySnap = await db.collection('monthly_revenue').get();
+  const financialRows = monthlySnap.docs.map(d => d.data());
+  console.log('  monthly_revenue: ' + financialRows.length + ' 行');
+
+  // 案件ID→獲得FY のマップ
+  const dealIdToFY: Record<string, string> = {};
+  const dealIdToMember: Record<string, { ownerName: string; teamId: string; ownerEmail: string }> = {};
+  const dealIdToMonthlyRevenue: Record<string, number> = {};
+  for (const d of filteredRaw) {
+    const id = String(d.id);
+    const fy = yearMonthToFY(String(d.yearMonth || ''));
+    if (fy) dealIdToFY[id] = fy;
+    dealIdToMember[id] = {
+      ownerName: String(d.ownerName || '?'),
+      teamId: String(d.teamId || '?'),
+      ownerEmail: String(d.ownerEmail || ''),
+    };
+    if (d.monthlyRevenue != null) {
+      dealIdToMonthlyRevenue[id] = Number(d.monthlyRevenue) || 0;
+    }
+  }
+
+  // 実績データを年度内完結ルールでフィルタ
+  // 案件獲得FY === 実績月FY のもののみ採用
+  const validFinancials = financialRows.filter(r => {
+    const dealId = String(r.dealId || '');
+    const acquiredFy = dealIdToFY[dealId];
+    if (!acquiredFy) return false;
+    const recordFy = yearMonthToFY(String(r.yearMonth || ''));
+    return recordFy === acquiredFy;
+  });
+
+  // チーム/メンバーマスタ
+  type FinAgg = { revenue: number; grossProfit: number; deals: Set<string> };
+  const newFinAgg = (): FinAgg => ({ revenue: 0, grossProfit: 0, deals: new Set<string>() });
+
+  // 全期間集計（年度内完結ルール適用）
+  const totalsByTeam: Record<string, FinAgg> = {};
+  const totalsByMember: Record<string, FinAgg & { ownerName: string; teamId: string }> = {};
+  let grandRevenue = 0, grandGrossProfit = 0;
+  // 月別
+  const totalsByMonth: Record<string, FinAgg> = {};
+  // FY別
+  const totalsByFy: Record<string, FinAgg> = {};
+
+  for (const r of validFinancials) {
+    const dealId = String(r.dealId || '');
+    const member = dealIdToMember[dealId];
+    if (!member) continue;
+    const team = member.teamId;
+    const ym = String(r.yearMonth || '');
+    const fy = yearMonthToFY(ym) || '?';
+    const rev = Number(r.revenue) || 0;
+    const gp = Number(r.grossProfit) || 0;
+
+    grandRevenue += rev;
+    grandGrossProfit += gp;
+
+    if (!totalsByTeam[team]) totalsByTeam[team] = newFinAgg();
+    totalsByTeam[team].revenue += rev;
+    totalsByTeam[team].grossProfit += gp;
+    totalsByTeam[team].deals.add(dealId);
+
+    const memKey = member.ownerName + '|' + team;
+    if (!totalsByMember[memKey]) totalsByMember[memKey] = { ...newFinAgg(), ownerName: member.ownerName, teamId: team };
+    totalsByMember[memKey].revenue += rev;
+    totalsByMember[memKey].grossProfit += gp;
+    totalsByMember[memKey].deals.add(dealId);
+
+    if (!totalsByMonth[ym]) totalsByMonth[ym] = newFinAgg();
+    totalsByMonth[ym].revenue += rev;
+    totalsByMonth[ym].grossProfit += gp;
+    totalsByMonth[ym].deals.add(dealId);
+
+    if (!totalsByFy[fy]) totalsByFy[fy] = newFinAgg();
+    totalsByFy[fy].revenue += rev;
+    totalsByFy[fy].grossProfit += gp;
+    totalsByFy[fy].deals.add(dealId);
+  }
+
+  // メンバーごとの「期間内獲得案件の月間予定売上合計」と「年度内累積実績」を計算
+  // ダッシュボードの個人ランキング用
+  type MemberFinByPeriod = {
+    all: { plan: number; cumRev: number; cumGp: number };
+    byFy: Record<string, { plan: number; cumRev: number; cumGp: number }>;
+    byMonth: Record<string, { plan: number; cumRev: number; cumGp: number }>;
+  };
+  const memberFin: Record<string, MemberFinByPeriod> = {};
+  // 期間内獲得案件集合
+  for (const d of filteredRaw) {
+    const id = String(d.id);
+    const member = dealIdToMember[id];
+    if (!member) continue;
+    const memKey = member.ownerName;
+    const acquiredFy = dealIdToFY[id];
+    if (!acquiredFy) continue;
+    const ym = String(d.yearMonth || '');
+    const plan = dealIdToMonthlyRevenue[id] || 0;
+    if (!memberFin[memKey]) memberFin[memKey] = {
+      all: { plan: 0, cumRev: 0, cumGp: 0 },
+      byFy: {}, byMonth: {},
+    };
+    memberFin[memKey].all.plan += plan;
+    if (!memberFin[memKey].byFy[acquiredFy]) memberFin[memKey].byFy[acquiredFy] = { plan: 0, cumRev: 0, cumGp: 0 };
+    memberFin[memKey].byFy[acquiredFy].plan += plan;
+    if (ym) {
+      if (!memberFin[memKey].byMonth[ym]) memberFin[memKey].byMonth[ym] = { plan: 0, cumRev: 0, cumGp: 0 };
+      memberFin[memKey].byMonth[ym].plan += plan;
+    }
+  }
+  // 実績累積（年度内完結ルール適用済み）
+  for (const r of validFinancials) {
+    const dealId = String(r.dealId || '');
+    const member = dealIdToMember[dealId];
+    if (!member) continue;
+    const memKey = member.ownerName;
+    const acquiredFy = dealIdToFY[dealId];
+    if (!acquiredFy) continue;
+    const rev = Number(r.revenue) || 0;
+    const gp = Number(r.grossProfit) || 0;
+    const dealYm = String((filteredRaw.find(x => String(x.id) === dealId) || {}).yearMonth || '');
+    if (!memberFin[memKey]) memberFin[memKey] = {
+      all: { plan: 0, cumRev: 0, cumGp: 0 },
+      byFy: {}, byMonth: {},
+    };
+    memberFin[memKey].all.cumRev += rev;
+    memberFin[memKey].all.cumGp += gp;
+    if (!memberFin[memKey].byFy[acquiredFy]) memberFin[memKey].byFy[acquiredFy] = { plan: 0, cumRev: 0, cumGp: 0 };
+    memberFin[memKey].byFy[acquiredFy].cumRev += rev;
+    memberFin[memKey].byFy[acquiredFy].cumGp += gp;
+    if (dealYm) {
+      if (!memberFin[memKey].byMonth[dealYm]) memberFin[memKey].byMonth[dealYm] = { plan: 0, cumRev: 0, cumGp: 0 };
+      memberFin[memKey].byMonth[dealYm].cumRev += rev;
+      memberFin[memKey].byMonth[dealYm].cumGp += gp;
+    }
+  }
+
+  // 期間別financials（全体集計用）
+  function packFin(agg: FinAgg) {
+    return { revenue: agg.revenue, grossProfit: agg.grossProfit, dealCount: agg.deals.size };
+  }
+  const financialsByPeriod: Record<string, { revenue: number; grossProfit: number; byTeam: Record<string, ReturnType<typeof packFin>> }> = {};
+  for (const [ym, agg] of Object.entries(totalsByMonth)) {
+    financialsByPeriod[ym] = { revenue: agg.revenue, grossProfit: agg.grossProfit, byTeam: {} };
+  }
+  // チーム別×月別を作る
+  const teamByMonth: Record<string, Record<string, FinAgg>> = {};
+  for (const r of validFinancials) {
+    const dealId = String(r.dealId || '');
+    const member = dealIdToMember[dealId];
+    if (!member) continue;
+    const team = member.teamId;
+    const ym = String(r.yearMonth || '');
+    if (!teamByMonth[ym]) teamByMonth[ym] = {};
+    if (!teamByMonth[ym][team]) teamByMonth[ym][team] = newFinAgg();
+    teamByMonth[ym][team].revenue += Number(r.revenue) || 0;
+    teamByMonth[ym][team].grossProfit += Number(r.grossProfit) || 0;
+    teamByMonth[ym][team].deals.add(dealId);
+  }
+  for (const [ym, byTeamMap] of Object.entries(teamByMonth)) {
+    if (!financialsByPeriod[ym]) financialsByPeriod[ym] = { revenue: 0, grossProfit: 0, byTeam: {} };
+    for (const [team, agg] of Object.entries(byTeamMap)) {
+      financialsByPeriod[ym].byTeam[team] = packFin(agg);
+    }
+  }
+  // 年度別の財務（全体）
+  const financialsByFy: Record<string, { revenue: number; grossProfit: number; byTeam: Record<string, ReturnType<typeof packFin>> }> = {};
+  for (const [fy, agg] of Object.entries(totalsByFy)) {
+    financialsByFy[fy] = { revenue: agg.revenue, grossProfit: agg.grossProfit, byTeam: {} };
+  }
+  const teamByFy: Record<string, Record<string, FinAgg>> = {};
+  for (const r of validFinancials) {
+    const dealId = String(r.dealId || '');
+    const member = dealIdToMember[dealId];
+    if (!member) continue;
+    const team = member.teamId;
+    const fy = yearMonthToFY(String(r.yearMonth || '')) || '?';
+    if (!teamByFy[fy]) teamByFy[fy] = {};
+    if (!teamByFy[fy][team]) teamByFy[fy][team] = newFinAgg();
+    teamByFy[fy][team].revenue += Number(r.revenue) || 0;
+    teamByFy[fy][team].grossProfit += Number(r.grossProfit) || 0;
+    teamByFy[fy][team].deals.add(dealId);
+  }
+  for (const [fy, byTeamMap] of Object.entries(teamByFy)) {
+    if (!financialsByFy[fy]) financialsByFy[fy] = { revenue: 0, grossProfit: 0, byTeam: {} };
+    for (const [team, agg] of Object.entries(byTeamMap)) {
+      financialsByFy[fy].byTeam[team] = packFin(agg);
+    }
+  }
+  // 全体財務
+  const financialsAll = {
+    revenue: grandRevenue,
+    grossProfit: grandGrossProfit,
+    byTeam: Object.fromEntries(Object.entries(totalsByTeam).map(([t, a]) => [t, packFin(a)])),
+    byMember: Object.fromEntries(Object.entries(totalsByMember).map(([k, a]) => [k, { ...packFin(a), ownerName: a.ownerName, teamId: a.teamId }])),
+    byMonth: Object.fromEntries(Object.entries(totalsByMonth).map(([k, a]) => [k, { revenue: a.revenue, grossProfit: a.grossProfit }])),
+  };
+
+  // Firestore書込 (summary/aggregate ドキュメント1件に全部入れる)
+  await db.collection('summary').doc('aggregate').set({
+    computedAt: FieldValue.serverTimestamp(),
+    aggregate: overall,
+    aggregateByPeriod: byPeriod,
+    aggregateByFiscalYear: byFy,
+    financials: financialsAll,
+    financialsByPeriod,
+    financialsByFiscalYear: financialsByFy,
+    memberFinancials: memberFin,
+    activeMemberCount: activeMemberEmails.size,
+    activeTeamCount: activeTeamIds.size,
+    sourceDeals: filtered.length,
+    totalDeals: allDeals.length,
+    sourceFinancialRows: validFinancials.length,
+  });
+  console.log('  完了: summary/aggregate に書込（財務含む）');
 }
 
 async function syncFinancials(): Promise<void> {

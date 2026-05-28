@@ -19,9 +19,14 @@
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'Yu Gothic','Hiragino Sans','Meiryo',sans-serif; background: var(--c-bg); color: var(--c-text); line-height: 1.6; }
-header { background: linear-gradient(135deg,var(--c-primary),var(--c-accent)); color: white; padding: 14px 24px; }
+header { background: linear-gradient(135deg,var(--c-primary),var(--c-accent)); color: white; padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+header .header-left { flex: 1 1 auto; min-width: 0; }
+header .header-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end; }
 header h1 { font-size: 20px; font-weight: 700; }
 header .meta { font-size: 12px; opacity: 0.85; margin-top: 2px; }
+header .header-right .user-email { font-size: 12px; opacity: 0.9; }
+header .header-right button { background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.4); padding: 4px 10px; border-radius: 6px; font-size: 11px; cursor: pointer; font-weight: 600; }
+header .header-right button:hover { background: rgba(255,255,255,0.3); }
 nav { background: white; border-bottom: 1px solid var(--c-border); padding: 0 24px; display: flex; overflow-x: auto; }
 nav button { background: none; border: none; padding: 14px 20px; font-size: 14px; font-weight: 600; color: var(--c-text-sub); cursor: pointer; border-bottom: 3px solid transparent; white-space: nowrap; }
 nav button.active { color: var(--c-primary); border-bottom-color: var(--c-primary); }
@@ -113,8 +118,11 @@ table.ranking td.num { text-align: right; font-variant-numeric: tabular-nums; }
 </head>
 <body>
 <header>
-  <h1>🏔 サミット営業成績ダッシュボード</h1>
-  <div class="meta" id="meta"></div>
+  <div class="header-left">
+    <h1>🏔 サミット営業成績ダッシュボード</h1>
+    <div class="meta" id="meta"></div>
+  </div>
+  <div class="header-right" id="header-actions"></div>
 </header>
 <nav>
   <button data-view="overview" class="active">全体</button>
@@ -122,7 +130,7 @@ table.ranking td.num { text-align: right; font-variant-numeric: tabular-nums; }
   <button data-view="individuals">個人別</button>
   <button data-view="monthly">月別推移</button>
   <button data-view="financials">実績（売上/粗利）</button>
-  <button data-view="import-csv">📥 実績取込</button>
+  <button data-view="import-csv" style="margin-left:auto">📥 実績取込</button>
   <button data-view="settings-admin" id="nav-settings" style="display:none">⚙ 設定</button>
 </nav>
 <div class="filter-bar">
@@ -160,8 +168,27 @@ table.ranking td.num { text-align: right; font-variant-numeric: tabular-nums; }
   </div>
 </div>
 <script>
-const TEAM_INFO = { T1:{name:'富士',color:'#FFB3B3',dark:'#E07070'}, T2:{name:'立山',color:'#A5D8FF',dark:'#4A98D8'}, T3:{name:'剱',color:'#B2F2BB',dark:'#4CAF50'}, T4:{name:'白山',color:'#FFD8A8',dark:'#F59E0B'} };
-const TEAM_IDS = ['T1','T2','T3','T4'];
+// チーム情報はFirestoreから動的に生成（rebuildTeamInfoで上書き）。フォールバック用の初期値。
+let TEAM_INFO = { T1:{name:'富士',color:'#FFB3B3',dark:'#E07070'}, T2:{name:'立山',color:'#A5D8FF',dark:'#4A98D8'}, T3:{name:'剱',color:'#B2F2BB',dark:'#4CAF50'}, T4:{name:'白山',color:'#FFD8A8',dark:'#F59E0B'} };
+let TEAM_IDS = ['T1','T2','T3','T4'];
+
+function rebuildTeamInfo() {
+  // window.__TEAMS__ は data-loader.js が active=true なチームをソート済みで格納
+  const teams = window.__TEAMS__;
+  if (!teams || teams.length === 0) return;
+  const info = {};
+  const ids = [];
+  for (const t of teams) {
+    info[t.id] = {
+      name: t.name || t.id,
+      color: t.color || '#cccccc',
+      dark: t.color || '#888888',
+    };
+    ids.push(t.id);
+  }
+  TEAM_INFO = info;
+  TEAM_IDS = ids;
+}
 
 let SUMMARY = null, DEALS = null, FINANCIALS = null;
 let isInitialized = false;
@@ -173,6 +200,7 @@ function initAfterDataReady() {
     document.querySelector('main').innerHTML = '<div class="empty"><h2>データが読み込めません</h2></div>';
     return;
   }
+  rebuildTeamInfo();  // Firestoreから取得したteamsでTEAM_INFO/TEAM_IDSを上書き
   document.getElementById('meta').textContent = buildMetaLine();
   // 管理者なら設定ナビを表示
   if (window.__USER_ROLE__ === 'admin') {
@@ -182,6 +210,13 @@ function initAfterDataReady() {
   // 強制再読込ボタンを meta 行に注入（1回だけ）
   injectRefreshButton();
   if (!isInitialized) {
+    // デフォルト: 全体タブ / 本日の年度 / 累積
+    const todayFY = getCurrentFY();
+    if (SUMMARY.aggregateByFiscalYear && SUMMARY.aggregateByFiscalYear[todayFY]) {
+      currentFY = todayFY;
+    }
+    currentMonth = 'all';
+    currentView = 'overview';
     isInitialized = true;
     renderFyPills(); renderMonthPills(); updateFilterInfo(); renderOverview();
   } else {
@@ -198,6 +233,13 @@ if (window.__SUMMARY__) {
 
 let currentFY = 'all', currentMonth = 'all', currentView = 'overview';
 let currentMember = null, currentTeam = null;
+
+function getCurrentFY() {
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = now.getMonth() + 1; // 1-12
+  return 'FY' + (m >= 4 ? y : y - 1);
+}
 
 function fyMonths(fy) {
   if (!fy.startsWith('FY')) return [];
@@ -234,33 +276,35 @@ function yearMonthToFY(ym) {
 }
 
 function getFinancialsForPeriod() {
+  // 軽量化: 事前集計された SUMMARY.financials* を使用（dealsから再計算しない）
   const empty = { revenue:0, grossProfit:0, byTeam:{}, byMember:{}, byMonth:{}, matchedRows:[] };
-  if (!FINANCIALS || !FINANCIALS.matchedRows) return empty;
-  const dealFy = dealsFiscalYearMap();
-  const filtered = FINANCIALS.matchedRows.filter(r => {
-    // 「年度内完結」ルール: 案件獲得年度と実績月の年度が一致するもののみ集計
-    const acquiredFy = dealFy[r.dealId];
-    if (!acquiredFy) return false;
-    const recordFy = yearMonthToFY(r.yearMonth);
-    if (recordFy !== acquiredFy) return false;
-    // 期間フィルタ
-    if (currentMonth !== 'all') return r.yearMonth === currentMonth;
-    if (currentFY !== 'all') return acquiredFy === currentFY;
-    return true;
-  });
-  const out = { revenue:0, grossProfit:0, byTeam:{}, byMember:{}, byMonth:{}, matchedRows:filtered };
-  for (const r of filtered) {
-    out.revenue += r.revenue; out.grossProfit += r.grossProfit;
-    const team = r.teamId || '?';
-    if (!out.byTeam[team]) out.byTeam[team] = { revenue:0, grossProfit:0, deals:0 };
-    out.byTeam[team].revenue += r.revenue; out.byTeam[team].grossProfit += r.grossProfit; out.byTeam[team].deals++;
-    const mk = (r.ownerName || '?') + '|' + team;
-    if (!out.byMember[mk]) out.byMember[mk] = { ownerName:r.ownerName||'?', teamId:team, revenue:0, grossProfit:0, deals:0 };
-    out.byMember[mk].revenue += r.revenue; out.byMember[mk].grossProfit += r.grossProfit; out.byMember[mk].deals++;
-    if (!out.byMonth[r.yearMonth]) out.byMonth[r.yearMonth] = { revenue:0, grossProfit:0, deals:0 };
-    out.byMonth[r.yearMonth].revenue += r.revenue; out.byMonth[r.yearMonth].grossProfit += r.grossProfit; out.byMonth[r.yearMonth].deals++;
+  if (!SUMMARY) return empty;
+  if (currentMonth !== 'all') {
+    const f = (SUMMARY.financialsByPeriod || {})[currentMonth];
+    if (!f) return empty;
+    const byTeam = {};
+    for (const [tid, v] of Object.entries(f.byTeam || {})) {
+      byTeam[tid] = { revenue: v.revenue, grossProfit: v.grossProfit, deals: v.dealCount };
+    }
+    return { revenue: f.revenue, grossProfit: f.grossProfit, byTeam, byMember: {}, byMonth: { [currentMonth]: { revenue:f.revenue, grossProfit:f.grossProfit, deals: 0 } }, matchedRows: [] };
   }
-  return out;
+  if (currentFY !== 'all') {
+    const f = (SUMMARY.financialsByFiscalYear || {})[currentFY];
+    if (!f) return empty;
+    const byTeam = {};
+    for (const [tid, v] of Object.entries(f.byTeam || {})) {
+      byTeam[tid] = { revenue: v.revenue, grossProfit: v.grossProfit, deals: v.dealCount };
+    }
+    return { revenue: f.revenue, grossProfit: f.grossProfit, byTeam, byMember: {}, byMonth: {}, matchedRows: [] };
+  }
+  // 全期間
+  const f = SUMMARY.financials;
+  if (!f) return empty;
+  const byTeam = {};
+  for (const [tid, v] of Object.entries(f.byTeam || {})) {
+    byTeam[tid] = { revenue: v.revenue, grossProfit: v.grossProfit, deals: v.dealCount };
+  }
+  return { revenue: f.revenue, grossProfit: f.grossProfit, byTeam, byMember: f.byMember || {}, byMonth: f.byMonth || {}, matchedRows: [] };
 }
 
 function fmtPt(n) { return (Math.round(n*100)/100).toFixed(2); }
@@ -459,7 +503,12 @@ async function reloadTeamsAndMembersOnly() {
   if (window.__RELOAD_TEAMS_MEMBERS__) {
     await window.__RELOAD_TEAMS_MEMBERS__();
   }
+  rebuildTeamInfo(); // 名前/色の変更を反映
+  // 案件データ自体の teamId は変わらないが、表示用の TEAM_INFO を更新したので
+  // 他タブに切り替えれば即時反映される（設定画面はrenderSettingsAdminが呼ばれる）
 }
+
+function clearDataCache() { if (window.__CLEAR_DATA_CACHE__) window.__CLEAR_DATA_CACHE__(); }
 
 async function onSaveTeam(id, sec) {
   const inputs = sec.querySelectorAll('[data-team-id="' + id + '"]');
@@ -470,6 +519,7 @@ async function onSaveTeam(id, sec) {
     else data[f] = inp.value;
   });
   await window.__SETTINGS_WRITER__.upsertTeam(id, data);
+  clearDataCache(); // キャッシュ古い名前を保持しないように
 }
 async function onToggleTeam(id) {
   const t = (window.__TEAMS_ALL__ || []).find(x => x.id === id);
@@ -477,6 +527,7 @@ async function onToggleTeam(id) {
   const newActive = !(t.active !== false); // active未定義はtrueと見做すのでトグルでfalseに
   if (!newActive && !confirm('チーム「' + (t.name||id) + '」を非表示にします。所属メンバーの案件もダッシュボード集計から外れます。よろしいですか？')) return;
   await window.__SETTINGS_WRITER__.upsertTeam(id, { active: newActive });
+  clearDataCache();
 }
 async function onAddTeam(sec) {
   const id = document.getElementById('new-team-id').value.trim();
@@ -486,12 +537,14 @@ async function onAddTeam(sec) {
   if ((window.__TEAMS_ALL__ || []).some(t => t.id === id)) { alert('ID「' + id + '」は既に存在します'); return; }
   const nextOrder = (window.__TEAMS_ALL__ || []).reduce((m, t) => Math.max(m, t.sortOrder || 0), 0) + 1;
   await window.__SETTINGS_WRITER__.addTeam(id, name, color, nextOrder);
+  clearDataCache();
 }
 async function onSaveMember(email, sec) {
   const inputs = sec.querySelectorAll('[data-member-email="' + email + '"]');
   const data = {};
   inputs.forEach(inp => { data[inp.dataset.field] = inp.value; });
   await window.__SETTINGS_WRITER__.upsertMember(email, data);
+  clearDataCache();
 }
 async function onToggleMember(email) {
   const m = (window.__MEMBERS_ALL__ || []).find(x => x.email === email);
@@ -499,6 +552,7 @@ async function onToggleMember(email) {
   const newActive = !(m.active !== false);
   if (!newActive && !confirm('メンバー「' + (m.name||email) + '」を非表示にします。そのメンバーの案件もダッシュボード集計から外れます。よろしいですか？')) return;
   await window.__SETTINGS_WRITER__.upsertMember(email, { active: newActive });
+  clearDataCache();
 }
 async function onAddMember(sec) {
   const name = document.getElementById('new-member-name').value.trim();
@@ -509,6 +563,7 @@ async function onAddMember(sec) {
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { alert('メールアドレスの形式が不正です'); return; }
   if ((window.__MEMBERS_ALL__ || []).some(m => m.email === email)) { alert('「' + email + '」は既に登録されています'); return; }
   await window.__SETTINGS_WRITER__.addMember(name, email, team, role);
+  clearDataCache();
 }
 
 async function reloadAllData() {
@@ -870,66 +925,85 @@ function showTeamDetail(teamId) {
   attachClickHandlers(document.getElementById('team-detail'));
 }
 
-function showIndividualDetail(ownerName) {
+async function showIndividualDetail(ownerName) {
   currentMember = ownerName; currentTeam = null;
   setActiveSection('individual-detail');
-  const a = getAggregate(); const fin = getFinancialsForPeriod();
+  const a = getAggregate();
   const m = a.members.find(x => x.ownerName === ownerName);
   if (!m) { document.getElementById('individual-detail').innerHTML = '<div class="empty">未検出</div>'; return; }
   const info = TEAM_INFO[m.teamId] || {name:m.teamId,color:'#ccc'};
   const rank = a.rankings.individual.find(r => r.ownerName === ownerName);
-  const fm = fin.byMember[ownerName+'|'+m.teamId] || {revenue:0,grossProfit:0};
+  // 売上/粗利は SUMMARY.memberFinancials から取得（軽量）
+  const mfin = getMemberFinancialsCumulative(ownerName);
 
-  // 担当案件リスト（DEALSから抽出。期間フィルタ適用）
-  const personDeals = getPersonDeals(ownerName);
-
-  let html = '<span class="back-link" onclick="goBack(\'individuals\')">← 戻る</span>';
-  html += '<div class="detail-header"><div class="swatch" style="background:'+info.color+'"></div>';
-  html += '<div><div class="name">'+m.ownerName+' '+teamTag(m.teamId)+'</div>';
-  html += '<div class="stats">'+fmtPt(m.totalPoint)+'pt / 案件 '+m.totalDeals+'件 / 順位 '+(rank?.rank ?? '?')+'位</div>';
-  html += '<div class="stats">売上 '+fmtYen(fm.revenue)+' / 粗利 '+fmtYen(fm.grossProfit)+' / M '+m.mainCount+' S '+m.subCount+'</div>';
-  html += '<div class="stats" style="font-size:11px">'+(m.ownerEmail||'')+'</div></div></div>';
-
-  html += '<h2>担当案件リスト（'+personDeals.length+'件）</h2>';
-  if (personDeals.length === 0) {
-    html += '<div class="empty">この期間の案件はありません</div>';
-  } else {
-    html += '<table class="ranking"><thead><tr><th>稼働開始</th><th>案件名</th><th>M/S</th><th class="num">時単価</th><th class="num">pt</th><th>区分</th><th class="num">月間予定売上</th><th>操作</th></tr></thead><tbody>';
-    for (const d of personDeals) {
-      const msLabel = d.msKbn === 'main' ? 'メイン' : d.msKbn === 'sub' ? 'サブ' : '?';
-      html += '<tr>';
-      html += '<td>'+(d.operationStartDate ? d.operationStartDate.slice(0,10) : '-')+'</td>';
-      html += '<td>'+escHtml(d.name)+'</td>';
-      html += '<td>'+msLabel+'</td>';
-      html += '<td class="num">'+(d.hourlyRate != null ? fmtYen(d.hourlyRate) : '-')+'</td>';
-      html += '<td class="num"><strong>'+fmtPt(d.point)+'pt</strong></td>';
-      html += '<td>'+escHtml(d.classification || '-')+'</td>';
-      html += '<td class="num">'+(d.monthlyRevenue != null ? fmtYen(d.monthlyRevenue) : '-')+'</td>';
-      html += '<td><div class="btn-group">';
-      html += '<button class="btn primary" onclick="showDealDetail(\''+d.id+'\')">詳細</button>';
-      html += '<button class="btn success" onclick="showDealFinancial(\''+d.id+'\')">実績</button>';
-      html += '</div></td></tr>';
-    }
-    html += '</tbody></table>';
-  }
-
-  html += '<h2>係数内訳</h2><table class="ranking"><thead><tr><th>係数</th><th class="num">案件数</th></tr></thead><tbody>';
+  // 一旦ヘッダだけ描画してから、案件は lazy load
+  let headerHtml = '<span class="back-link" onclick="goBack(\'individuals\')">← 戻る</span>';
+  headerHtml += '<div class="detail-header"><div class="swatch" style="background:'+info.color+'"></div>';
+  headerHtml += '<div><div class="name">'+m.ownerName+' '+teamTag(m.teamId)+'</div>';
+  headerHtml += '<div class="stats">'+fmtPt(m.totalPoint)+'pt / 案件 '+m.totalDeals+'件 / 順位 '+(rank?.rank ?? '?')+'位</div>';
+  headerHtml += '<div class="stats">売上 '+fmtYen(mfin.cumRev)+' / 粗利 '+fmtYen(mfin.cumGp)+' / M '+m.mainCount+' S '+m.subCount+'</div>';
+  headerHtml += '<div class="stats" style="font-size:11px">'+(m.ownerEmail||'')+'</div></div></div>';
+  headerHtml += '<div id="person-deals-area"><div class="empty" style="padding:20px">📡 担当案件を読み込み中...</div></div>';
+  headerHtml += '<h2>係数内訳</h2><table class="ranking"><thead><tr><th>係数</th><th class="num">案件数</th></tr></thead><tbody>';
   for (const [k,v] of Object.entries(m.coefBreakdown || {}).sort()) {
-    html += '<tr><td><strong>'+k+'</strong></td><td class="num">'+v+'件</td></tr>';
+    headerHtml += '<tr><td><strong>'+k+'</strong></td><td class="num">'+v+'件</td></tr>';
   }
-  html += '</tbody></table>';
+  headerHtml += '</tbody></table>';
+  document.getElementById('individual-detail').innerHTML = headerHtml;
 
-  document.getElementById('individual-detail').innerHTML = html;
+  // 案件をlazy load
+  try {
+    const allDeals = await loadPersonDealsCached(m.ownerName, m.ownerEmail);
+    // 期間フィルタを適用
+    const personDeals = filterPersonDeals(allDeals);
+    let dealsHtml = '<h2>担当案件リスト（'+personDeals.length+'件）</h2>';
+    if (personDeals.length === 0) {
+      dealsHtml += '<div class="empty">この期間の案件はありません</div>';
+    } else {
+      dealsHtml += '<table class="ranking"><thead><tr><th>稼働開始</th><th>案件名</th><th>M/S</th><th class="num">時単価</th><th class="num">pt</th><th>区分</th><th class="num">月間予定売上</th><th>操作</th></tr></thead><tbody>';
+      for (const d of personDeals) {
+        const msLabel = d.msKbn === 'main' ? 'メイン' : d.msKbn === 'sub' ? 'サブ' : '?';
+        dealsHtml += '<tr>';
+        dealsHtml += '<td>'+(d.operationStartDate ? String(d.operationStartDate).slice(0,10) : '-')+'</td>';
+        dealsHtml += '<td>'+escHtml(d.name)+'</td>';
+        dealsHtml += '<td>'+msLabel+'</td>';
+        dealsHtml += '<td class="num">'+(d.hourlyRate != null ? fmtYen(d.hourlyRate) : '-')+'</td>';
+        dealsHtml += '<td class="num"><strong>'+fmtPt(d.point)+'pt</strong></td>';
+        dealsHtml += '<td>'+escHtml(d.classification || '-')+'</td>';
+        dealsHtml += '<td class="num">'+(d.monthlyRevenue != null ? fmtYen(d.monthlyRevenue) : '-')+'</td>';
+        dealsHtml += '<td><div class="btn-group">';
+        dealsHtml += '<button class="btn primary" onclick="showDealDetail(\''+d.id+'\')">詳細</button>';
+        dealsHtml += '<button class="btn success" onclick="showDealFinancial(\''+d.id+'\')">実績</button>';
+        dealsHtml += '</div></td></tr>';
+      }
+      dealsHtml += '</tbody></table>';
+    }
+    const area = document.getElementById('person-deals-area');
+    if (area) area.innerHTML = dealsHtml;
+  } catch (e) {
+    const area = document.getElementById('person-deals-area');
+    if (area) area.innerHTML = '<div class="empty">担当案件の読み込みに失敗しました: ' + (e.message || e) + '</div>';
+  }
 }
 
-function getPersonDeals(ownerName) {
-  if (!DEALS || !DEALS.deals) return [];
-  return DEALS.deals.filter(d => {
-    if (d.ownerName !== ownerName) return false;
+// 個人詳細用: lazyロードしたdeals配列から期間でフィルタ
+function filterPersonDeals(allDeals) {
+  return allDeals.filter(d => {
     if (currentMonth !== 'all') return d.yearMonth === currentMonth;
     if (currentFY !== 'all') return ymInFY(d.yearMonth, currentFY);
     return true;
   });
+}
+
+// 個人詳細表示用のキャッシュ（同じ人を複数回開くときに再読込しないため）
+const personDealsCache = {};
+async function loadPersonDealsCached(ownerName, ownerEmail) {
+  const cacheKey = ownerEmail || ownerName;
+  if (personDealsCache[cacheKey]) return personDealsCache[cacheKey];
+  if (!window.__LOAD_PERSON_DEALS__) return [];
+  const deals = await window.__LOAD_PERSON_DEALS__(ownerName, ownerEmail);
+  personDealsCache[cacheKey] = deals;
+  return deals;
 }
 
 /**
@@ -937,36 +1011,31 @@ function getPersonDeals(ownerName) {
  *  - SF月間予定売上の合計（plan）
  *  - それら案件の年度内累積売上実績（cumRev）
  *  - それら案件の年度内累積粗利実績（cumGp）
+ * 軽量化: SUMMARY.memberFinancials を使用（dealsから再計算しない）
  */
 function getMemberFinancialsCumulative(ownerName) {
-  const personDeals = getPersonDeals(ownerName);
-  const dealIds = new Set(personDeals.map(d => d.id));
-  const plan = personDeals.reduce((s, d) => s + (d.monthlyRevenue || 0), 0);
-  // 案件ID → 獲得年度
-  const dealFy = {};
-  for (const d of personDeals) {
-    const fy = yearMonthToFY(d.yearMonth);
-    if (fy) dealFy[d.id] = fy;
+  const mf = (SUMMARY && SUMMARY.memberFinancials) ? SUMMARY.memberFinancials[ownerName] : null;
+  if (!mf) return { plan: 0, cumRev: 0, cumGp: 0 };
+  if (currentMonth !== 'all') {
+    const m = (mf.byMonth || {})[currentMonth];
+    return m ? { plan: m.plan, cumRev: m.cumRev, cumGp: m.cumGp } : { plan: 0, cumRev: 0, cumGp: 0 };
   }
-  let cumRev = 0, cumGp = 0;
-  if (FINANCIALS && FINANCIALS.matchedRows) {
-    for (const r of FINANCIALS.matchedRows) {
-      if (!dealIds.has(r.dealId)) continue;
-      // 「年度内完結」ルール: 案件獲得年度と実績月の年度が一致するもののみ集計
-      const acquiredFy = dealFy[r.dealId];
-      if (!acquiredFy) continue;
-      const recordFy = yearMonthToFY(r.yearMonth);
-      if (recordFy !== acquiredFy) continue;
-      cumRev += r.revenue;
-      cumGp += r.grossProfit;
-    }
+  if (currentFY !== 'all') {
+    const f = (mf.byFy || {})[currentFY];
+    return f ? { plan: f.plan, cumRev: f.cumRev, cumGp: f.cumGp } : { plan: 0, cumRev: 0, cumGp: 0 };
   }
-  return { plan, cumRev, cumGp };
+  return { plan: mf.all.plan, cumRev: mf.all.cumRev, cumGp: mf.all.cumGp };
 }
 
-function showDealDetail(dealId) {
-  if (!DEALS) { alert('案件詳細データがありません'); return; }
-  const d = DEALS.deals.find(x => x.id === dealId);
+async function showDealDetail(dealId) {
+  // lazy load: 1案件だけ取得（1読取）
+  let d = null;
+  // 先にキャッシュを探す（個人詳細でロード済みの場合）
+  for (const cached of Object.values(personDealsCache)) {
+    const found = cached.find(x => x.id === dealId);
+    if (found) { d = found; break; }
+  }
+  if (!d && window.__LOAD_DEAL__) d = await window.__LOAD_DEAL__(dealId);
   if (!d) { alert('案件が見つかりません: ' + dealId); return; }
   const info = TEAM_INFO[d.teamId] || {name:d.teamId||'?'};
   let html = '<h3>'+escHtml(d.name)+'</h3>';
@@ -994,11 +1063,16 @@ function showDealDetail(dealId) {
   document.getElementById('modal-deal-detail').classList.add('active');
 }
 
-function showDealFinancial(dealId) {
-  if (!DEALS) { alert('案件データがありません'); return; }
-  const d = DEALS.deals.find(x => x.id === dealId);
+async function showDealFinancial(dealId) {
+  // lazy load: 1案件 + その実績だけ取得
+  let d = null;
+  for (const cached of Object.values(personDealsCache)) {
+    const found = cached.find(x => x.id === dealId);
+    if (found) { d = found; break; }
+  }
+  if (!d && window.__LOAD_DEAL__) d = await window.__LOAD_DEAL__(dealId);
   if (!d) { alert('案件が見つかりません'); return; }
-  const rows = (FINANCIALS && FINANCIALS.matchedRows) ? FINANCIALS.matchedRows.filter(r => r.dealId === dealId) : [];
+  const rows = window.__LOAD_DEAL_FINANCIALS__ ? await window.__LOAD_DEAL_FINANCIALS__(dealId) : [];
   // 案件の獲得年度
   const dealAcquiredFy = yearMonthToFY(d.yearMonth);
   // 「年度内完結」ルール: 案件獲得年度と実績月の年度が一致するもののみ表示
@@ -1047,27 +1121,27 @@ function attachClickHandlers(sec) {
 document.querySelectorAll('nav button').forEach(btn => btn.addEventListener('click', () => { currentView = btn.dataset.view; currentMember = null; currentTeam = null; setActiveTab(currentView); setActiveSection(currentView); renderCurrentView(); }));
 
 function injectRefreshButton() {
-  const header = document.querySelector('header');
-  if (!header || document.getElementById('btn-force-refresh')) return;
+  const actions = document.getElementById('header-actions');
+  if (!actions || document.getElementById('btn-force-refresh')) return;
   const btn = document.createElement('button');
   btn.id = 'btn-force-refresh';
   btn.title = '5分以内のキャッシュを破棄してFirestoreから最新データを再取得';
-  btn.style.cssText = 'position:absolute;top:14px;right:140px;background:rgba(255,255,255,0.2);color:white;border:1px solid rgba(255,255,255,0.4);padding:4px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-weight:600';
   btn.textContent = '🔄 最新化';
   btn.addEventListener('click', async () => {
     if (window.__CLEAR_DATA_CACHE__) window.__CLEAR_DATA_CACHE__();
     if (window.__DATA_RELOADER__) await window.__DATA_RELOADER__();
   });
-  header.style.position = 'relative';
-  header.appendChild(btn);
+  // 最新化ボタンは user-info より前（左側）に配置
+  actions.insertBefore(btn, actions.firstChild);
 }
 
 function buildMetaLine() {
   const parts = [];
   if (SUMMARY.computedAt) parts.push('SFデータ更新日時: ' + new Date(SUMMARY.computedAt).toLocaleString('ja-JP'));
-  if (FINANCIALS && FINANCIALS.matchedRows && FINANCIALS.matchedRows.length > 0) {
-    const yms = Array.from(new Set(FINANCIALS.matchedRows.map(r => r.yearMonth).filter(Boolean))).sort();
-    if (yms.length > 0) parts.push('実績データ: ' + yms[0] + ' 〜 ' + yms[yms.length - 1] + '（' + FINANCIALS.matchedRows.length + '行）');
+  // 実績データの月範囲は SUMMARY.financialsByPeriod のキーから算出
+  if (SUMMARY.financialsByPeriod) {
+    const yms = Object.keys(SUMMARY.financialsByPeriod).filter(Boolean).sort();
+    if (yms.length > 0) parts.push('実績データ: ' + yms[0] + ' 〜 ' + yms[yms.length - 1]);
   }
   return parts.join('  /  ');
 }

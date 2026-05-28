@@ -67,21 +67,25 @@ function checkDomain(email) {
 
 // ユーザー情報をヘッダーに表示 + ログアウトボタン
 function injectUserInfo(user) {
-  const existing = document.getElementById('user-info');
-  if (existing) existing.remove();
-  const div = document.createElement('div');
-  div.id = 'user-info';
-  div.style.cssText = 'position:absolute;top:14px;right:20px;display:flex;align-items:center;gap:8px;font-size:12px;color:white;';
-  div.innerHTML = `
-    <span>${user.email}</span>
-    <button id="btn-logout" style="background:rgba(255,255,255,0.2);color:white;border:1px solid rgba(255,255,255,0.4);padding:4px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-weight:600">ログアウト</button>
-  `;
-  const header = document.querySelector('header');
-  if (header) {
-    header.style.position = 'relative';
-    header.appendChild(div);
-  }
-  document.getElementById('btn-logout').addEventListener('click', () => signOut(auth));
+  // 既存のユーザー情報を削除
+  const oldSpan = document.getElementById('user-info');
+  if (oldSpan) oldSpan.remove();
+  const oldBtn = document.getElementById('btn-logout');
+  if (oldBtn) oldBtn.remove();
+
+  // header-actions コンテナに追加（ヘッダーレイアウト統一のため）
+  const actions = document.getElementById('header-actions');
+  if (!actions) return;
+  const span = document.createElement('span');
+  span.id = 'user-info';
+  span.className = 'user-email';
+  span.textContent = user.email;
+  const btn = document.createElement('button');
+  btn.id = 'btn-logout';
+  btn.textContent = 'ログアウト';
+  btn.addEventListener('click', () => signOut(auth));
+  actions.appendChild(span);
+  actions.appendChild(btn);
 }
 
 // 初期はメインを隠す
