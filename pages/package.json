@@ -1,0 +1,17 @@
+{
+  "name": "summit-fy2026-pages",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler pages dev ./public",
+    "deploy": "wrangler pages deploy ./public --project-name=summit-fy2026",
+    "d1:execute:local": "wrangler d1 execute summit-fy2026 --local --file=./migrations/0001_initial_schema.sql",
+    "d1:execute:remote": "wrangler d1 execute summit-fy2026 --remote --file=./migrations/0001_initial_schema.sql"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250101.0",
+    "typescript": "^5.6.3",
+    "wrangler": "^4.0.0"
+  }
+}

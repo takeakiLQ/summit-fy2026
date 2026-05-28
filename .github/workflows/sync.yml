@@ -1,10 +1,8 @@
-name: Salesforce → Firestore 自動同期
+name: Salesforce → Cloudflare D1 自動同期
 
 on:
   schedule:
-    # Firestore無料枠（読取5万/日）に収めるため、6時間ごとに実行
-    # （毎時実行では差分削除のための全件読取で 14,000読取/日に達するため）
-    # UTC 0/6/12/18時 = JST 9/15/21/3時
+    # 6時間ごとに実行（UTC基準）。JST 9/15/21/3時。
     - cron: '0 */6 * * *'
   workflow_dispatch:  # GitHub UI から手動実行できるように
 
@@ -24,22 +22,19 @@ jobs:
         with:
           node-version: '20'
 
-      - name: firestore-sync — サービスアカウント鍵を書き出し（事前ステップ用）
-        working-directory: firestore-sync
+      - name: Cloudflare から members.json を取得（最新のチーム・メンバー設定をSF SOQL対象に反映）
         env:
-          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          CLOUDFLARE_PAGES_URL: ${{ secrets.CLOUDFLARE_PAGES_URL }}
+          SYNC_API_KEY: ${{ secrets.SYNC_API_KEY }}
         run: |
-          printf '%s' "$FIREBASE_SERVICE_ACCOUNT" > service-account.json
+          curl -fsS -H "x-sync-api-key: $SYNC_API_KEY" \
+            "$CLOUDFLARE_PAGES_URL/api/sync/members-json" \
+            -o sf-extract/config/members.json
+          echo "--- members.json (取得確認) ---"
+          head -c 500 sf-extract/config/members.json
+          echo ""
 
-      - name: firestore-sync — 依存インストール（事前）
-        working-directory: firestore-sync
-        run: npm install --no-audit --no-fund
-
-      - name: firestore-sync — Firestoreからmembers.jsonを生成（管理画面の変更をSF SOQLに反映）
-        working-directory: firestore-sync
-        run: npm run sync -- --export-members-json
-
-      - name: sf-extract — Salesforce認証情報を .env に書き出し
+      - name: sf-extract — Salesforce 認証情報を .env に書き出し
         working-directory: sf-extract
         env:
           SF_AUTH_TYPE: ${{ secrets.SF_AUTH_TYPE }}
@@ -66,7 +61,7 @@ jobs:
         working-directory: sf-extract
         run: npm install --no-audit --no-fund
 
-      - name: sf-extract — Salesforce案件抽出
+      - name: sf-extract — Salesforce 案件抽出
         working-directory: sf-extract
         run: npm run extract -- --out output/deals-latest.json
 
@@ -78,27 +73,19 @@ jobs:
         working-directory: kpi-compute
         run: npm run compute -- --in ../sf-extract/output/deals-latest.json --out-base latest
 
-      - name: firestore-sync — サービスアカウント鍵を書き出し
-        working-directory: firestore-sync
+      - name: Cloudflare D1 に案件データを投入（差分削除＋サマリー再計算込み）
         env:
-          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          CLOUDFLARE_PAGES_URL: ${{ secrets.CLOUDFLARE_PAGES_URL }}
+          SYNC_API_KEY: ${{ secrets.SYNC_API_KEY }}
         run: |
-          printf '%s' "$FIREBASE_SERVICE_ACCOUNT" > service-account.json
+          node pages/migrations/import-deals.mjs \
+            "$CLOUDFLARE_PAGES_URL" "$SYNC_API_KEY" \
+            kpi-compute/output/latest_deals.json
 
-      - name: firestore-sync — 依存インストール
-        working-directory: firestore-sync
-        run: npm install --no-audit --no-fund
-
-      - name: firestore-sync — Firestoreに書込（実績はスキップ、案件のみ）
-        working-directory: firestore-sync
-        run: npm run sync -- --skip-financials
-
-      - name: 後片付け（鍵・.envを念のため削除）
+      - name: 後片付け（.env を削除）
         if: always()
-        run: |
-          rm -f sf-extract/.env || true
-          rm -f firestore-sync/service-account.json || true
+        run: rm -f sf-extract/.env || true
 
       - name: 同期完了通知
         if: success()
-        run: echo "✅ Salesforce → Firestore 同期 完了 ($(date -u '+%Y-%m-%d %H:%M:%S') UTC)"
+        run: echo "✅ Salesforce → Cloudflare D1 同期 完了 ($(date -u '+%Y-%m-%d %H:%M:%S') UTC)"

@@ -1,0 +1,14 @@
+name = "summit-fy2026"
+compatibility_date = "2025-04-01"
+compatibility_flags = ["nodejs_compat"]
+pages_build_output_dir = "./public"
+
+# D1 データベース
+[[d1_databases]]
+binding = "DB"
+database_name = "summit-fy2026"
+database_id = "1cb025e2-7409-4e23-9c92-e6ea3858ba18"
+
+# 環境変数（Pages の Functions から参照）
+[vars]
+ALLOWED_EMAIL_DOMAINS = "logiquest.co.jp,qqbp.co.jp"
