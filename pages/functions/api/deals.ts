@@ -58,5 +58,6 @@ function rowToDeal(r: any) {
     issues: r.issues ? JSON.parse(r.issues) : [],
     yearMonth: r.year_month,
     fiscalYear: r.fiscal_year,
+    kind: r.kind || 'Qhai',
   };
 }

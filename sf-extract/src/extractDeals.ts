@@ -31,6 +31,8 @@ export interface NormalizedDeal {
   plannedStartDate: string | null;
   registeredAt: string | null;
   lastModifiedAt: string | null;
+  groupFy22: string | null;
+  kind: 'ByQ' | 'Qhai';
   raw: Record<string, unknown>;
 }
 
@@ -175,6 +177,8 @@ export async function extractDeals(
       plannedStartDate: f.plannedStartDate ? toString(r[f.plannedStartDate]) : null,
       registeredAt: toString(r[f.registeredAt]),
       lastModifiedAt: toString(r[f.lastModifiedAt]),
+      groupFy22: f.groupFy22 ? toString(r[f.groupFy22]) : null,
+      kind: (f.groupFy22 && toString(r[f.groupFy22]) === '都市物流営業部（緊急便）') ? 'ByQ' : 'Qhai',
       raw: r,
     });
   }

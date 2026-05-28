@@ -45,6 +45,8 @@ interface DealInput {
   hasIssue?: boolean;
   issues?: string[];
   yearMonth?: string;
+  groupFy22?: string;
+  kind?: 'ByQ' | 'Qhai';
 }
 
 function yearMonthToFY(ym?: string): string | null {
@@ -82,8 +84,8 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       status, classification, operation_start_date, planned_start_date,
       registered_at, last_modified_at,
       hourly_rate, hourly_coef, hourly_coef_label, base_point, point,
-      has_issue, issues, year_month, fiscal_year, synced_at
-    ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+      has_issue, issues, year_month, fiscal_year, kind, synced_at
+    ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
     ON CONFLICT(id) DO UPDATE SET
       name=excluded.name, manual_no=excluded.manual_no,
       owner_name=excluded.owner_name, owner_email=excluded.owner_email,
@@ -99,6 +101,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       hourly_coef_label=excluded.hourly_coef_label, base_point=excluded.base_point, point=excluded.point,
       has_issue=excluded.has_issue, issues=excluded.issues,
       year_month=excluded.year_month, fiscal_year=excluded.fiscal_year,
+      kind=excluded.kind,
       synced_at=excluded.synced_at
   `;
 
@@ -119,6 +122,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       d.hourlyCoefLabel ?? null, d.basePoint ?? null, d.point ?? 0,
       d.hasIssue ? 1 : 0, d.issues ? JSON.stringify(d.issues) : null,
       d.yearMonth ?? null, yearMonthToFY(d.yearMonth),
+      d.kind ?? (d.groupFy22 === '都市物流営業部（緊急便）' ? 'ByQ' : 'Qhai'),
       now
     ));
   }

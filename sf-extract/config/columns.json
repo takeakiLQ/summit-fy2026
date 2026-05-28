@@ -17,7 +17,8 @@
     "operationStartDate": "OperationStartDate__c",
     "plannedStartDate": "PlannedStartDate__c",
     "registeredAt": "CreatedDate",
-    "lastModifiedAt": "LastModifiedDate"
+    "lastModifiedAt": "LastModifiedDate",
+    "groupFy22": "Group_FY22__c"
   },
   "filters": {
     "statusInclude": ["配車済み", "稼働終了"],

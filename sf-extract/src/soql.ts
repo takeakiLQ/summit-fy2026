@@ -37,6 +37,7 @@ export function buildDealQuery(cols: ColumnsConfig, opts: BuildQueryOptions = {}
     f.status, f.classification,
     f.operationStartDate, f.plannedStartDate,
     f.registeredAt, f.lastModifiedAt,
+    f.groupFy22,
   ].filter(x => x && x.trim() !== '');
 
   const uniqueFields = Array.from(new Set(selectFields));

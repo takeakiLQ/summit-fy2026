@@ -55,6 +55,7 @@ export interface ColumnsConfig {
     plannedStartDate: string;
     registeredAt: string;
     lastModifiedAt: string;
+    groupFy22?: string;
   };
   filters: {
     statusInclude: string[];

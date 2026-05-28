@@ -613,6 +613,14 @@ function renderImportCsv() {
   document.getElementById('btn-import').addEventListener('click', importCsvToD1);
 }
 
+function detectCsvKind(filename) {
+  if (!filename) return null;
+  const lower = filename.toLowerCase();
+  if (lower.startsWith('byq_') || lower.includes('_byq_')) return 'ByQ';
+  if (lower.startsWith('q配_') || filename.startsWith('Q配_') || lower.includes('qhai')) return 'Qhai';
+  return null;
+}
+
 function previewCsv() {
   const file = document.getElementById('csv-file').files[0];
   if (!file) { alert('ファイルを選択'); return; }
@@ -646,9 +654,10 @@ function previewCsv() {
       csvParsedRows.push({ yearMonth: ymNorm, manualNo: mn, revenue: rev, grossProfit: rev - cp, workdays: wd });
     }
     const sortedMonths = Array.from(months).sort();
+    const kind = detectCsvKind(file.name);
     let html = '<h3 style="margin-bottom:8px">プレビュー</h3>';
     html += '<table class="ranking"><tbody>';
-    html += '<tr><td>ファイル名</td><td><strong>'+file.name+'</strong></td></tr>';
+    html += '<tr><td>ファイル名</td><td><strong>'+file.name+'</strong>'+(kind?' <span style="margin-left:8px;padding:2px 10px;border-radius:8px;font-size:11px;font-weight:700;background:'+(kind==='ByQ'?'#fee2e2;color:#991b1b':'#e0e7ff;color:#3730a3')+'">'+kind+'</span>':' <span style="color:#DC2626">⚠ 種別を判別できません（ByQ_*.csv または Q配_*.csv 推奨）</span>')+'</td></tr>';
     html += '<tr><td>有効行数</td><td>'+rowCount+'</td></tr>';
     html += '<tr><td>対象月</td><td><strong>'+sortedMonths.join(', ')+'</strong></td></tr>';
     html += '<tr><td>合計売上</td><td>'+fmtYen(totalRev)+'</td></tr>';
@@ -874,6 +883,7 @@ function sortPersonDeals(deals, sort) {
   const getter = {
     operationStartDate: d => d.operationStartDate || '',
     name: d => d.name || '',
+    kind: d => d.kind || 'Qhai',
     msKbn: d => d.msKbn === 'main' ? 1 : d.msKbn === 'sub' ? 2 : 9,
     hourlyRate: d => d.hourlyRate ?? -1,
     point: d => d.point ?? 0,
@@ -902,6 +912,7 @@ function renderPersonDealsTable(personDeals) {
   html += '<table class="ranking"><thead><tr>';
   html += '<th class="sortable" data-sort-col="operationStartDate">稼働開始'+ind('operationStartDate')+'</th>';
   html += '<th class="sortable" data-sort-col="name">案件名'+ind('name')+'</th>';
+  html += '<th class="sortable" data-sort-col="kind">種別'+ind('kind')+'</th>';
   html += '<th class="sortable" data-sort-col="msKbn">M/S'+ind('msKbn')+'</th>';
   html += '<th class="sortable num" data-sort-col="hourlyRate">時単価'+ind('hourlyRate')+'</th>';
   html += '<th class="sortable num" data-sort-col="point">pt'+ind('point')+'</th>';
@@ -910,9 +921,14 @@ function renderPersonDealsTable(personDeals) {
   html += '<th>操作</th></tr></thead><tbody>';
   for (const d of sorted) {
     const msLabel = d.msKbn === 'main' ? 'メイン' : d.msKbn === 'sub' ? 'サブ' : '?';
+    const kindBadge = d.kind === 'ByQ'
+      ? '<span style="background:#fee2e2;color:#991b1b;padding:1px 8px;border-radius:8px;font-size:10px;font-weight:700">ByQ</span>'
+      : '<span style="background:#e0e7ff;color:#3730a3;padding:1px 8px;border-radius:8px;font-size:10px;font-weight:700">Qhai</span>';
     html += '<tr>';
     html += '<td>'+(d.operationStartDate?String(d.operationStartDate).slice(0,10):'-')+'</td>';
-    html += '<td>'+escHtml(d.name)+'</td><td>'+msLabel+'</td>';
+    html += '<td>'+escHtml(d.name)+'</td>';
+    html += '<td>'+kindBadge+'</td>';
+    html += '<td>'+msLabel+'</td>';
     html += '<td class="num">'+(d.hourlyRate!=null?fmtYen(d.hourlyRate):'-')+'</td>';
     html += '<td class="num"><strong>'+fmtPt(d.point)+'pt</strong></td>';
     html += '<td>'+escHtml(d.classification || '-')+'</td>';
@@ -999,6 +1015,7 @@ async function showDealDetail(dealId) {
   html += '<tr><td>稼働開始日</td><td>'+(d.operationStartDate?String(d.operationStartDate).slice(0,10):'-')+'</td></tr>';
   html += '<tr><td>ステータス</td><td>'+escHtml(d.status)+'</td></tr>';
   html += '<tr><td>案件区分</td><td>'+escHtml(d.classification)+'</td></tr>';
+  html += '<tr><td>種別</td><td>'+(d.kind==='ByQ'?'<span style="color:#DC2626;font-weight:700">ByQ</span>（都市物流・緊急便）':'<span style="color:#2E5C8A;font-weight:700">Qhai</span>')+'</td></tr>';
   html += '<tr><td>月間売上</td><td>'+(d.monthlyRevenue!=null?fmtYen(d.monthlyRevenue):'-')+'</td></tr>';
   html += '<tr><td>時間当たり単価</td><td>'+(d.hourlyRate!=null?fmtYen(d.hourlyRate):'-')+'</td></tr>';
   html += '<tr><td><strong>獲得ポイント</strong></td><td><strong style="color:#2E5C8A;font-size:16px">'+fmtPt(d.point)+'pt</strong></td></tr>';
