@@ -17,14 +17,16 @@ interface CliArgs {
   teamsOnly: boolean;
   skipFinancials: boolean;
   skipDeals: boolean;
+  exportMembersJson: boolean;
 }
 
 function parseArgs(): CliArgs {
-  const args: CliArgs = { teamsOnly: false, skipFinancials: false, skipDeals: false };
+  const args: CliArgs = { teamsOnly: false, skipFinancials: false, skipDeals: false, exportMembersJson: false };
   for (const a of process.argv.slice(2)) {
     if (a === '--teams-members-only') args.teamsOnly = true;
     else if (a === '--skip-financials') args.skipFinancials = true;
     else if (a === '--skip-deals') args.skipDeals = true;
+    else if (a === '--export-members-json') args.exportMembersJson = true;
     else if (a === '--help' || a === '-h') { console.log('Usage: see source'); process.exit(0); }
   }
   return args;
@@ -47,7 +49,7 @@ function yearMonthToFY(ym: string): string | null {
 }
 
 async function syncTeamsAndMembers(): Promise<void> {
-  console.log('[1/4] チーム・メンバーを Firestore に書込');
+  console.log('[1/4] チーム・メンバーを Firestore に書込（merge方式、active/roleはWeb UI管理）');
   const membersPath = path.resolve(projectRoot, '..', 'sf-extract', 'config', 'members.json');
   if (!fs.existsSync(membersPath)) {
     console.warn('  members.json が見つかりません: ' + membersPath);
@@ -55,27 +57,69 @@ async function syncTeamsAndMembers(): Promise<void> {
   }
   const cfg = JSON.parse(fs.readFileSync(membersPath, 'utf-8'));
 
-  // teams
+  // teams (merge方式: name/color/sortOrder のみ上書き、active等のWeb UI管理項目は保護)
   const teamItems = (cfg.teams || []).map((t: { id: string; name: string; color: string }, i: number) => ({
     id: t.id,
-    data: { id: t.id, name: t.name, color: t.color, sortOrder: i + 1, updatedAt: FieldValue.serverTimestamp() }
+    data: {
+      id: t.id,
+      name: t.name,
+      color: t.color,
+      sortOrder: i + 1,
+      updatedAt: FieldValue.serverTimestamp(),
+      // active は触らない（Web UI管理。新規作成時は initActiveTeams ヘルパーで補完）
+    }
   }));
-  await batchSet('teams', teamItems);
+  await batchSet('teams', teamItems, { merge: true });
 
-  // members（既存の role を保持するため merge）
+  // members (merge方式: email/name/team のみ。role/active はWeb UI管理項目なので保護)
   const memberItems = (cfg.members || []).map((m: { name: string; email: string; team: string }) => ({
     id: m.email,
     data: {
       email: m.email,
       name: m.name,
       team: m.team,
-      role: 'member',
-      active: true,
       updatedAt: FieldValue.serverTimestamp(),
+      // role / active は触らない（Web UI管理。新規作成時は initActiveMembers ヘルパーで補完）
     }
   }));
   await batchSet('members', memberItems, { merge: true });
+
+  // 初期投入時のみ active: true / role: 'member' を補完（既存ドキュメントは変更しない）
+  await initActiveDefaults();
+
   console.log('  完了: ' + teamItems.length + 'チーム / ' + memberItems.length + 'メンバー');
+}
+
+/**
+ * 新規作成された teams/members ドキュメントに対し、未設定なら active: true をデフォルト付与。
+ * 既に active が設定されている（trueでもfalseでも）ドキュメントには触らない。
+ */
+async function initActiveDefaults(): Promise<void> {
+  // teams: active が未定義のドキュメントだけ true に
+  const teamsSnap = await db.collection('teams').get();
+  let teamFixCount = 0;
+  for (const doc of teamsSnap.docs) {
+    if (doc.data().active === undefined) {
+      await doc.ref.set({ active: true }, { merge: true });
+      teamFixCount++;
+    }
+  }
+  if (teamFixCount > 0) console.log('  teams: ' + teamFixCount + '件に active:true をデフォルト付与');
+
+  // members: active 未定義 → true、role 未定義 → 'member'
+  const membersSnap = await db.collection('members').get();
+  let memberFixCount = 0;
+  for (const doc of membersSnap.docs) {
+    const data = doc.data();
+    const update: Record<string, unknown> = {};
+    if (data.active === undefined) update.active = true;
+    if (data.role === undefined) update.role = 'member';
+    if (Object.keys(update).length > 0) {
+      await doc.ref.set(update, { merge: true });
+      memberFixCount++;
+    }
+  }
+  if (memberFixCount > 0) console.log('  members: ' + memberFixCount + '件に active:true/role:member をデフォルト付与');
 }
 
 async function syncSettings(): Promise<void> {
@@ -225,12 +269,53 @@ async function syncFinancials(): Promise<void> {
   }, { merge: true });
 }
 
+/**
+ * Firestoreから sf-extract/config/members.json を生成。
+ * 方針: SF SOQL は active 状態に関わらず全員分取得し続ける（データ復活を即時に保つため）。
+ * 非アクティブメンバーの「集計除外」はダッシュボード側で行う。
+ * チームは active=false を除外（チーム自体が消える＝紐づくメンバーも members.json から落ちる）。
+ */
+async function exportMembersJson(): Promise<void> {
+  console.log('[export] Firestore → sf-extract/config/members.json を生成（SF取得は全員分維持）');
+  const teamsSnap = await db.collection('teams').get();
+  const membersSnap = await db.collection('members').get();
+
+  const teams = teamsSnap.docs
+    .map(d => d.data())
+    .filter(t => t.active !== false) // active未定義もtrueと見做す
+    .sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0))
+    .map(t => ({ id: t.id, name: t.name, color: t.color }));
+
+  const activeTeamIds = new Set(teams.map(t => t.id));
+
+  // メンバーは active 関係なく全員（SF取得対象として維持）
+  // ただし、所属チームが非アクティブな場合は members.json に含めない（紐付け先がないため）
+  const members = membersSnap.docs
+    .map(d => d.data())
+    .filter(m => activeTeamIds.has(m.team))
+    .map(m => ({ name: m.name, email: m.email, team: m.team }));
+
+  const out = { teams, members };
+  const outPath = path.resolve(projectRoot, '..', 'sf-extract', 'config', 'members.json');
+  fs.writeFileSync(outPath, JSON.stringify(out, null, 2) + '\n', 'utf-8');
+  console.log('  書出: ' + outPath);
+  console.log('  チーム ' + teams.length + ' 件 / メンバー ' + members.length + ' 件（active関係なくSF SOQL対象）');
+}
+
 async function main(): Promise<void> {
   const args = parseArgs();
   const start = Date.now();
   console.log('[firestore-sync] 開始');
 
   try {
+    // モード1: Firestore → members.json 書出のみ（GitHub Actions の sf-extract 実行前で使う）
+    if (args.exportMembersJson) {
+      await exportMembersJson();
+      console.log('[firestore-sync] members.json 書出完了 (' + ((Date.now() - start) / 1000).toFixed(1) + ' 秒)');
+      process.exit(0);
+    }
+
+    // モード2: 通常の同期
     await syncTeamsAndMembers();
     if (args.teamsOnly) {
       console.log('[firestore-sync] チーム・メンバーのみ完了');

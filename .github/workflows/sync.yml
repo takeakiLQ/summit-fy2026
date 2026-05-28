@@ -22,6 +22,21 @@ jobs:
         with:
           node-version: '20'
 
+      - name: firestore-sync — サービスアカウント鍵を書き出し（事前ステップ用）
+        working-directory: firestore-sync
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          printf '%s' "$FIREBASE_SERVICE_ACCOUNT" > service-account.json
+
+      - name: firestore-sync — 依存インストール（事前）
+        working-directory: firestore-sync
+        run: npm install --no-audit --no-fund
+
+      - name: firestore-sync — Firestoreからmembers.jsonを生成（管理画面の変更をSF SOQLに反映）
+        working-directory: firestore-sync
+        run: npm run sync -- --export-members-json
+
       - name: sf-extract — Salesforce認証情報を .env に書き出し
         working-directory: sf-extract
         env:

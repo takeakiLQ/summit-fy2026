@@ -6,6 +6,7 @@
 import { getFirestore, collection, getDocs, doc, getDoc }
   from 'https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js';
 import { getApp } from 'https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js';
+import { getAuth } from 'https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js';
 
 // ----- ユーティリティ -----
 function yearMonthToFY(ym) {
@@ -126,15 +127,52 @@ async function loadData() {
 
   const db = getFirestore(getApp());
 
+  setMsg('チーム・メンバー取得中...');
+  const teamsRaw = await fetchAll(db, 'teams');
+  const membersRaw = await fetchAll(db, 'members');
+
+  // 非アクティブを完全除外（active未定義はtrueとみなす）
+  const activeTeams = teamsRaw.filter(t => t.active !== false);
+  const activeMembers = membersRaw.filter(m => m.active !== false);
+  const activeTeamIds = new Set(activeTeams.map(t => t.id));
+  const activeMemberEmails = new Set(activeMembers.map(m => m.email));
+  const activeMemberNames = new Set(activeMembers.map(m => m.name));
+  // 非アクティブチームに属するメンバーも除外
+  const finalActiveEmails = new Set(activeMembers.filter(m => activeTeamIds.has(m.team)).map(m => m.email));
+  const finalActiveNames = new Set(activeMembers.filter(m => activeTeamIds.has(m.team)).map(m => m.name));
+
   setMsg('案件データ取得中...');
-  const dealsRaw = await fetchAll(db, 'deals');
+  const dealsRawAll = await fetchAll(db, 'deals');
+  // 非アクティブメンバー/チームの案件を完全除外
+  const dealsRaw = dealsRawAll.filter(d => {
+    if (d.teamId && !activeTeamIds.has(d.teamId)) return false;
+    // ownerEmail で照合（取れない場合は ownerName）
+    if (d.ownerEmail) return finalActiveEmails.has(d.ownerEmail);
+    if (d.ownerName) return finalActiveNames.has(d.ownerName);
+    return false;
+  });
+  const excluded = dealsRawAll.length - dealsRaw.length;
+  if (excluded > 0) console.info('[data-loader] 非アクティブ除外: ' + excluded + '件の案件をスキップ');
 
   setMsg('実績データ取得中...');
-  const monthlyRaw = await fetchAll(db, 'monthly_revenue');
+  const monthlyRawAll = await fetchAll(db, 'monthly_revenue');
+  const monthlyRaw = monthlyRawAll.filter(r => {
+    if (r.teamId && !activeTeamIds.has(r.teamId)) return false;
+    if (r.ownerName && !finalActiveNames.has(r.ownerName)) return false;
+    return true;
+  });
 
   setMsg('設定取得中...');
   const settingsKpi = await getDoc(doc(db, 'settings', 'kpi'));
   const meta = await getDoc(doc(db, 'meta', 'sync_status'));
+
+  setMsg('ユーザーロール取得中...');
+  const auth = getAuth();
+  let userRole = 'member';
+  if (auth.currentUser && auth.currentUser.email) {
+    const myDoc = await getDoc(doc(db, 'members', auth.currentUser.email));
+    if (myDoc.exists() && myDoc.data().role === 'admin') userRole = 'admin';
+  }
 
   setMsg('集計中...');
 
@@ -175,6 +213,12 @@ async function loadData() {
   window.__SUMMARY__ = summary;
   window.__DEALS__ = { deals };
   window.__FINANCIALS__ = financials;
+  window.__TEAMS__ = activeTeams.sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
+  window.__MEMBERS__ = activeMembers;
+  window.__TEAMS_ALL__ = teamsRaw;  // 非アクティブ含む全件（設定画面用）
+  window.__MEMBERS_ALL__ = membersRaw;
+  window.__USER_ROLE__ = userRole;
+  window.__USER_EMAIL__ = auth.currentUser ? auth.currentUser.email : null;
 
   setMsg('完了');
   overlay.remove();
@@ -189,3 +233,8 @@ window.addEventListener('summit-auth-ready', () => {
     if (o) o.innerHTML = '<div style="text-align:center"><div style="font-size:14px;color:#DC2626">データ読込失敗: ' + (err.message || err) + '</div></div>';
   });
 });
+
+// 設定画面からの再ロードAPI
+window.__DATA_RELOADER__ = async () => {
+  await loadData();
+};

@@ -8,6 +8,7 @@
 <script src="./firebase-config.js"></script>
 <script type="module" src="./auth-guard.js"></script>
 <script type="module" src="./data-loader.js"></script>
+<script type="module" src="./settings-writer.js"></script>
 <style>
 :root {
   --c-t1: #FFB3B3; --c-t2: #A5D8FF; --c-t3: #B2F2BB; --c-t4: #FFD8A8;
@@ -122,6 +123,7 @@ table.ranking td.num { text-align: right; font-variant-numeric: tabular-nums; }
   <button data-view="monthly">月別推移</button>
   <button data-view="financials">実績（売上/粗利）</button>
   <button data-view="import-csv">📥 実績取込</button>
+  <button data-view="settings-admin" id="nav-settings" style="display:none">⚙ 設定</button>
 </nav>
 <div class="filter-bar">
   <div class="filter-row">
@@ -141,6 +143,7 @@ table.ranking td.num { text-align: right; font-variant-numeric: tabular-nums; }
   <section id="monthly" class="section"></section>
   <section id="financials" class="section"></section>
   <section id="import-csv" class="section"></section>
+  <section id="settings-admin" class="section"></section>
   <section id="team-detail" class="section"></section>
   <section id="individual-detail" class="section"></section>
 </main>
@@ -161,6 +164,7 @@ const TEAM_INFO = { T1:{name:'富士',color:'#FFB3B3',dark:'#E07070'}, T2:{name:
 const TEAM_IDS = ['T1','T2','T3','T4'];
 
 let SUMMARY = null, DEALS = null, FINANCIALS = null;
+let isInitialized = false;
 function initAfterDataReady() {
   SUMMARY = window.__SUMMARY__;
   DEALS = window.__DEALS__;
@@ -170,7 +174,18 @@ function initAfterDataReady() {
     return;
   }
   document.getElementById('meta').textContent = buildMetaLine();
-  renderFyPills(); renderMonthPills(); updateFilterInfo(); renderOverview();
+  // 管理者なら設定ナビを表示
+  if (window.__USER_ROLE__ === 'admin') {
+    const navSettings = document.getElementById('nav-settings');
+    if (navSettings) navSettings.style.display = '';
+  }
+  if (!isInitialized) {
+    isInitialized = true;
+    renderFyPills(); renderMonthPills(); updateFilterInfo(); renderOverview();
+  } else {
+    // 設定変更後の再ロード等: 現在のビューを保ったまま再描画
+    renderFyPills(); renderMonthPills(); updateFilterInfo(); renderCurrentView();
+  }
 }
 if (window.__SUMMARY__) {
   // 既存data.js経由（後方互換）
@@ -297,7 +312,7 @@ function renderCurrentView() {
     if (active.id === 'individual-detail' && currentMember) { showIndividualDetail(currentMember); return; }
     if (active.id === 'team-detail' && currentTeam) { showTeamDetail(currentTeam); return; }
   }
-  ({overview:renderOverview, teams:renderTeams, individuals:renderIndividuals, monthly:renderMonthly, financials:renderFinancials, 'import-csv':renderImportCsv}[currentView] || (()=>{}))();
+  ({overview:renderOverview, teams:renderTeams, individuals:renderIndividuals, monthly:renderMonthly, financials:renderFinancials, 'import-csv':renderImportCsv, 'settings-admin':renderSettingsAdmin}[currentView] || (()=>{}))();
 }
 
 function parseCsvLine(line) {
@@ -315,6 +330,183 @@ function parseCsvLine(line) {
   }
   out.push(cur);
   return out;
+}
+
+// ============= 設定画面（管理者用UI） =============
+
+function renderSettingsAdmin() {
+  const sec = document.getElementById('settings-admin');
+  if (window.__USER_ROLE__ !== 'admin') {
+    sec.innerHTML = '<div class="empty"><h2>⛔ 権限がありません</h2><p style="margin-top:8px;font-size:13px">この画面は管理者のみアクセスできます</p></div>';
+    return;
+  }
+  const teams = (window.__TEAMS_ALL__ || []).slice().sort((a,b)=>(a.sortOrder||0)-(b.sortOrder||0));
+  const members = (window.__MEMBERS_ALL__ || []).slice().sort((a,b)=>(a.team||'').localeCompare(b.team||'')||(a.name||'').localeCompare(b.name||''));
+
+  let html = '<h2>⚙ 設定（管理者用）</h2>';
+  html += '<p style="font-size:12px;color:var(--c-text-sub);margin-bottom:16px">変更はFirestoreに即時保存されます。「非表示」にしたチーム・メンバーはダッシュボードの集計対象から外れます（データ自体は残るため、再アクティブ化で復活）。</p>';
+
+  // ====== チーム管理 ======
+  html += '<div style="background:white;border:1px solid var(--c-border);border-radius:12px;padding:20px;margin-bottom:20px">';
+  html += '<h3 style="font-size:14px;font-weight:700;color:var(--c-primary);margin-bottom:12px">🏔 チーム管理</h3>';
+  html += '<table class="ranking"><thead><tr><th>ID</th><th>チーム名</th><th>色</th><th class="num">並び順</th><th>状態</th><th>操作</th></tr></thead><tbody id="tbody-teams">';
+  for (const t of teams) {
+    const isActive = t.active !== false;
+    const inactClass = isActive ? '' : ' style="opacity:0.45"';
+    html += '<tr' + inactClass + '>';
+    html += '<td><strong>' + escHtml(t.id) + '</strong></td>';
+    html += '<td><input type="text" data-team-id="' + escHtml(t.id) + '" data-field="name" value="' + escHtml(t.name||'') + '" style="width:120px;padding:4px 8px;border:1px solid var(--c-border);border-radius:4px;font-size:13px"/></td>';
+    html += '<td><input type="color" data-team-id="' + escHtml(t.id) + '" data-field="color" value="' + escHtml(t.color||'#cccccc') + '" style="width:48px;height:28px;padding:0;border:1px solid var(--c-border);border-radius:4px"/></td>';
+    html += '<td class="num"><input type="number" data-team-id="' + escHtml(t.id) + '" data-field="sortOrder" value="' + (t.sortOrder||0) + '" style="width:60px;padding:4px 8px;border:1px solid var(--c-border);border-radius:4px;font-size:13px;text-align:right"/></td>';
+    html += '<td>' + (isActive ? '<span style="color:#059669;font-weight:700">●アクティブ</span>' : '<span style="color:#DC2626;font-weight:700">●非表示</span>') + '</td>';
+    html += '<td><div class="btn-group">';
+    html += '<button class="btn primary" data-action="save-team" data-team-id="' + escHtml(t.id) + '">保存</button>';
+    html += '<button class="btn" data-action="toggle-team" data-team-id="' + escHtml(t.id) + '">' + (isActive ? '非表示' : '再表示') + '</button>';
+    html += '</div></td></tr>';
+  }
+  html += '</tbody></table>';
+  // 新規追加フォーム
+  html += '<div style="margin-top:14px;padding:12px;background:var(--c-bg);border-radius:8px">';
+  html += '<div style="font-size:12px;font-weight:700;color:var(--c-text-sub);margin-bottom:8px">+ 新規チーム追加</div>';
+  html += '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">';
+  html += '<input type="text" id="new-team-id" placeholder="ID (例: T5)" style="width:80px;padding:6px 10px;border:1px solid var(--c-border);border-radius:6px;font-size:13px"/>';
+  html += '<input type="text" id="new-team-name" placeholder="チーム名" style="width:140px;padding:6px 10px;border:1px solid var(--c-border);border-radius:6px;font-size:13px"/>';
+  html += '<input type="color" id="new-team-color" value="#CCCCCC" style="width:48px;height:32px;padding:0;border:1px solid var(--c-border);border-radius:6px"/>';
+  html += '<button class="btn success" data-action="add-team">追加</button>';
+  html += '</div></div>';
+  html += '</div>';
+
+  // ====== メンバー管理 ======
+  html += '<div style="background:white;border:1px solid var(--c-border);border-radius:12px;padding:20px">';
+  html += '<h3 style="font-size:14px;font-weight:700;color:var(--c-primary);margin-bottom:12px">👤 メンバー管理</h3>';
+  html += '<table class="ranking"><thead><tr><th>名前</th><th>メールアドレス</th><th>チーム</th><th>ロール</th><th>状態</th><th>操作</th></tr></thead><tbody id="tbody-members">';
+  // チーム選択肢（active=trueのみ）
+  const teamOptions = teams.filter(t => t.active !== false).map(t => '<option value="' + escHtml(t.id) + '">' + escHtml(t.id) + ' ' + escHtml(t.name||'') + '</option>').join('');
+  for (const m of members) {
+    const isActive = m.active !== false;
+    const inactClass = isActive ? '' : ' style="opacity:0.45"';
+    html += '<tr' + inactClass + '>';
+    html += '<td><input type="text" data-member-email="' + escHtml(m.email) + '" data-field="name" value="' + escHtml(m.name||'') + '" style="width:120px;padding:4px 8px;border:1px solid var(--c-border);border-radius:4px;font-size:13px"/></td>';
+    html += '<td><code style="font-size:11px">' + escHtml(m.email) + '</code></td>';
+    html += '<td><select data-member-email="' + escHtml(m.email) + '" data-field="team" style="padding:4px 8px;border:1px solid var(--c-border);border-radius:4px;font-size:13px">';
+    for (const t of teams) {
+      const sel = t.id === m.team ? ' selected' : '';
+      html += '<option value="' + escHtml(t.id) + '"' + sel + '>' + escHtml(t.id) + ' ' + escHtml(t.name||'') + '</option>';
+    }
+    html += '</select></td>';
+    html += '<td><select data-member-email="' + escHtml(m.email) + '" data-field="role" style="padding:4px 8px;border:1px solid var(--c-border);border-radius:4px;font-size:13px">';
+    html += '<option value="member"' + (m.role !== 'admin' ? ' selected' : '') + '>member</option>';
+    html += '<option value="admin"' + (m.role === 'admin' ? ' selected' : '') + '>admin</option>';
+    html += '</select></td>';
+    html += '<td>' + (isActive ? '<span style="color:#059669;font-weight:700">●</span>' : '<span style="color:#DC2626;font-weight:700">●非表示</span>') + '</td>';
+    html += '<td><div class="btn-group">';
+    html += '<button class="btn primary" data-action="save-member" data-member-email="' + escHtml(m.email) + '">保存</button>';
+    html += '<button class="btn" data-action="toggle-member" data-member-email="' + escHtml(m.email) + '">' + (isActive ? '非表示' : '再表示') + '</button>';
+    html += '</div></td></tr>';
+  }
+  html += '</tbody></table>';
+  // 新規追加フォーム
+  html += '<div style="margin-top:14px;padding:12px;background:var(--c-bg);border-radius:8px">';
+  html += '<div style="font-size:12px;font-weight:700;color:var(--c-text-sub);margin-bottom:8px">+ 新規メンバー追加</div>';
+  html += '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">';
+  html += '<input type="text" id="new-member-name" placeholder="名前" style="width:120px;padding:6px 10px;border:1px solid var(--c-border);border-radius:6px;font-size:13px"/>';
+  html += '<input type="email" id="new-member-email" placeholder="email@logiquest.co.jp" style="width:220px;padding:6px 10px;border:1px solid var(--c-border);border-radius:6px;font-size:13px"/>';
+  html += '<select id="new-member-team" style="padding:6px 10px;border:1px solid var(--c-border);border-radius:6px;font-size:13px">' + teamOptions + '</select>';
+  html += '<select id="new-member-role" style="padding:6px 10px;border:1px solid var(--c-border);border-radius:6px;font-size:13px"><option value="member">member</option><option value="admin">admin</option></select>';
+  html += '<button class="btn success" data-action="add-member">追加</button>';
+  html += '</div></div>';
+  html += '</div>';
+
+  html += '<p style="margin-top:14px;font-size:11px;color:var(--c-text-sub)">※ 変更はFirestoreに即時保存されます。SF SOQL対象（members.json）は次回のGitHub Actions実行時にFirestoreから自動生成されます。即時反映したい場合は GitHub Actions の「Run workflow」で手動実行してください。</p>';
+
+  sec.innerHTML = html;
+  attachSettingsHandlers(sec);
+}
+
+function attachSettingsHandlers(sec) {
+  sec.querySelectorAll('[data-action]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const action = btn.dataset.action;
+      try {
+        btn.disabled = true;
+        const prevText = btn.textContent;
+        btn.textContent = '処理中...';
+        if (action === 'save-team') await onSaveTeam(btn.dataset.teamId, sec);
+        else if (action === 'toggle-team') await onToggleTeam(btn.dataset.teamId);
+        else if (action === 'add-team') await onAddTeam(sec);
+        else if (action === 'save-member') await onSaveMember(btn.dataset.memberEmail, sec);
+        else if (action === 'toggle-member') await onToggleMember(btn.dataset.memberEmail);
+        else if (action === 'add-member') await onAddMember(sec);
+        btn.textContent = '✓ 完了';
+        await reloadAllData();
+        setTimeout(() => { btn.textContent = prevText; btn.disabled = false; }, 600);
+      } catch (e) {
+        alert('エラー: ' + (e.message || e));
+        btn.disabled = false;
+        btn.textContent = '失敗';
+      }
+    });
+  });
+}
+
+async function onSaveTeam(id, sec) {
+  const inputs = sec.querySelectorAll('[data-team-id="' + id + '"]');
+  const data = {};
+  inputs.forEach(inp => {
+    const f = inp.dataset.field;
+    if (f === 'sortOrder') data[f] = Number(inp.value) || 0;
+    else data[f] = inp.value;
+  });
+  await window.__SETTINGS_WRITER__.upsertTeam(id, data);
+}
+async function onToggleTeam(id) {
+  const t = (window.__TEAMS_ALL__ || []).find(x => x.id === id);
+  if (!t) return;
+  const newActive = !(t.active !== false); // active未定義はtrueと見做すのでトグルでfalseに
+  if (!newActive && !confirm('チーム「' + (t.name||id) + '」を非表示にします。所属メンバーの案件もダッシュボード集計から外れます。よろしいですか？')) return;
+  await window.__SETTINGS_WRITER__.upsertTeam(id, { active: newActive });
+}
+async function onAddTeam(sec) {
+  const id = document.getElementById('new-team-id').value.trim();
+  const name = document.getElementById('new-team-name').value.trim();
+  const color = document.getElementById('new-team-color').value;
+  if (!id || !name) { alert('IDとチーム名を入力してください'); return; }
+  if ((window.__TEAMS_ALL__ || []).some(t => t.id === id)) { alert('ID「' + id + '」は既に存在します'); return; }
+  const nextOrder = (window.__TEAMS_ALL__ || []).reduce((m, t) => Math.max(m, t.sortOrder || 0), 0) + 1;
+  await window.__SETTINGS_WRITER__.addTeam(id, name, color, nextOrder);
+}
+async function onSaveMember(email, sec) {
+  const inputs = sec.querySelectorAll('[data-member-email="' + email + '"]');
+  const data = {};
+  inputs.forEach(inp => { data[inp.dataset.field] = inp.value; });
+  await window.__SETTINGS_WRITER__.upsertMember(email, data);
+}
+async function onToggleMember(email) {
+  const m = (window.__MEMBERS_ALL__ || []).find(x => x.email === email);
+  if (!m) return;
+  const newActive = !(m.active !== false);
+  if (!newActive && !confirm('メンバー「' + (m.name||email) + '」を非表示にします。そのメンバーの案件もダッシュボード集計から外れます。よろしいですか？')) return;
+  await window.__SETTINGS_WRITER__.upsertMember(email, { active: newActive });
+}
+async function onAddMember(sec) {
+  const name = document.getElementById('new-member-name').value.trim();
+  const email = document.getElementById('new-member-email').value.trim().toLowerCase();
+  const team = document.getElementById('new-member-team').value;
+  const role = document.getElementById('new-member-role').value;
+  if (!name || !email || !team) { alert('名前・メアド・チームを入力してください'); return; }
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { alert('メールアドレスの形式が不正です'); return; }
+  if ((window.__MEMBERS_ALL__ || []).some(m => m.email === email)) { alert('「' + email + '」は既に登録されています'); return; }
+  await window.__SETTINGS_WRITER__.addMember(name, email, team, role);
+}
+
+async function reloadAllData() {
+  // 設定変更後にFirestoreから再ロード（data-loader.jsのloadDataを再呼出）
+  // 簡易実装: ページをそのまま再ロード（重い処理ではないため）
+  if (window.__DATA_RELOADER__) {
+    await window.__DATA_RELOADER__();
+  } else {
+    location.reload();
+  }
 }
 
 // CSVのパース結果を保持
@@ -844,12 +1036,7 @@ document.querySelectorAll('nav button').forEach(btn => btn.addEventListener('cli
 
 function buildMetaLine() {
   const parts = [];
-  if (SUMMARY.computedAt) parts.push('集計日時: ' + new Date(SUMMARY.computedAt).toLocaleString('ja-JP'));
-  if (DEALS && DEALS.deals && DEALS.deals.length > 0) {
-    let maxIso = '';
-    for (const d of DEALS.deals) if (d.lastModifiedAt && String(d.lastModifiedAt) > maxIso) maxIso = String(d.lastModifiedAt);
-    if (maxIso) parts.push('SF案件 最終更新: ' + new Date(maxIso).toLocaleString('ja-JP'));
-  }
+  if (SUMMARY.computedAt) parts.push('SFデータ更新日時: ' + new Date(SUMMARY.computedAt).toLocaleString('ja-JP'));
   if (FINANCIALS && FINANCIALS.matchedRows && FINANCIALS.matchedRows.length > 0) {
     const yms = Array.from(new Set(FINANCIALS.matchedRows.map(r => r.yearMonth).filter(Boolean))).sort();
     if (yms.length > 0) parts.push('実績データ: ' + yms[0] + ' 〜 ' + yms[yms.length - 1] + '（' + FINANCIALS.matchedRows.length + '行）');
