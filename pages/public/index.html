@@ -325,28 +325,53 @@ function parseCsvLine(line) {
   out.push(cur); return out;
 }
 
+// ペンディング変更（セッション内で保留）。 { team_<id>_<field>: value, member_<email>_<field>: value }
+const pendingChanges = { teams: {}, members: {} };
+function pendingCount() {
+  let n = 0;
+  for (const t of Object.values(pendingChanges.teams)) n += Object.keys(t).length;
+  for (const m of Object.values(pendingChanges.members)) n += Object.keys(m).length;
+  return n;
+}
+// タブ離脱・リロード時の未保存警告
+window.addEventListener('beforeunload', e => {
+  if (pendingCount() > 0) { e.preventDefault(); e.returnValue = ''; }
+});
+
 function renderSettingsAdmin() {
   const sec = document.getElementById('settings-admin');
   if (window.__USER_ROLE__ !== 'admin') { sec.innerHTML = '<div class="empty"><h2>⛔ 権限がありません</h2></div>'; return; }
   const teams = (window.__TEAMS_ALL__ || []).slice().sort((a,b)=>(a.sortOrder||0)-(b.sortOrder||0));
   const members = (window.__MEMBERS_ALL__ || []).slice().sort((a,b)=>(a.team||'').localeCompare(b.team||'')||(a.name||'').localeCompare(b.name||''));
+  const pcount = pendingCount();
   let html = '<h2>⚙ 設定（管理者用）</h2>';
-  html += '<p style="font-size:12px;color:var(--c-text-sub);margin-bottom:16px">変更は即時保存されます。「非表示」にしたチーム・メンバーは集計から外れます。</p>';
+  // 未保存バナー
+  if (pcount > 0) {
+    html += '<div id="pending-bar" style="background:#fef3c7;border:1px solid #f59e0b;border-radius:10px;padding:12px 16px;margin-bottom:14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">';
+    html += '<span style="font-size:13px;color:#92400e;font-weight:700">📝 未保存の変更が '+pcount+' 件あります</span>';
+    html += '<button class="btn primary" data-action="save-all">💾 まとめて保存</button>';
+    html += '<button class="btn" data-action="discard-all">破棄</button>';
+    html += '</div>';
+  }
+  html += '<p style="font-size:12px;color:var(--c-text-sub);margin-bottom:16px">編集は複数行をまとめて変更し、上の「💾 まとめて保存」で一括反映されます。「非表示」「追加」は即時実行です。</p>';
   html += '<div style="background:white;border:1px solid var(--c-border);border-radius:12px;padding:20px;margin-bottom:20px">';
   html += '<h3 style="font-size:14px;font-weight:700;color:var(--c-primary);margin-bottom:12px">🏔 チーム管理</h3>';
   html += '<table class="ranking"><thead><tr><th>ID</th><th>名前</th><th>色</th><th class="num">順</th><th>状態</th><th>操作</th></tr></thead><tbody>';
   for (const t of teams) {
     const isActive = t.active !== false;
-    html += '<tr'+(isActive?'':' style="opacity:0.45"')+'>';
-    html += '<td><strong>'+escHtml(t.id)+'</strong></td>';
-    html += '<td><input type="text" data-team-id="'+escHtml(t.id)+'" data-field="name" value="'+escHtml(t.name||'')+'" style="width:120px;padding:4px 8px;border:1px solid var(--c-border);border-radius:4px;font-size:13px"/></td>';
-    html += '<td><input type="color" data-team-id="'+escHtml(t.id)+'" data-field="color" value="'+escHtml(t.color||'#cccccc')+'" style="width:48px;height:28px;padding:0;border:1px solid var(--c-border);border-radius:4px"/></td>';
-    html += '<td class="num"><input type="number" data-team-id="'+escHtml(t.id)+'" data-field="sortOrder" value="'+(t.sortOrder||0)+'" style="width:60px;padding:4px 8px;border:1px solid var(--c-border);border-radius:4px;font-size:13px;text-align:right"/></td>';
+    const pc = pendingChanges.teams[t.id] || {};
+    const hasPc = Object.keys(pc).length > 0;
+    const rowStyle = (isActive ? '' : 'opacity:0.45') + (hasPc ? ';background:#fffbeb' : '');
+    html += '<tr style="'+rowStyle+'">';
+    html += '<td><strong>'+escHtml(t.id)+'</strong>'+(hasPc?' 📝':'')+'</td>';
+    const nv = pc.name ?? t.name ?? '';
+    const cv = pc.color ?? t.color ?? '#cccccc';
+    const sv = pc.sortOrder ?? t.sortOrder ?? 0;
+    html += '<td><input type="text" data-team-id="'+escHtml(t.id)+'" data-field="name" value="'+escHtml(nv)+'" style="width:120px;padding:4px 8px;border:1px solid var(--c-border);border-radius:4px;font-size:13px"/></td>';
+    html += '<td><input type="color" data-team-id="'+escHtml(t.id)+'" data-field="color" value="'+escHtml(cv)+'" style="width:48px;height:28px;padding:0;border:1px solid var(--c-border);border-radius:4px"/></td>';
+    html += '<td class="num"><input type="number" data-team-id="'+escHtml(t.id)+'" data-field="sortOrder" value="'+sv+'" style="width:60px;padding:4px 8px;border:1px solid var(--c-border);border-radius:4px;font-size:13px;text-align:right"/></td>';
     html += '<td>'+(isActive?'<span style="color:#059669;font-weight:700">●</span>':'<span style="color:#DC2626;font-weight:700">●非表示</span>')+'</td>';
-    html += '<td><div class="btn-group">';
-    html += '<button class="btn primary" data-action="save-team" data-team-id="'+escHtml(t.id)+'">保存</button>';
-    html += '<button class="btn" data-action="toggle-team" data-team-id="'+escHtml(t.id)+'">'+(isActive?'非表示':'再表示')+'</button>';
-    html += '</div></td></tr>';
+    html += '<td><button class="btn" data-action="toggle-team" data-team-id="'+escHtml(t.id)+'">'+(isActive?'非表示':'再表示')+'</button></td></tr>';
   }
   html += '</tbody></table>';
   html += '<div style="margin-top:14px;padding:12px;background:var(--c-bg);border-radius:8px">';
@@ -362,21 +387,24 @@ function renderSettingsAdmin() {
   const teamOptions = teams.filter(t=>t.active!==false).map(t=>'<option value="'+escHtml(t.id)+'">'+escHtml(t.id)+' '+escHtml(t.name||'')+'</option>').join('');
   for (const m of members) {
     const isActive = m.active !== false;
-    html += '<tr'+(isActive?'':' style="opacity:0.45"')+'>';
-    html += '<td><input type="text" data-member-email="'+escHtml(m.email)+'" data-field="name" value="'+escHtml(m.name||'')+'" style="width:120px;padding:4px 8px;border:1px solid var(--c-border);border-radius:4px;font-size:13px"/></td>';
+    const pc = pendingChanges.members[m.email] || {};
+    const hasPc = Object.keys(pc).length > 0;
+    const rowStyle = (isActive ? '' : 'opacity:0.45') + (hasPc ? ';background:#fffbeb' : '');
+    html += '<tr style="'+rowStyle+'">';
+    const nameVal = pc.name ?? m.name ?? '';
+    const teamVal = pc.team ?? m.team ?? '';
+    const roleVal = pc.role ?? m.role ?? 'member';
+    html += '<td><input type="text" data-member-email="'+escHtml(m.email)+'" data-field="name" value="'+escHtml(nameVal)+'" style="width:120px;padding:4px 8px;border:1px solid var(--c-border);border-radius:4px;font-size:13px"/>'+(hasPc?' 📝':'')+'</td>';
     html += '<td><code style="font-size:11px">'+escHtml(m.email)+'</code></td>';
     html += '<td><select data-member-email="'+escHtml(m.email)+'" data-field="team" style="padding:4px 8px;border:1px solid var(--c-border);border-radius:4px;font-size:13px">';
-    for (const t of teams) html += '<option value="'+escHtml(t.id)+'"'+(t.id===m.team?' selected':'')+'>'+escHtml(t.id)+' '+escHtml(t.name||'')+'</option>';
+    for (const t of teams) html += '<option value="'+escHtml(t.id)+'"'+(t.id===teamVal?' selected':'')+'>'+escHtml(t.id)+' '+escHtml(t.name||'')+'</option>';
     html += '</select></td>';
     html += '<td><select data-member-email="'+escHtml(m.email)+'" data-field="role" style="padding:4px 8px;border:1px solid var(--c-border);border-radius:4px;font-size:13px">';
-    html += '<option value="member"'+(m.role!=='admin'?' selected':'')+'>member</option>';
-    html += '<option value="admin"'+(m.role==='admin'?' selected':'')+'>admin</option>';
+    html += '<option value="member"'+(roleVal!=='admin'?' selected':'')+'>member</option>';
+    html += '<option value="admin"'+(roleVal==='admin'?' selected':'')+'>admin</option>';
     html += '</select></td>';
     html += '<td>'+(isActive?'<span style="color:#059669;font-weight:700">●</span>':'<span style="color:#DC2626;font-weight:700">●非表示</span>')+'</td>';
-    html += '<td><div class="btn-group">';
-    html += '<button class="btn primary" data-action="save-member" data-member-email="'+escHtml(m.email)+'">保存</button>';
-    html += '<button class="btn" data-action="toggle-member" data-member-email="'+escHtml(m.email)+'">'+(isActive?'非表示':'再表示')+'</button>';
-    html += '</div></td></tr>';
+    html += '<td><button class="btn" data-action="toggle-member" data-member-email="'+escHtml(m.email)+'">'+(isActive?'非表示':'再表示')+'</button></td></tr>';
   }
   html += '</tbody></table>';
   html += '<div style="margin-top:14px;padding:12px;background:var(--c-bg);border-radius:8px">';
@@ -392,6 +420,36 @@ function renderSettingsAdmin() {
 }
 
 function attachSettingsHandlers(sec) {
+  // 編集はchangeでpendingに保留
+  sec.querySelectorAll('[data-team-id][data-field]').forEach(inp => {
+    inp.addEventListener('change', () => {
+      const id = inp.dataset.teamId;
+      const f = inp.dataset.field;
+      const orig = (window.__TEAMS_ALL__ || []).find(x => x.id === id) || {};
+      const val = f === 'sortOrder' ? Number(inp.value) || 0 : inp.value;
+      const origVal = orig[f];
+      if (!pendingChanges.teams[id]) pendingChanges.teams[id] = {};
+      if (val === origVal) delete pendingChanges.teams[id][f];
+      else pendingChanges.teams[id][f] = val;
+      if (Object.keys(pendingChanges.teams[id]).length === 0) delete pendingChanges.teams[id];
+      renderSettingsAdmin();
+    });
+  });
+  sec.querySelectorAll('[data-member-email][data-field]').forEach(inp => {
+    inp.addEventListener('change', () => {
+      const email = inp.dataset.memberEmail;
+      const f = inp.dataset.field;
+      const orig = (window.__MEMBERS_ALL__ || []).find(x => x.email === email) || {};
+      const val = inp.value;
+      const origVal = orig[f];
+      if (!pendingChanges.members[email]) pendingChanges.members[email] = {};
+      if (val === origVal) delete pendingChanges.members[email][f];
+      else pendingChanges.members[email][f] = val;
+      if (Object.keys(pendingChanges.members[email]).length === 0) delete pendingChanges.members[email];
+      renderSettingsAdmin();
+    });
+  });
+  // ボタン
   sec.querySelectorAll('[data-action]').forEach(btn => {
     btn.addEventListener('click', async () => {
       const action = btn.dataset.action;
@@ -399,22 +457,51 @@ function attachSettingsHandlers(sec) {
         btn.disabled = true;
         const prev = btn.textContent;
         btn.textContent = '処理中...';
-        if (action === 'save-team') await onSaveTeam(btn.dataset.teamId, sec);
+        if (action === 'save-all') await onSaveAll();
+        else if (action === 'discard-all') onDiscardAll();
         else if (action === 'toggle-team') await onToggleTeam(btn.dataset.teamId);
         else if (action === 'add-team') await onAddTeam(sec);
-        else if (action === 'save-member') await onSaveMember(btn.dataset.memberEmail, sec);
         else if (action === 'toggle-member') await onToggleMember(btn.dataset.memberEmail);
         else if (action === 'add-member') await onAddMember(sec);
-        btn.textContent = '✓ 完了';
-        await reloadTeamsAndMembersOnly();
+        if (action !== 'discard-all') {
+          await reloadTeamsAndMembersOnly();
+        }
         renderSettingsAdmin();
-        setTimeout(() => { btn.textContent = prev; btn.disabled = false; }, 600);
       } catch (e) {
         alert('エラー: ' + (e.message || e));
         btn.disabled = false; btn.textContent = '失敗';
       }
     });
   });
+}
+
+async function onSaveAll() {
+  const teamIds = Object.keys(pendingChanges.teams);
+  const memberEmails = Object.keys(pendingChanges.members);
+  const errors = [];
+  // チーム
+  for (const id of teamIds) {
+    try {
+      await window.__SETTINGS_WRITER__.upsertTeam(id, pendingChanges.teams[id]);
+    } catch (e) { errors.push('team ' + id + ': ' + (e.message || e)); }
+  }
+  // メンバー
+  for (const email of memberEmails) {
+    try {
+      await window.__SETTINGS_WRITER__.upsertMember(email, pendingChanges.members[email]);
+    } catch (e) { errors.push('member ' + email + ': ' + (e.message || e)); }
+  }
+  // クリア
+  pendingChanges.teams = {};
+  pendingChanges.members = {};
+  clearDataCache();
+  if (errors.length > 0) alert('一部失敗しました:\n' + errors.join('\n'));
+  else alert('✅ ' + (teamIds.length + memberEmails.length) + '件の変更を保存しました');
+}
+function onDiscardAll() {
+  if (!confirm('未保存の変更を全て破棄しますか？')) return;
+  pendingChanges.teams = {};
+  pendingChanges.members = {};
 }
 
 async function reloadTeamsAndMembersOnly() {
@@ -588,10 +675,10 @@ function renderOverview() {
   }
   html += '</tbody></table>';
   sec.innerHTML = html;
-  setTimeout(() => {
+  requestAnimationFrame(() => requestAnimationFrame(() => {
     const ctx = document.getElementById('ch-teams'); if (!ctx) return;
     new Chart(ctx, { type:'bar', data:{labels:a.rankings.team.map(t=>TEAM_INFO[t.teamId]?.name||t.teamId), datasets:[{data:a.rankings.team.map(t=>t.point), backgroundColor:a.rankings.team.map(t=>TEAM_INFO[t.teamId]?.color||'#ccc'), borderRadius:8}]}, options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}}});
-  }, 50);
+  }));
   attachClickHandlers(sec);
 }
 
@@ -637,10 +724,11 @@ function renderMonthly() {
     html += '</tr>';
   }
   sec.innerHTML = html + '</tbody></table>';
-  setTimeout(() => {
+  // requestAnimationFrame x2 で確実に次のフレーム（レイアウト計算済み）後に描画
+  requestAnimationFrame(() => requestAnimationFrame(() => {
     const ctx = document.getElementById('ch-monthly'); if (!ctx) return;
     new Chart(ctx, { type:'bar', data:{labels:a.monthly.map(m=>m.yearMonth), datasets:TEAM_IDS.map(tid=>({label:tid+' '+(TEAM_INFO[tid]?.name||tid), data:a.monthly.map(m=>m.byTeam[tid]||0), backgroundColor:TEAM_INFO[tid]?.color||'#ccc', borderRadius:4}))}, options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top'}},scales:{x:{stacked:true},y:{stacked:true,beginAtZero:true}}}});
-  }, 50);
+  }));
 }
 
 function renderFinancials() {

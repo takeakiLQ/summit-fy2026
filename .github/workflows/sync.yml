@@ -2,8 +2,8 @@ name: Salesforce → Cloudflare D1 自動同期
 
 on:
   schedule:
-    # 6時間ごとに実行（UTC基準）。JST 9/15/21/3時。
-    - cron: '0 */6 * * *'
+    # 毎時0分に実行（UTC基準＝JSTも毎時0分）。GitHub側の負荷により数分遅れることあり。
+    - cron: '0 * * * *'
   workflow_dispatch:  # GitHub UI から手動実行できるように
 
 permissions:
