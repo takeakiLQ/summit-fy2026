@@ -629,7 +629,7 @@ function parseOneCsv(text) {
   const header = parseCsvLine(lines[0]);
   const idx = {
     ym: header.findIndex(h => h.includes('配送年月')),
-    mn: header.findIndex(h => h.includes('マニュアル番号')),
+    mn: header.findIndex(h => h.includes('マニュアル番号') || h.includes('マニュアル№')),
     rev: header.findIndex(h => h.includes('売上合計')),
     cp: header.findIndex(h => h.includes('CP用原価合計')),
     wd: header.findIndex(h => h.includes('稼働日数')),
@@ -641,7 +641,9 @@ function parseOneCsv(text) {
   for (let i = 1; i < lines.length; i++) {
     const c = parseCsvLine(lines[i]);
     const ym = String(c[idx.ym] || '').replace(/['"]/g,'').trim();
-    const mn = String(c[idx.mn] || '').replace(/['"]/g,'').trim();
+    // マニュアル番号: ByQ形式「97740-1」はハイフン以降を切り捨て「97740」に正規化（Qhai形式「531719」は変化なし）
+    const mnRaw = String(c[idx.mn] || '').replace(/['"]/g,'').trim();
+    const mn = mnRaw.split('-')[0].trim();
     const rev = Number(c[idx.rev]) || 0;
     const cp = Number(c[idx.cp]) || 0;
     const wd = Number(c[idx.wd]) || 0;
@@ -688,6 +690,25 @@ async function previewCsv() {
     });
   }
 
+  // (yearMonth, manualNo) で売上/粗利を合算（ByQ CSVではコース別に複数行ある場合があるため）
+  const aggMap = new Map();
+  for (const row of csvParsedRows) {
+    const key = row.yearMonth + '|' + row.manualNo;
+    if (!aggMap.has(key)) {
+      aggMap.set(key, { yearMonth: row.yearMonth, manualNo: row.manualNo, revenue: row.revenue, grossProfit: row.grossProfit, workdays: row.workdays });
+    } else {
+      const e = aggMap.get(key);
+      e.revenue += row.revenue;
+      e.grossProfit += row.grossProfit;
+      e.workdays = Math.max(e.workdays, row.workdays); // 稼働日数は最大値（同じ案件の月内の最大）
+    }
+  }
+  const aggregatedCount = aggMap.size;
+  const originalCount = csvParsedRows.length;
+  csvParsedRows = Array.from(aggMap.values());
+  csvParsedMeta.aggregatedCount = aggregatedCount;
+  csvParsedMeta.originalCount = originalCount;
+
   // プレビュー描画
   const sortedMonths = Array.from(csvParsedMeta.allMonths).sort();
   let html = '<h3 style="margin-bottom:8px">プレビュー（'+files.length+'件のファイル）</h3>';
@@ -709,6 +730,9 @@ async function previewCsv() {
   }
   html += '<tr style="background:var(--c-bg);font-weight:700"><td>合計</td><td>-</td><td class="num">'+csvParsedMeta.totalRows+'</td><td><code style="font-size:11px">'+sortedMonths.join(', ')+'</code></td><td class="num">'+fmtYen(csvParsedMeta.totalRev)+'</td><td class="num">'+fmtYen(csvParsedMeta.totalGp)+'</td></tr>';
   html += '</tbody></table>';
+  if (csvParsedMeta.aggregatedCount && csvParsedMeta.originalCount > csvParsedMeta.aggregatedCount) {
+    html += '<p style="color:#2E5C8A;font-size:12px;margin-top:8px">📊 '+csvParsedMeta.originalCount+'行 → '+csvParsedMeta.aggregatedCount+'行 に合算（同一案件・同一月の売上/粗利を統合）</p>';
+  }
   if (errorCount > 0) html += '<p style="color:#DC2626;font-size:12px;margin-top:8px">⚠ '+errorCount+'件のファイルでエラーがあります。エラーファイルはスキップして取込されます。</p>';
   previewEl.innerHTML = html;
   document.getElementById('btn-import').disabled = (csvParsedRows.length === 0);
