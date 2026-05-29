@@ -131,6 +131,10 @@ table.ranking th .sort-ind { color: var(--c-primary); margin-left: 4px; font-wei
   /* テーブルを横スクロール可能に */
   table.ranking { display: block; overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; font-size: 11px; }
   table.ranking th, table.ranking td { padding: 6px 8px; }
+  /* 案件リストの「操作」列はスマホでは非表示（行タップでアクションシート） */
+  table.ranking th.col-actions, table.ranking td.col-actions { display: none; }
+  /* 案件行はタップ可能であることを示す視覚的なヒント */
+  tr.deal-row:active { background: var(--c-bg); }
   /* KPIカードを2列に */
   .kpi-row { grid-template-columns: repeat(2, 1fr); gap: 8px; }
   .kpi-box { padding: 10px 12px; }
@@ -1051,13 +1055,13 @@ function renderPersonDealsTable(personDeals) {
   html += '<th class="sortable num" data-sort-col="point">pt'+ind('point')+'</th>';
   html += '<th class="sortable" data-sort-col="classification">区分'+ind('classification')+'</th>';
   html += '<th class="sortable num" data-sort-col="monthlyRevenue">月間予定売上'+ind('monthlyRevenue')+'</th>';
-  html += '<th>操作</th></tr></thead><tbody>';
+  html += '<th class="col-actions">操作</th></tr></thead><tbody>';
   for (const d of sorted) {
     const msLabel = d.msKbn === 'main' ? 'メイン' : d.msKbn === 'sub' ? 'サブ' : '?';
     const kindBadge = d.kind === 'ByQ'
       ? '<span style="background:#fee2e2;color:#991b1b;padding:1px 8px;border-radius:8px;font-size:10px;font-weight:700">ByQ</span>'
       : '<span style="background:#e0e7ff;color:#3730a3;padding:1px 8px;border-radius:8px;font-size:10px;font-weight:700">Qhai</span>';
-    html += '<tr>';
+    html += '<tr class="deal-row" data-deal-id="'+escHtml(d.id)+'" data-deal-name="'+escHtml(d.name)+'">';
     html += '<td>'+(d.operationStartDate?String(d.operationStartDate).slice(0,10):'-')+'</td>';
     html += '<td>'+escHtml(d.name)+'</td>';
     html += '<td>'+kindBadge+'</td>';
@@ -1066,9 +1070,9 @@ function renderPersonDealsTable(personDeals) {
     html += '<td class="num"><strong>'+fmtPt(d.point)+'pt</strong></td>';
     html += '<td>'+escHtml(d.classification || '-')+'</td>';
     html += '<td class="num">'+(d.monthlyRevenue!=null?fmtYen(d.monthlyRevenue):'-')+'</td>';
-    html += '<td><div class="btn-group">';
-    html += '<button class="btn primary" onclick="showDealDetail(\''+d.id+'\')">詳細</button>';
-    html += '<button class="btn success" onclick="showDealFinancial(\''+d.id+'\')">実績</button>';
+    html += '<td class="col-actions"><div class="btn-group">';
+    html += '<button class="btn primary" onclick="event.stopPropagation();showDealDetail(\''+d.id+'\')">詳細</button>';
+    html += '<button class="btn success" onclick="event.stopPropagation();showDealFinancial(\''+d.id+'\')">実績</button>';
     html += '</div></td></tr>';
   }
   html += '</tbody></table>';
@@ -1082,6 +1086,40 @@ function renderPersonDealsTable(personDeals) {
       renderPersonDealsTable(personDeals);
     });
   });
+  // 行クリックで案件アクションシート（スマホで操作列が隠れる対策）
+  area.querySelectorAll('tr.deal-row').forEach(tr => {
+    tr.style.cursor = 'pointer';
+    tr.addEventListener('click', (e) => {
+      // ボタン直接クリック時は無視（event.stopPropagationでも来るが念のため）
+      if (e.target.tagName === 'BUTTON') return;
+      showDealActionSheet(tr.dataset.dealId, tr.dataset.dealName);
+    });
+  });
+}
+
+function showDealActionSheet(dealId, dealName) {
+  let sheet = document.getElementById('deal-action-sheet');
+  if (sheet) sheet.remove();
+  sheet = document.createElement('div');
+  sheet.id = 'deal-action-sheet';
+  sheet.className = 'modal active';
+  sheet.style.alignItems = 'flex-end';
+  sheet.style.padding = '0';
+  sheet.innerHTML = `
+    <div style="background:white;width:100%;border-top-left-radius:16px;border-top-right-radius:16px;padding:20px;max-width:600px;margin:0 auto">
+      <div style="text-align:center;font-size:13px;color:var(--c-text-sub);margin-bottom:4px">案件</div>
+      <div style="font-size:15px;font-weight:700;color:var(--c-primary);text-align:center;margin-bottom:18px;word-break:break-all">${escHtml(dealName||'')}</div>
+      <button class="btn primary" style="display:block;width:100%;margin-bottom:8px;padding:12px;font-size:14px" data-action="detail">📋 詳細を見る</button>
+      <button class="btn success" style="display:block;width:100%;margin-bottom:12px;padding:12px;font-size:14px" data-action="financial">💰 実績を見る</button>
+      <button class="btn" style="display:block;width:100%;padding:10px;font-size:13px" data-action="cancel">キャンセル</button>
+    </div>
+  `;
+  document.body.appendChild(sheet);
+  const close = () => sheet.remove();
+  sheet.addEventListener('click', (e) => { if (e.target === sheet) close(); });
+  sheet.querySelector('[data-action="detail"]').addEventListener('click', () => { close(); showDealDetail(dealId); });
+  sheet.querySelector('[data-action="financial"]').addEventListener('click', () => { close(); showDealFinancial(dealId); });
+  sheet.querySelector('[data-action="cancel"]').addEventListener('click', close);
 }
 
 function filterPersonDeals(allDeals) {
