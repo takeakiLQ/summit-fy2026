@@ -107,6 +107,52 @@ table.ranking th .sort-ind { color: var(--c-primary); margin-left: 4px; font-wei
 .modal table td.num { text-align: right; font-variant-numeric: tabular-nums; }
 .modal table tr.total { background: var(--c-bg); font-weight: 700; }
 .modal .kvtable td:first-child { color: var(--c-text-sub); font-size: 11px; width: 40%; }
+
+/* ===== スマホ・タブレット最適化（max-width:640px） ===== */
+@media (max-width: 640px) {
+  /* ヘッダーをコンパクトに */
+  header { padding: 8px 12px; gap: 6px; }
+  header h1 { font-size: 14px; line-height: 1.2; }
+  header .meta { font-size: 10px; margin-top: 1px; overflow: hidden; max-height: 26px; }
+  header .header-right { gap: 4px; }
+  header .header-right .user-email { display: none; }  /* メアドは非表示で省スペース */
+  header .header-right button { padding: 3px 6px; font-size: 10px; }
+  /* ナビも小さく */
+  nav { padding: 0 8px; }
+  nav button { padding: 8px 10px; font-size: 12px; }
+  /* フィルターバー */
+  .filter-bar { padding: 6px 12px; gap: 4px; }
+  .filter-row { gap: 6px; }
+  .filter-row .label { font-size: 10px; min-width: 40px; }
+  .pill { padding: 3px 8px; font-size: 11px; }
+  .filter-info { font-size: 10px; width: 100%; margin-left: 0; }
+  /* メインの余白 */
+  main { padding: 12px 8px; }
+  /* テーブルを横スクロール可能に */
+  table.ranking { display: block; overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; font-size: 11px; }
+  table.ranking th, table.ranking td { padding: 6px 8px; }
+  /* KPIカードを2列に */
+  .kpi-row { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .kpi-box { padding: 10px 12px; }
+  .kpi-box .value { font-size: 18px; }
+  /* チームカードを2列 or 1列 */
+  .team-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .team-card { padding: 12px 14px; }
+  .team-card .name { font-size: 16px; }
+  .team-card .pt { font-size: 22px; }
+  /* h2 */
+  h2 { font-size: 13px; margin: 14px 0 8px; }
+  /* モーダル */
+  .modal { padding: 16px 8px; }
+  .modal-body { padding: 16px; }
+  .modal h3 { font-size: 15px; }
+  /* 詳細ヘッダ */
+  .detail-header { padding: 12px; gap: 10px; }
+  .detail-header .name { font-size: 16px; }
+  .detail-header .swatch { width: 32px; height: 32px; }
+  /* チャートを小さく */
+  .chart-wrap { height: 200px !important; }
+}
 </style>
 </head>
 <body>
